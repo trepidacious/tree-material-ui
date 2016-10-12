@@ -42,38 +42,28 @@ lazy val treeMaterialUi = crossProject.in(file(".")).
     addCompilerPlugin("org.scalamacros" %% "paradise" % "2.1.0" cross CrossVersion.full)
 
   ).jvmSettings(
-  // Add JVM-specific settings here
-  libraryDependencies ++= Seq(
-    
-  )
+    // Add JVM-specific settings here
+    libraryDependencies ++= Seq(
+    )
+    // Something like this should add js output as resource for server?
+    // resources in Compile += (fastOptJS in js).value.data
 
 ).jsSettings(
-  // Add JS-specific settings here
-  libraryDependencies ++= Seq(
-    "com.github.chandu0101.scalajs-react-components" %%% "core" % scalajsReactComponentsVersion
-  ),
+    // Add JS-specific settings here
+    libraryDependencies ++= Seq(
+      "com.github.chandu0101.scalajs-react-components" %%% "core" % scalajsReactComponentsVersion
+    ),
 
-  // React JS itself (Note the filenames, adjust as needed, eg. to remove addons.)
-  jsDependencies ++= Seq(
+    // Output compiled scala-js to assets directory
+    artifactPath in (Compile, fastOptJS) :=
+      file("assets") / ((moduleName in fastOptJS).value + "-fastopt.js"),
 
-    "org.webjars.bower" % "react" % reactVersion
-      /        "react-with-addons.js"
-      minified "react-with-addons.min.js"
-      commonJSName "React",
+    artifactPath in (Compile, fullOptJS) :=
+      file("assets") / ((moduleName in fullOptJS).value + "-opt.js"),
 
-    "org.webjars.bower" % "react" % reactVersion
-      /         "react-dom.js"
-      minified  "react-dom.min.js"
-      dependsOn "react-with-addons.js"
-      commonJSName "ReactDOM",
-
-    "org.webjars.bower" % "react" % reactVersion
-      /         "react-dom-server.js"
-      minified  "react-dom-server.min.js"
-      dependsOn "react-dom.js"
-      commonJSName "ReactDOMServer"
+    // We get dependencies from webpack
+    jsDependencies ++= Seq()
   )
-)
 
 lazy val treeMaterialUiJVM = treeMaterialUi.jvm
 lazy val treeMaterialUiJS = treeMaterialUi.js

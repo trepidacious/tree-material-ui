@@ -23,3 +23,8 @@ project/plugins/project/
 .ensime_cache
 
 .DS_Store
+
+node_modules
+
+# Assets produced by webpack using `npm install; npm run build;`
+assets
