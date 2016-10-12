@@ -1,27 +1,170 @@
 <!DOCTYPE html>
 <html>
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Tree</title>
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>tree-material-ui demo</title>
+  <style>
+    html {
+      font-family:  sans-serif;
+      /* 1 */
+      -ms-text-size-adjust: 100%;
+      /* 2 */
+      -webkit-text-size-adjust: 100%;
+      /* 2 */
+    }
 
-    <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons" />
-    <!--<link rel="stylesheet" href="https://code.getmdl.io/1.2.0/material.grey-amber.min.css" />-->
-    <link rel="stylesheet" href="https://code.getmdl.io/1.2.1/material.blue_grey-orange.min.css" />
-    <link rel="stylesheet" href="css/tree.css" />
-    <script src="https://code.getmdl.io/1.2.1/material.min.js"></script>
+    body {
+      margin: 0;
+      font-size: 13px;
+      line-height: 20px;
+    }
 
-  </head>
-  <body>
+    body > #loading {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      top: 0;
+      z-index: 1000000;
+      opacity: 1;
+      background-color: #FFFFFF;
+    }
 
-    <div class="content">
+    .spinner {
+      margin: 50px auto 0;
+      width: 100px;
+      text-align: center;
+    }
 
-    <!--Include Scala.js compiled code -->
-    <script type="text/javascript" src="scalajs/tree-fastopt.js"></script>
-    <script type="text/javascript" src="scalajs/tree-jsdeps.js"></script>
+    .spinner > div {
+      width: 24px;
+      height: 24px;
+      /*background-color: white;*/
+      background-color: #607D8B;
 
-    <script type="text/javascript">
-      org.rebeam.tree.demo.JSDemoApp().main();
-    </script>
-  </body>
+      border-radius: 100%;
+      display: inline-block;
+      -webkit-animation: bouncedelay 1.4s infinite ease-in-out;
+      animation: bouncedelay 1.4s infinite ease-in-out;
+      /* Prevent first frame from flickering when animation starts */
+      -webkit-animation-fill-mode: both;
+      animation-fill-mode: both;
+    }
+
+    .spinner .bounce1 {
+      -webkit-animation-delay: -0.32s;
+      animation-delay: -0.32s;
+    }
+
+    .spinner .bounce2 {
+      -webkit-animation-delay: -0.16s;
+      animation-delay: -0.16s;
+    }
+
+    @-webkit-keyframes bouncedelay {
+      0%, 50%, 100% { -webkit-transform: scale(0.4) }
+      25% { -webkit-transform: scale(0.7) }
+    }
+    @keyframes bouncedelay {
+      0%, 50%, 100% {
+        transform: scale(0.4);
+        -webkit-transform: scale(0.4);
+      } 25% {
+        transform: scale(0.7);
+        -webkit-transform: scale(0.7);
+      }
+    }
+
+    .message {
+        text-align: center;
+        margin: 100px auto;
+        /*color: #ffffff;*/
+        color: #607D8B;
+
+        font-size: 24px;
+        font-weight: 400;
+    }
+
+    body > #container {
+        display: none;
+    }
+
+    body.app-loaded > #container {
+        display: block;
+    }
+
+    body.app-loaded > #loading {
+      opacity: 0;
+      -webkit-transition: opacity 0.4s ease-in-out 0s;
+      -moz-transition: opacity 0.4s ease-in-out 0s;
+      -ms-transition: opacity 0.4s ease-in-out 0s;
+      -o-transition: opacity 0.4s ease-in-out 0s;
+      transition: opacity 0.4s ease-in-out 0s;
+    }
+
+/*  This fades screen in when first displayed, however it also interferes with fading out after loaded...
+    body.app-loading > #loading {
+      -webkit-animation: fadein 1.0s; /* Safari, Chrome and Opera > 12.1 */
+         -moz-animation: fadein 1.0s; /* Firefox < 16 */
+          -ms-animation: fadein 1.0s; /* Internet Explorer */
+           -o-animation: fadein 1.0s; /* Opera < 12.1 */
+              animation: fadein 1.0s;
+    }
+
+    @keyframes fadein {
+        from { opacity: 0; }
+        to   { opacity: 1; }
+    }
+
+    /* Firefox < 16 */
+    @-moz-keyframes fadein {
+        from { opacity: 0; }
+        to   { opacity: 1; }
+    }
+
+    /* Safari, Chrome and Opera > 12.1 */
+    @-webkit-keyframes fadein {
+        from { opacity: 0; }
+        to   { opacity: 1; }
+    }
+
+    /* Internet Explorer */
+    @-ms-keyframes fadein {
+        from { opacity: 0; }
+        to   { opacity: 1; }
+    }
+
+    /* Opera < 12.1 */
+    @-o-keyframes fadein {
+        from { opacity: 0; }
+        to   { opacity: 1; }
+    }
+    */
+
+  </style>
+</head>
+<body class="app-loading">
+
+  <div id="container"></div>
+
+  <div id="loading">
+    <div class="message">
+      <blockquote>tree-material-ui demo loading</blockquote>
+      <div class="spinner">
+        <div class="bounce1"></div>
+        <div class="bounce2"></div>
+        <div class="bounce3"></div>
+      </div>
+    </div>
+  </div>
+
+  <!--all js dependencies-->
+  <script type="text/javascript" src="assets/index-bundle.js"></script>
+  <!-- Include Scala.js compiled code -->
+  <script type="text/javascript" src="assets/tree-material-ui-fastopt.js"></script>
+
+  <!-- Run React App-->
+ <script>org.rebeam.tree.demo.ReactApp().main()</script>
+</body>
 </html>

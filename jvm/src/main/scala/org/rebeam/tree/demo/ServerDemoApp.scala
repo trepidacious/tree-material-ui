@@ -76,6 +76,12 @@ object ServerDemoApp extends ServerApp {
 
   }
 
+  val assets = resourceService(ResourceService.Config("", "/"))
+
+  val assetsService: HttpService = HttpService {
+    case r @ GET -> _ => assets(r)
+  }
+
   //This will serve from java resources, so work in a jar
   //We can also set cacheStartegy = staticcontent.MemoryCache() in the Config
   //val resources = resourceService(ResourceService.Config("", "/"))
@@ -103,6 +109,7 @@ object ServerDemoApp extends ServerApp {
       .withWebSockets(true)
       .mountService(apiService, "/api")
       .mountService(resourcesService, "/")
+      .mountService(assetsService, "/assets")
       .mountService(scalajsService, "/")
       // .mountService(apiCORS, "/api")
       .start

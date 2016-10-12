@@ -29,9 +29,9 @@ object ReactApp extends JSApp {
 //    val router = DemoRoutes.router
 //    router() render mountNode
 
-    MaterialSwatch.AllFamiliesView() render mountNode
+//    MaterialSwatch.AllFamiliesView() render mountNode
 
-//    ReactDOM.render(DemoViews.todoListView, mountNode)
+    DemoViews.todoListView render mountNode
   }
 
 }

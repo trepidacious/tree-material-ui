@@ -32,6 +32,8 @@ lazy val root = project.in(file(".")).
   )
 
 lazy val treeMaterialUi = crossProject.in(file(".")).
+
+  //Settings for all projects
   settings(
     name := "tree-material-ui",
     version := "0.1-SNAPSHOT",
@@ -41,15 +43,15 @@ lazy val treeMaterialUi = crossProject.in(file(".")).
     //For @Lenses
     addCompilerPlugin("org.scalamacros" %% "paradise" % "2.1.0" cross CrossVersion.full)
 
+  //Settings specific to JVM
   ).jvmSettings(
-    // Add JVM-specific settings here
-    libraryDependencies ++= Seq(
-    )
-    // Something like this should add js output as resource for server?
-    // resources in Compile += (fastOptJS in js).value.data
+    libraryDependencies ++= Seq(),
+    //We need to assets directory at runtime, so we can serve files in it
+    unmanagedClasspath in (Compile, runMain) += baseDirectory.value / "assets"
 
-).jsSettings(
-    // Add JS-specific settings here
+  //Settings specific to JS
+  ).jsSettings(
+    //Scalajs dependencies that are used on the client only
     libraryDependencies ++= Seq(
       "com.github.chandu0101.scalajs-react-components" %%% "core" % scalajsReactComponentsVersion
     ),
@@ -61,7 +63,7 @@ lazy val treeMaterialUi = crossProject.in(file(".")).
     artifactPath in (Compile, fullOptJS) :=
       file("assets") / ((moduleName in fullOptJS).value + "-opt.js"),
 
-    // We get dependencies from webpack
+    // We get javascript dependencies from webpack
     jsDependencies ++= Seq()
   )
 
