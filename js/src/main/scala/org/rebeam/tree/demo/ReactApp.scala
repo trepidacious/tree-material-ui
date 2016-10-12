@@ -4,29 +4,25 @@ import org.scalajs.dom
 
 import org.rebeam.tree.view.MaterialSwatch
 
-import scala.scalajs.js
 import scala.scalajs.js.JSApp
-import scala.scalajs.js.Dynamic.{global => g}
+import scala.scalajs.js.timers._
 
 object ReactApp extends JSApp {
 
   def main(): Unit = {
 
-    // remove waiting page stuff
-    if (!js.isUndefined(g.loadingElement)) {
-      g.loadingElement
+    //Update body class to app-loaded, this will
+    //fade out the loading screen
+    dom.document.body.className = "app-loaded"
 
-      dom.document.getElementsByClassName("pg-loading-screen")
-
-      g.document.body.removeChild(g.loadingElement)
-      g.loadingElement = js.undefined
-      dom.document.body.className.replace("pg-loading", "")
-      dom.document.body.className += " pg-loaded"
+    //in 1.0s when it has faded out, remove loading node completely
+    setTimeout(1000.0){
+      val loadingNode = dom.document.getElementById("loading")
+      dom.document.body.removeChild(loadingNode)
     }
 
 //    AppCSS.load()
 //    AppRouter.router().render(dom.document.getElementById("container"))
-
 
     val mountNode = dom.document.getElementById("container")
 
