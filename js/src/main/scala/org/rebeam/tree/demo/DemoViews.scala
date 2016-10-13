@@ -7,7 +7,6 @@ import org.rebeam.tree.view.Cursor._
 
 import DemoData._
 import org.rebeam.tree.demo.DemoData.Priority._
-import com.payalabs.scalajs.react.mdl.MaterialAble
 
 object DemoViews {
 
@@ -103,7 +102,7 @@ object DemoViews {
         }
 
       )
-    ).material
+    )
   }}
 
   val noTodoList = <.div(

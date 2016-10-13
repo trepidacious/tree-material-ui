@@ -76,8 +76,14 @@ object ServerDemoApp extends ServerApp {
 
   }
 
-  val assets = resourceService(ResourceService.Config("", "/"))
+  //This will serve from java resources, so work in a jar
+  //We can also set cacheStartegy = staticcontent.MemoryCache() in the Config
+//  val assets = resourceService(ResourceService.Config("", "/"))
 
+  //This serves directly from development resources directory, so will update
+  //when we change original resources files and refresh browser
+  //Serve our assets relative to user directory - kind of messy
+  val assets = fileService(FileService.Config(new File(System.getProperty("user.dir")).getParent + "/assets", "/assets"))
   val assetsService: HttpService = HttpService {
     case r @ GET -> _ => assets(r)
   }
@@ -96,12 +102,6 @@ object ServerDemoApp extends ServerApp {
     case r @ GET -> _ => resources(r)
   }
 
-  //Serve our scala-js from js project target - kind of messy
-  val scalajs = fileService(FileService.Config(new File(System.getProperty("user.dir")).getParent + "/js/target/scala-2.11", "/scalajs"))
-  val scalajsService: HttpService = HttpService {
-    case r @ GET -> _ => scalajs(r)
-  }
-
   // val apiCORS = CORS(apiService)
 
   def server(args: List[String]) =
@@ -109,8 +109,7 @@ object ServerDemoApp extends ServerApp {
       .withWebSockets(true)
       .mountService(apiService, "/api")
       .mountService(resourcesService, "/")
-      .mountService(assetsService, "/assets")
-      .mountService(scalajsService, "/")
+      .mountService(assetsService, "/")     //Note that the "/assets" path is already built into the fileService
       // .mountService(apiCORS, "/api")
       .start
 
