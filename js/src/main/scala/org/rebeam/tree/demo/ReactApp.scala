@@ -34,7 +34,8 @@ object ReactApp extends JSApp {
 
     val themedView = ReactComponentB[Unit]("themedView").render(p =>
       MuiMuiThemeProvider()(
-        DemoViews.buttonView()
+//        DemoViews.addressView
+        DemoViews.todoListView
       )
     ).build
 

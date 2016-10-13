@@ -5,20 +5,24 @@ import org.rebeam.tree.view.View._
 import org.rebeam.tree.view._
 import org.rebeam.tree.view.Cursor._
 import DemoData._
-import chandu0101.scalajs.react.components._
-import chandu0101.scalajs.react.components.materialui.{MuiFlatButton, MuiMuiThemeProvider}
-import japgolly.scalajs.react.ReactComponentB
+import chandu0101.scalajs.react.components.materialui._
+import japgolly.scalajs.react._
 import org.rebeam.tree.demo.DemoData.Priority._
 
 object DemoViews {
 
   val streetView = cursorView[Street]("StreetView") { c =>
+    val cap: Callback = c.act(StreetAction.Capitalise: StreetAction)
     <.div(
       <.p("Blah"),
       intView(c.zoomN(Street.number).label("Number")),
       textView(c.zoomN(Street.name).label("Name")),
-      <.p(actButton("Number multiple", c.act(StreetAction.NumberMultiple(10): StreetAction))),
-      <.p(actButton("Capitalise", c.act(StreetAction.Capitalise: StreetAction)))
+      raisedButton("Number multiple"){
+        c.act(StreetAction.NumberMultiple(10): StreetAction)
+      },
+      raisedButton("Capitalise"){
+        c.act(StreetAction.Capitalise: StreetAction)
+      }
     )
   }
 
@@ -36,79 +40,91 @@ object DemoViews {
     }
   }
 
-  val homeView = staticView (
+  val homeView = staticView("home")(
     <.div (
       <.h3("Home")
     )
   )
 
   val todoView = cursorView[Todo]("TodoView") { c =>
-    def tdText(xs: TagMod*) = <.td(^.cls := "mdl-data-table__cell--non-numeric")(xs)
-
-    def tdPriority(p: Priority) =
-      <.td(
-        ^.classSet1(
-          "mdl-data-table__cell--priority",
-          "mdl-data-table__cell--priority-high" -> (p == High),
-          "mdl-data-table__cell--priority-medium" -> (p == Medium),
-          "mdl-data-table__cell--priority-low" -> (p == Low)
-        ),
-        ^.onClick --> c.act(TodoAction.CyclePriority: TodoAction),
-        <.i(
-          ^.cls := "material-icons",
-          p match {
-            case High => "star"
-            case Medium => "star_half"
-            case Low => "star_border"
-          }
-        )
-      )
+//    def tdText(xs: TagMod*) = <.td(^.cls := "mdl-data-table__cell--non-numeric")(xs)
+//
+//    def tdPriority(p: Priority) =
+//      <.td(
+//        ^.classSet1(
+//          "mdl-data-table__cell--priority",
+//          "mdl-data-table__cell--priority-high" -> (p == High),
+//          "mdl-data-table__cell--priority-medium" -> (p == Medium),
+//          "mdl-data-table__cell--priority-low" -> (p == Low)
+//        ),
+//        ^.onClick --> c.act(TodoAction.CyclePriority: TodoAction),
+//        <.i(
+//          ^.cls := "material-icons",
+//          p match {
+//            case High => "star"
+//            case Medium => "star_half"
+//            case Low => "star_border"
+//          }
+//        )
+//      )
 
     val t = c.model
-    <.tr(
-      tdText(booleanView(c.zoomN(Todo.completed).label("Done"))),
-      tdText("#" + t.id),
-      tdText(textViewPlainLabel(c.zoomN(Todo.name).label("Name"))),
-      tdPriority(t.priority)
+
+    MuiTableRow(key = t.id.toString)(
+      MuiTableRowColumn()(
+        booleanViewUnlabelled(c.zoomN(Todo.completed))
+      ),
+      MuiTableRowColumn()(
+        "#" + t.id
+      ),
+      MuiTableRowColumn()(
+        textViewPlainLabel(c.zoomN(Todo.name).label("Name"))
+      ),
+      MuiTableRowColumn()(
+        t.priority match {
+          case High => "star"
+          case Medium => "star_half"
+          case Low => "star_border"
+        }
+      )
     )
   }
 
-  val todoListTableView = cursorView[TodoList]("TodoListTableView") { c => {
-    val itemsCursor = c.zoomN(TodoList.items)
-
-    def th(xs: TagMod*) = <.th(^.cls := "mdl-data-table__cell--non-numeric")(xs)
-
-    <.table(
-      ^.cls := "mdl-data-table mdl-js-data-table",  //mdl-data-table--selectable mdl-shadow--2dp
-      <.thead(
-        <.tr(
-          th("Done?"), th("Id"), th("Name"), th("Priority")
+  val todoListTableView = cursorView[TodoList]("TodoListTableView") { c =>
+    MuiTable(
+      selectable = false
+    )(
+      MuiTableHeader(displaySelectAll = false, adjustForCheckbox = false, enableSelectAll = false)(
+        MuiTableRow()(
+          MuiTableHeaderColumn(tooltip = "Tick when item is done")("Done?"),
+          MuiTableHeaderColumn(tooltip = "Permanent identifier for the item")("Id"),
+          MuiTableHeaderColumn(tooltip = "Name of item")("Name"),
+          MuiTableHeaderColumn(tooltip = "Priority of item")("Priority")
         )
       ),
-      <.tbody(
+      MuiTableBody(
+        showRowHover = true,
+        stripedRows = false
+      )(
         //zoomAllI produces a list of cursors by position in list,
         //then we view each one. This is easy, but fragile since we
         //don't know that items will stay at the same index in the list
-//        itemsCursor.zoomAllI.map(
-//          todoCursor => todoView.withKey(todoCursor.model.id)(todoCursor)
-//        )
+        //        itemsCursor.zoomAllI.map(
+        //          todoCursor => todoView.withKey(todoCursor.model.id)(todoCursor)
+        //        )
 
         //zoomAllMatches accepts a function from items to a predicate finding
         //them, and produces a list of cursors for the items.
         //This is more robust, since a delta generated by the cursor will use
         //FindTodoById and so will find the same Todo in an updated list (or
         //do nothing if there is no matching Todo).
-        itemsCursor.zoomAllMatches(todo => FindTodoById(todo.id)).map {
-          //TODO neater way of getting key into the view
-          todoCursor => todoView.withKey(todoCursor.model.id)(todoCursor)
-        }
-
+        c.zoomN(TodoList.items).zoomAllMatches(todo => FindTodoById(todo.id)).map(todoView(_))
       )
     )
-  }}
+  }
 
   val noTodoList = <.div(
-    <.h3("Todo"),
+    <.h3("Todo List ..."),
     spinner()
   )
   val todoListView = WSRootComponent[TodoList](noTodoList, "api/todolist") {
@@ -121,9 +137,5 @@ object DemoViews {
       )
     }
   }
-
-  val buttonView = ReactComponentB[Unit]("buttonView").render(p =>
-    MuiFlatButton(label = "BUTTON!")()
-  ).build
 
 }

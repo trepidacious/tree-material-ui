@@ -1,10 +1,17 @@
 package org.rebeam.tree.view
 
+import chandu0101.scalajs.react.components.materialui._
 import japgolly.scalajs.react._
-import japgolly.scalajs.react.vdom.prefix_<^._
 import japgolly.scalajs.react.extra.Reusability
 
+import scala.scalajs.js
+
 object View {
+
+  def touch(c: Callback): js.UndefOr[ReactTouchEventH => Callback] = {
+    e: ReactTouchEventH => e.preventDefaultCB >> c
+  }
+
   def view[A](name: String, overlay: Boolean = true)(render: A => ReactElement) =
     ReactComponentB[A](name).render_P(render).build
 
@@ -15,87 +22,67 @@ object View {
   def cursorView[A](name: String)(render: Cursor[A] => ReactElement) =
     ReactComponentB[Cursor[A]](name).render_P(render).configure(Reusability.shouldComponentUpdate).build
 
-  def labelledCursorView[A](name: String, overlay: Boolean = false)(render: LabelledCursor[A] => ReactElement) =
+  def labelledCursorView[A](name: String)(render: LabelledCursor[A] => ReactElement) =
     ReactComponentB[LabelledCursor[A]](name).render_P(render).configure(Reusability.shouldComponentUpdate).build
 
-  def staticView(e: ReactElement, name: String = "StaticView") = ReactComponentB[Unit](name)
+  def staticView(name: String)(e: ReactElement) = ReactComponentB[Unit](name)
     .render(_ => e)
     .build
 
   def dynamicView(name: String)(render: => ReactElement) =
     ReactComponentB[Unit](name).render_P(_ => render).build
 
-  val spinner = staticView(<.div(), "Spinner")
+  val spinner = staticView("Spinner")(
+    MuiCircularProgress(mode = DeterminateIndeterminate.indeterminate)()
+  )
 
   val textView = labelledCursorView[String]("textView") { p =>
-    <.form(
-      <.div(
-        <.input(
-          ^.id := "string-view-input",
-          ^.`type` := "text",
-          ^.value := p.cursor.model,
-          ^.onChange ==> ((e: ReactEventI) => p.cursor.set(e.target.value))
-        ),
-        <.label(
-          ^.`for` := "string-view-input",
-          p.label
-        )
-      )
-    )
+    MuiTextField(
+      value = p.cursor.model,
+      onChange = (e: ReactEventI) => e.preventDefaultCB >>  p.cursor.set(e.target.value),
+      floatingLabelText = p.label: ReactNode
+    )()
   }
 
   val textViewPlainLabel = labelledCursorView[String]("textViewPlainLabel") { p =>
-    <.form(
-      <.div(
-        <.input(
-          ^.id := "string-view-input",
-          ^.`type` := "text",
-          ^.value := p.cursor.model,
-          ^.onChange ==> ((e: ReactEventI) => p.cursor.set(e.target.value))
-        ),
-        <.label(
-          ^.`for` := "string-view-input",
-          p.label
-        )
-      )
-    )
+    MuiTextField(
+      value = p.cursor.model,
+      onChange = (e: ReactEventI) => e.preventDefaultCB >>  p.cursor.set(e.target.value),
+      hintText = p.label: ReactNode
+    )()
   }
 
   val intView = labelledCursorView[Int]("intView") { p =>
-    <.form(
-      <.div(
-        <.input(
-          ^.id := "string-view-input",
-          ^.`type` := "number",
-          ^.value := p.cursor.model.toString,
-          ^.onChange ==> ((e: ReactEventI) => p.cursor.set(e.target.value.toInt))
-        ),
-        <.label(
-          ^.`for` := "string-view-input",
-          p.label
-        )
-      )
-    )
+    MuiTextField(
+      `type` = "number",
+      value = p.cursor.model.toString,
+      onChange = (e: ReactEventI) => e.preventDefaultCB >> p.cursor.set(e.target.value.toInt),
+      floatingLabelText = p.label: ReactNode
+    )()
   }
 
   val booleanView = labelledCursorView[Boolean]("booleanView") { p =>
-    <.form(
-      <.label(
-        <.input.checkbox(
-          ^.checked := p.cursor.model,
-          ^.onChange --> p.cursor.set(!p.cursor.model)
-        ),
-        <.span(
-          p.label
-        )
-      )
-    )
+    MuiCheckbox(
+      label = p.label: ReactNode,
+      checked = p.cursor.model,
+      onCheck = (e: ReactEventH, b: Boolean) => e.preventDefaultCB >> p.cursor.set(!p.cursor.model)
+    )()
   }
 
-  def actButton(s: String, c: Callback, accent: Boolean = false, colored: Boolean = true) =
-    <.button(
-      s,
-      ^.onClick ==> ((e: ReactEventI) => e.preventDefaultCB >> c)
-    )
+  val booleanViewUnlabelled = cursorView[Boolean]("booleanView") { p =>
+    MuiCheckbox(
+      checked = p.model,
+      onCheck = (e: ReactEventH, b: Boolean) => e.preventDefaultCB >> p.set(!p.model)
+    )()
+  }
+
+  def raisedButton(label: String, primary: Boolean = false, secondary: Boolean = false)(callback: Callback) = {
+    MuiRaisedButton(
+      label = label,
+      primary = primary,
+      secondary = secondary,
+      onTouchTap = touch(callback)
+    )()
+  }
 
 }
