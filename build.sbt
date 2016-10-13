@@ -53,7 +53,8 @@ lazy val treeMaterialUi = crossProject.in(file(".")).
   ).jsSettings(
     //Scalajs dependencies that are used on the client only
     libraryDependencies ++= Seq(
-      "com.github.chandu0101.scalajs-react-components" %%% "core" % scalajsReactComponentsVersion
+      "com.github.chandu0101.scalajs-react-components"  %%% "core"        % scalajsReactComponentsVersion,
+      "com.github.japgolly.scalacss"                    %%% "ext-react"   % "0.5.0"
     ),
 
     // Output compiled scala-js to assets directory

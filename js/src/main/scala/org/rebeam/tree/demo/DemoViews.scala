@@ -4,8 +4,10 @@ import japgolly.scalajs.react.vdom.prefix_<^._
 import org.rebeam.tree.view.View._
 import org.rebeam.tree.view._
 import org.rebeam.tree.view.Cursor._
-
 import DemoData._
+import chandu0101.scalajs.react.components._
+import chandu0101.scalajs.react.components.materialui.{MuiFlatButton, MuiMuiThemeProvider}
+import japgolly.scalajs.react.ReactComponentB
 import org.rebeam.tree.demo.DemoData.Priority._
 
 object DemoViews {
@@ -119,5 +121,9 @@ object DemoViews {
       )
     }
   }
+
+  val buttonView = ReactComponentB[Unit]("buttonView").render(p =>
+    MuiFlatButton(label = "BUTTON!")()
+  ).build
 
 }

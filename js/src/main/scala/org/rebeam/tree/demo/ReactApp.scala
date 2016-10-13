@@ -1,7 +1,8 @@
 package org.rebeam.tree.demo
 
+import chandu0101.scalajs.react.components.materialui._
+import japgolly.scalajs.react.ReactComponentB
 import org.scalajs.dom
-
 import org.rebeam.tree.view.MaterialSwatch
 
 import scala.scalajs.js.JSApp
@@ -31,7 +32,13 @@ object ReactApp extends JSApp {
 
 //    MaterialSwatch.AllFamiliesView() render mountNode
 
-    DemoViews.todoListView render mountNode
+    val themedView = ReactComponentB[Unit]("themedView").render(p =>
+      MuiMuiThemeProvider()(
+        DemoViews.buttonView()
+      )
+    ).build
+
+    themedView() render mountNode
   }
 
 }
