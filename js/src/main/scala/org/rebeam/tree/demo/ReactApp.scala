@@ -21,19 +21,33 @@ object ReactApp extends JSApp {
       dom.document.body.removeChild(loadingNode)
     }
 
+    // We would load scala-css styles here if we had any
 //    AppCSS.load()
 
-    val mountNode = dom.document.getElementById("container")
+    // Set up a theme based on default light theme, but replacing cyan with
+    // blueGrey
+    val baseTheme = Mui.Styles.LightRawTheme
+    val theme = Mui.Styles.getMuiTheme(
+      baseTheme.copy(palette =
+        baseTheme.palette
+          .copy(primary1Color = Mui.Styles.colors.blueGrey500)
+          .copy(primary2Color = Mui.Styles.colors.blueGrey700)
+          .copy(accent1Color = Mui.Styles.colors.amberA200)
+      )
+    )
 
+    // Our top-level component, display pages based on URL, with app bar and navigation
     val router = DemoRoutes.router
 
+    // Need to wrap our top-level router component in a theme for Material-UI to work
     val themedView = ReactComponentB[Unit]("themedView").render(p =>
-      MuiMuiThemeProvider()(
+      MuiMuiThemeProvider(muiTheme = theme)(
         router()
       )
     ).build
 
-    themedView() render mountNode
+    // Finally, render the themed top-level view to the predefined HTML div with id "container"
+    themedView() render dom.document.getElementById("container")
   }
 
 }

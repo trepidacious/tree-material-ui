@@ -16,11 +16,19 @@ object Navigation {
 
   class Backend[P](scope: BackendScope[Props[P], State]) {
 
+    val toggleDrawerOpen = scope.modState(s => s.copy(drawerOpen = !s.drawerOpen))
+
+    val onRequestChange: (Boolean, String) => Callback =
+      (open, reason) =>
+        Callback.info(s"onRequestChange: open: $open, reason: $reason") >>
+          scope.modState(s => s.copy(drawerOpen = !s.drawerOpen))
+
+
     def render(p: Props[P], s: State) = {
       <.div(
         MuiAppBar(
           title = p.title: ReactNode,
-//          onLeftIconButtonTouchTap  = CallbackDebug.f1("onLeftIconButtonTouchTap"),
+          onLeftIconButtonTouchTap  = View.touch(toggleDrawerOpen),
 //          onRightIconButtonTouchTap = CallbackDebug.f1("onRightIconButtonTouchTap"),
 //          onTitleTouchTap           = CallbackDebug.f1("onTitleTouchTap"),
           showMenuIconButton = true,
@@ -29,17 +37,37 @@ object Navigation {
             "top" -> "0px"
           )
         )(),
-        <.div(
-          ^.paddingTop := "64px",
-          <.ul(
-            p.navs.map {
-              case (name, page) => <.li(
-                (if (p.page == page) ">" else " ") + name,
-                p.routerCtl setOnClick page
-              )
-            }
+        MuiDrawer(
+          onRequestChange = onRequestChange,  //Toggle open state
+          docked          = false,
+          open            = s.drawerOpen
+        )(
+          //TODO get the color from Material-UI theme, or is there a component that does this?
+          <.div(
+            ^.backgroundColor := "#757575",
+            ^.color           := "rgb(255, 255, 255)",
+            ^.height          := "64px"
           ),
-          p.resolution.render()
+          MuiList()(
+            p.navs.map {
+              case (name, page) =>
+                MuiListItem(
+  //              MuiMenuItem(
+                  key         = name,
+                  primaryText = name: ReactNode,
+  //                checked     = p.page == page,
+                  onTouchTap  = View.touch(p.routerCtl.set(page) >> toggleDrawerOpen),
+                  style       = js.Dynamic.literal(
+                    "cursor" -> "pointer",
+                    "user-select" -> "none"
+                  )
+                )()
+            }
+          )
+        ),
+        <.div(
+            ^.paddingTop := "64px",
+            p.resolution.render()
         )
       )
     }
