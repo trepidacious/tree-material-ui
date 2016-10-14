@@ -1,9 +1,12 @@
 package org.rebeam.tree.view
 
+import chandu0101.scalajs.react.components.materialui._
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.extra.Reusability
 import japgolly.scalajs.react.extra.router._
 import japgolly.scalajs.react.vdom.prefix_<^._
+
+import scala.scalajs.js
 
 object Navigation {
 
@@ -12,26 +15,41 @@ object Navigation {
   case class State(drawerOpen: Boolean)
 
   class Backend[P](scope: BackendScope[Props[P], State]) {
+
     def render(p: Props[P], s: State) = {
       <.div(
-        <.h1(p.title),
-        <.ul(
-          p.navs.map {
-            case (name, page) => <.li(
-              (if (p.page == page) ">" else " ") + name,
-              p.routerCtl setOnClick page
-            )
-          }
-        ),
-        p.resolution.render()
+        MuiAppBar(
+          title = p.title: ReactNode,
+//          onLeftIconButtonTouchTap  = CallbackDebug.f1("onLeftIconButtonTouchTap"),
+//          onRightIconButtonTouchTap = CallbackDebug.f1("onRightIconButtonTouchTap"),
+//          onTitleTouchTap           = CallbackDebug.f1("onTitleTouchTap"),
+          showMenuIconButton = true,
+          style = js.Dynamic.literal(
+            "position" -> "fixed",
+            "top" -> "0px"
+          )
+        )(),
+        <.div(
+          ^.paddingTop := "64px",
+          <.ul(
+            p.navs.map {
+              case (name, page) => <.li(
+                (if (p.page == page) ">" else " ") + name,
+                p.routerCtl setOnClick page
+              )
+            }
+          ),
+          p.resolution.render()
+        )
       )
     }
   }
 
+  //TODO make only the contents care about resolution
   //Reusable if all fields are equal except routerCtl, where we use its own reusability
   implicit def navPropsReuse[P]: Reusability[Props[P]] = Reusability.fn{
     case (a, b) if a eq b => true // First because most common case and fastest
-    case (a, b) if a.page == b.page && a.navs == b.navs && a.title == b.title => RouterCtl.reusability[P].test(a.routerCtl, b.routerCtl)
+    case (a, b) if a.page == b.page && a.navs == b.navs && a.title == b.title && a.resolution == b.resolution => RouterCtl.reusability[P].test(a.routerCtl, b.routerCtl)
     case _ => false
   }
 
@@ -40,7 +58,6 @@ object Navigation {
     .initialState(State(false))
     .backend(new Backend[P](_))
     .render(s => s.backend.render(s.props, s.state))
-//    .configure(Reusability.shouldComponentUpdate)
     .build
 
 

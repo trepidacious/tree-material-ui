@@ -10,7 +10,7 @@ object DemoRoutes {
   case object TodoList      extends Page
   case object Address       extends Page
 
-  val title = "Tree"
+  val title = "Tree Material UI"
 
   val routerConfig = RouterConfigDsl[Page].buildConfig { dsl =>
     import dsl._
