@@ -2,7 +2,6 @@ package org.rebeam.tree.demo
 
 import japgolly.scalajs.react.extra.router._
 import org.rebeam.tree.view.Navigation
-import org.rebeam.tree.view.Navigation._
 
 object DemoRoutes {
 
@@ -24,7 +23,7 @@ object DemoRoutes {
 
       .notFound(redirectToPage(Home)(Redirect.Replace))
       .renderWith(layout)
-      .verify(Home, Address)
+      .verify(Home, Address, TodoList)
   }
 
   val navs = Map(
@@ -33,11 +32,11 @@ object DemoRoutes {
     "Address" -> Address
   )
 
-  val nav = Navigation.apply[Page]
+  val navigation = Navigation.apply[Page]
 
   def layout(ctl: RouterCtl[Page], r: Resolution[Page]) = {
-    val np = Props(ctl, r, r.page, navs, title)
-    nav(np)
+    val np = Navigation.Props(ctl, r, r.page, navs, title)
+    navigation(np)
   }
 
   val baseUrl = BaseUrl.fromWindowOrigin_/
