@@ -51,6 +51,10 @@ object Navigation {
           MuiList()(
             p.navs.map {
               case (name, page) =>
+                //TODO show selected page - not sure how to select
+                //a MuiListItem, in plain js material-ui the list has
+                //a selection and items have values, but this wouldn't
+                //be great.
                 MuiListItem(
   //              MuiMenuItem(
                   key         = name,
