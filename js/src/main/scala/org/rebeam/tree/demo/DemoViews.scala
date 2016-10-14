@@ -9,6 +9,8 @@ import chandu0101.scalajs.react.components.materialui._
 import japgolly.scalajs.react._
 import org.rebeam.tree.demo.DemoData.Priority._
 
+import scala.scalajs.js
+
 object DemoViews {
 
   val streetView = cursorView[Street]("StreetView") { c =>
@@ -71,16 +73,16 @@ object DemoViews {
     val t = c.model
 
     MuiTableRow(key = t.id.toString)(
-      MuiTableRowColumn()(
+      MuiTableRowColumn(style = js.Dynamic.literal("width" -> "40px"))(
         booleanViewUnlabelled(c.zoomN(Todo.completed))
       ),
-      MuiTableRowColumn()(
+      MuiTableRowColumn(style = js.Dynamic.literal("width" -> "40px"))(
         "#" + t.id
       ),
-      MuiTableRowColumn()(
+      MuiTableRowColumn(style = js.Dynamic.literal("width" -> "100%"))(
         textViewPlainLabel(c.zoomN(Todo.name).label("Name"))
       ),
-      MuiTableRowColumn()(
+      MuiTableRowColumn(style = js.Dynamic.literal("width" -> "40px"))(
         t.priority match {
           case High => "star"
           case Medium => "star_half"
@@ -89,17 +91,16 @@ object DemoViews {
       )
     )
   }
-
   val todoListTableView = cursorView[TodoList]("TodoListTableView") { c =>
     MuiTable(
       selectable = false
     )(
       MuiTableHeader(displaySelectAll = false, adjustForCheckbox = false, enableSelectAll = false)(
         MuiTableRow()(
-          MuiTableHeaderColumn(tooltip = "Tick when item is done")("Done?"),
-          MuiTableHeaderColumn(tooltip = "Permanent identifier for the item")("Id"),
-          MuiTableHeaderColumn(tooltip = "Name of item")("Name"),
-          MuiTableHeaderColumn(tooltip = "Priority of item")("Priority")
+          MuiTableHeaderColumn(tooltip = "Tick when item is done", style = js.Dynamic.literal("width" -> "40px"))("Done?"),
+          MuiTableHeaderColumn(tooltip = "Permanent identifier for the item", style = js.Dynamic.literal("width" -> "40px"))("Id"),
+          MuiTableHeaderColumn(tooltip = "Name of item", style = js.Dynamic.literal("width" -> "100%"))("Name"),
+          MuiTableHeaderColumn(tooltip = "Priority of item", style = js.Dynamic.literal("width" -> "40px"))("Priority")
         )
       ),
       MuiTableBody(

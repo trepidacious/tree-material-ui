@@ -3,7 +3,6 @@ package org.rebeam.tree.demo
 import chandu0101.scalajs.react.components.materialui._
 import japgolly.scalajs.react.ReactComponentB
 import org.scalajs.dom
-import org.rebeam.tree.view.MaterialSwatch
 
 import scala.scalajs.js.JSApp
 import scala.scalajs.js.timers._
@@ -23,19 +22,14 @@ object ReactApp extends JSApp {
     }
 
 //    AppCSS.load()
-//    AppRouter.router().render(dom.document.getElementById("container"))
 
     val mountNode = dom.document.getElementById("container")
 
-//    val router = DemoRoutes.router
-//    router() render mountNode
-
-//    MaterialSwatch.AllFamiliesView() render mountNode
+    val router = DemoRoutes.router
 
     val themedView = ReactComponentB[Unit]("themedView").render(p =>
       MuiMuiThemeProvider()(
-//        DemoViews.addressView
-        DemoViews.todoListView
+        router()
       )
     ).build
 

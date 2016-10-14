@@ -1,8 +1,8 @@
 package org.rebeam.tree.demo
 
 import japgolly.scalajs.react.extra.router._
-import japgolly.scalajs.react.vdom.prefix_<^._
-import org.rebeam.tree.view.Nav._
+import org.rebeam.tree.view.Navigation
+import org.rebeam.tree.view.Navigation._
 
 object DemoRoutes {
 
@@ -33,17 +33,11 @@ object DemoRoutes {
     "Address" -> Address
   )
 
-  val navPageMenu = navMenu[Page]
-  val navPageDrawer = navDrawer[Page]
+  val nav = Navigation.apply[Page]
 
   def layout(ctl: RouterCtl[Page], r: Resolution[Page]) = {
-    val np = NavProps(ctl, r.page, navs, title)
-
-    navLayout(
-      navPageMenu(np),
-      navPageDrawer(np),
-      navContents(r.render())
-    )
+    val np = Props(ctl, r, r.page, navs, title)
+    nav(np)
   }
 
   val baseUrl = BaseUrl.fromWindowOrigin_/
