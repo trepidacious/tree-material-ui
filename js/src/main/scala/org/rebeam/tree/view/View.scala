@@ -1,5 +1,6 @@
 package org.rebeam.tree.view
 
+import chandu0101.scalajs.react.components.Implicits._
 import chandu0101.scalajs.react.components.materialui._
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.extra.Reusability
@@ -63,7 +64,7 @@ object View {
 
   val booleanView = labelledCursorView[Boolean]("booleanView") { p =>
     MuiCheckbox(
-      label = p.label: ReactNode,
+      label = p.label,
       checked = p.cursor.model,
       onCheck = (e: ReactEventH, b: Boolean) => e.preventDefaultCB >> p.cursor.set(!p.cursor.model)
     )()

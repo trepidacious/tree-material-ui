@@ -30,12 +30,12 @@ object ReactApp extends JSApp {
     val theme = Mui.Styles.getMuiTheme(
       baseTheme.copy(palette =
         baseTheme.palette
-//          .copy(primary1Color = Mui.Styles.colors.blueGrey500)
-//          .copy(primary2Color = Mui.Styles.colors.blueGrey700)
-//          .copy(accent1Color = Mui.Styles.colors.amberA200)
-          .copy(primary1Color = Mui.Styles.colors.blue500)
-          .copy(primary2Color = Mui.Styles.colors.blue700)
-          .copy(accent1Color = Mui.Styles.colors.lightGreenA200)
+          .copy(primary1Color = Mui.Styles.colors.blueGrey500)
+          .copy(primary2Color = Mui.Styles.colors.blueGrey700)
+          .copy(accent1Color = Mui.Styles.colors.deepOrangeA200)
+//          .copy(primary1Color = Mui.Styles.colors.blue500)
+//          .copy(primary2Color = Mui.Styles.colors.blue700)
+//          .copy(accent1Color = Mui.Styles.colors.lightGreenA700)
       )
     )
 

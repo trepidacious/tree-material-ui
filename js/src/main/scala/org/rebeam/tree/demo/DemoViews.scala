@@ -6,6 +6,7 @@ import org.rebeam.tree.view._
 import org.rebeam.tree.view.Cursor._
 import DemoData._
 import chandu0101.scalajs.react.components.materialui._
+import chandu0101.scalajs.react.components.Implicits._
 import japgolly.scalajs.react._
 import org.rebeam.tree.demo.DemoData.Priority._
 
@@ -14,15 +15,14 @@ import scala.scalajs.js
 object DemoViews {
 
   val streetView = cursorView[Street]("StreetView") { c =>
-    val cap: Callback = c.act(StreetAction.Capitalise: StreetAction)
     <.div(
       <.p("Blah"),
       intView(c.zoomN(Street.number).label("Number")),
       textView(c.zoomN(Street.name).label("Name")),
-      raisedButton("Number multiple"){
+      raisedButton("Number multiple", primary = true){
         c.act(StreetAction.NumberMultiple(10): StreetAction)
       },
-      raisedButton("Capitalise"){
+      raisedButton("Capitalise", secondary = true){
         c.act(StreetAction.Capitalise: StreetAction)
       }
     )
@@ -125,7 +125,7 @@ object DemoViews {
   }
 
   val noTodoList = <.div(
-    <.h3("Todo List ..."),
+    <.h3("Todo List"),
     spinner()
   )
   val todoListView = WSRootComponent[TodoList](noTodoList, "api/todolist") {
