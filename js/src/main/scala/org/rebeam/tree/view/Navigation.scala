@@ -48,18 +48,14 @@ object Navigation {
             ^.color           := "rgb(255, 255, 255)",
             ^.height          := "64px"
           ),
-          MuiList()(
+          MuiMenu()(
             p.navs.map {
               case (name, page) =>
-                //TODO show selected page - not sure how to select
-                //a MuiListItem, in plain js material-ui the list has
-                //a selection and items have values, but this wouldn't
-                //be great.
-                MuiListItem(
-  //              MuiMenuItem(
+                MuiMenuItem(
                   key         = name,
                   primaryText = name: ReactNode,
-  //                checked     = p.page == page,
+                  checked     = p.page == page,
+                  insetChildren = p.page != page,   //Allow space for icon/checkmark when it's not displayed
                   onTouchTap  = View.touch(p.routerCtl.set(page) >> toggleDrawerOpen),
                   style       = js.Dynamic.literal(
                     "cursor" -> "pointer",
