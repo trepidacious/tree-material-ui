@@ -45,9 +45,9 @@ lazy val treeMaterialUi = crossProject.in(file(".")).
 
   //Settings specific to JVM
   ).jvmSettings(
-    libraryDependencies ++= Seq(),
+    libraryDependencies ++= Seq()//,
     //We need to assets directory at runtime, so we can serve files in it
-    unmanagedClasspath in (Compile, runMain) += baseDirectory.value / "assets"
+//    unmanagedClasspath in (Compile, runMain) += baseDirectory.value / "assets"
 
   //Settings specific to JS
   ).jsSettings(
