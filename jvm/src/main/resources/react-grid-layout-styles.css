@@ -1,9 +1,11 @@
 .react-grid-layout {
   position: relative;
-  transition: height 200ms ease;
+  /*transition: height 200ms ease;*/
+  transition: height 200ms cubic-bezier(0.19, 1, 0.22, 1);
 }
 .react-grid-item {
-  transition: all 200ms ease;
+  /*transition: all 200ms ease;*/
+  transition: all 200ms cubic-bezier(0.19, 1, 0.22, 1);
   transition-property: left, top;
 }
 .react-grid-item.cssTransforms {
@@ -19,9 +21,11 @@
 }
 
 .react-grid-item.react-grid-placeholder {
-  background: red;
-  opacity: 0.2;
-  transition-duration: 100ms;
+  background: rgb(96, 125, 139);
+  opacity: 0.15;
+  /*transition-duration: 100ms;*/
+  transition: all 200ms cubic-bezier(0.19, 1, 0.22, 1);
+
   z-index: 2;
   -webkit-user-select: none;
   -moz-user-select: none;

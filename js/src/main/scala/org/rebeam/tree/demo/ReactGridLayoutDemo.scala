@@ -5,7 +5,6 @@ import io.circe.Decoder
 import japgolly.scalajs.react._
 import org.rebeam.tree.view.ReactGridLayout
 import org.rebeam.tree.view.ReactGridLayout._
-import org.rebeam.tree.view.WSRootComponent.State
 
 object ReactGridLayoutDemo {
 
@@ -14,6 +13,10 @@ object ReactGridLayoutDemo {
       println("Layout state: " + l)
       ReactGridLayout(
         layout = l,
+        cols = 1,
+        rowHeight = 50,
+        margin = XY(20, 20),
+        containerPadding = XY(0, 0),
         onLayoutChange = newLayout => scope.modState(s => newLayout)
       )(
         MuiPaper(key = "a")("A"),
