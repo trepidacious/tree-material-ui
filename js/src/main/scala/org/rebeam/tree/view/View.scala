@@ -30,9 +30,6 @@ object View {
     .render(_ => e)
     .build
 
-  def dynamicView(name: String)(render: => ReactElement) =
-    ReactComponentB[Unit](name).render_P(_ => render).build
-
   val spinner = staticView("Spinner")(
     MuiCircularProgress(mode = DeterminateIndeterminate.indeterminate)()
   )

@@ -15,6 +15,8 @@ scalacOptions in ThisBuild ++= Seq(
   "-Xlint"
 )
 
+resolvers += Resolver.sonatypeRepo("snapshots")
+
 //SLF4J simple logger, y u log to System.err by default, even for info?
 javaOptions in ThisBuild := Seq("-Dorg.slf4j.simpleLogger.logFile=System.out")
 
@@ -53,8 +55,8 @@ lazy val treeMaterialUi = crossProject.in(file(".")).
   ).jsSettings(
     //Scalajs dependencies that are used on the client only
     libraryDependencies ++= Seq(
-      "com.github.chandu0101.scalajs-react-components"  %%% "core"        % scalajsReactComponentsVersion,
-      "com.github.japgolly.scalacss"                    %%% "ext-react"   % "0.5.0"
+      "com.github.chandu0101.scalajs-react-components"  %%% "core"                  % scalajsReactComponentsVersion,
+      "com.github.japgolly.scalacss"                    %%% "ext-react"             % "0.5.0"
     ),
 
     // Output compiled scala-js to assets directory

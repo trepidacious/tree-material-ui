@@ -45,7 +45,7 @@ object MaterialSwatch {
     )
   }
 
-  val AllFamiliesView = dynamicView("AllFamiliesView"){
+  val AllFamiliesView = staticView("AllFamiliesView"){
     <.div(
       accented.map(f => AccentedFamilyView(f)),
       shaded.map(f => ShadedFamilyView(f)),

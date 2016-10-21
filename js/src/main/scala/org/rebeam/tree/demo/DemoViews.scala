@@ -6,7 +6,6 @@ import org.rebeam.tree.view._
 import org.rebeam.tree.view.Cursor._
 import DemoData._
 import chandu0101.scalajs.react.components.materialui._
-import chandu0101.scalajs.react.components.Implicits._
 import japgolly.scalajs.react._
 import org.rebeam.tree.demo.DemoData.Priority._
 
@@ -44,7 +43,9 @@ object DemoViews {
 
   val homeView = staticView("home")(
     <.div (
-      <.h3("Home")
+      ^.margin := "24px",
+      <.h3("Home"),
+      ReactGridLayoutDemo.c()
     )
   )
 
