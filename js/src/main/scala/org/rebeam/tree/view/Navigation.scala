@@ -66,7 +66,7 @@ object Navigation {
           )
         ),
         <.div(
-            ^.paddingTop := "64px",
+            ^.paddingTop    := "64px",
             p.resolution.render()
         )
       )

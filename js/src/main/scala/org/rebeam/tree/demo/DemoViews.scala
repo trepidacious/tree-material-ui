@@ -131,6 +131,7 @@ object DemoViews {
   val todoListView = WSRootComponent[TodoList](noTodoList, "api/todolist") {
     c => {
       <.div(
+        ^.margin := "24px",
         <.h3("Todo List"),
         textView(c.zoomN(TodoList.name).label("Name")),
         textView(c.zoomN(TodoList.email).label("Email")),
