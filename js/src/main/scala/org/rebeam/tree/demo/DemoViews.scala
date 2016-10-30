@@ -72,6 +72,11 @@ object DemoViews {
 //      )
 
     val t = c.model
+    val icon  = t.priority match {
+      case High => Mui.SvgIcons.ToggleStar(color = Mui.Styles.colors.amber700)()
+      case Medium => Mui.SvgIcons.ToggleStarHalf(color = Mui.Styles.colors.blue300)()
+      case Low => Mui.SvgIcons.ToggleStarBorder(color = Mui.Styles.colors.grey300)()
+    }
 
     MuiTableRow(key = t.id.toString)(
       MuiTableRowColumn(style = js.Dynamic.literal("width" -> "40px"))(
@@ -83,12 +88,12 @@ object DemoViews {
       MuiTableRowColumn(style = js.Dynamic.literal("width" -> "100%"))(
         textViewPlainLabel(c.zoomN(Todo.name).label("Name"))
       ),
-      MuiTableRowColumn(style = js.Dynamic.literal("width" -> "40px"))(
-        t.priority match {
-          case High => "star"
-          case Medium => "star_half"
-          case Low => "star_border"
-        }
+      MuiTableRowColumn(
+        style = js.Dynamic.literal("width" -> "40px")
+      )(
+        MuiIconButton(
+          onTouchTap = touch(c.act(TodoAction.CyclePriority: TodoAction))
+        )(icon)
       )
     )
   }
