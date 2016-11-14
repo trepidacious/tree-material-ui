@@ -2,6 +2,7 @@ package org.rebeam.tree.demo
 
 import org.rebeam.tree._
 //This macro gets us LensN rather than just Lens
+
 import org.rebeam.lenses.macros.Lenses
 //import monocle.macros.Lenses
 import org.rebeam.tree.view.Color

@@ -8,6 +8,7 @@ import DemoData._
 import chandu0101.scalajs.react.components.materialui._
 import japgolly.scalajs.react._
 import org.rebeam.tree.demo.DemoData.Priority._
+import org.rebeam.tree.sync.Sync.ModelIdGen
 
 import scala.scalajs.js
 
@@ -31,7 +32,20 @@ object DemoViews {
     <.h3("Address"),
     spinner()
   )
-  val addressView = WSRootComponent[Address](noAddress, "api/address") {
+//  val addressView = WSRootComponent[Address](noAddress, "api/address") {
+//    addressCursor => {
+//      val streetCursor = addressCursor.zoomN(Address.street)
+//      <.div(
+//        <.h3("Address"),
+//        streetView(streetCursor)
+//      )
+//    }
+//  }
+
+  implicit val addressIdGen = new ModelIdGen[Address] {
+    def genId(a: Address) = None
+  }
+  val addressView = ServerRootComponent[Address](noAddress, "api/address") {
     addressCursor => {
       val streetCursor = addressCursor.zoomN(Address.street)
       <.div(
@@ -40,6 +54,7 @@ object DemoViews {
       )
     }
   }
+
 
   val homeView = staticView("home")(
     <.div (
