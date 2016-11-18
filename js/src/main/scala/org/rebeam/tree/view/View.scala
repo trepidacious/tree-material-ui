@@ -54,16 +54,6 @@ object View {
     )()
   }
 
-  val intView = labelledCursorView[Int]("intView") { p =>
-    MuiTextField(
-      `type` = "number",
-      value = p.cursor.model.toString,
-      onChange = (e: ReactEventI) => e.preventDefaultCB >> p.cursor.set(e.target.value.toInt),
-      floatingLabelText = p.label: ReactNode
-    )()
-  }
-
-
   trait StringCodec[A] {
     def format(a: A): String
     def parse(s: String): Xor[String, A]
@@ -107,9 +97,7 @@ object View {
       def render(props: LabelledCursor[A], state: (String, Boolean)) = {
         val model = props.cursor.model
 
-        println("Render with props " + model + " and state " + state)
-
-        // f we have had a prop change since the last time we set state,
+        // If we have had a prop change since the last time we set state,
         // and state does not now represent model, move to model
         val text = if (state._2 && !codec.parse(state._1).toOption.contains(model)) {
           codec.format(model)
@@ -167,6 +155,7 @@ object View {
           Callback.empty
         }
       )
+      .configure(Reusability.shouldComponentUpdate)
       .build
   }
 
@@ -179,7 +168,18 @@ object View {
     }
   }
 
-  val doubleView = AsStringView.component[Double]("DoubleView", doubleStringCodec)
+  val doubleView = AsStringView.component[Double]("doubleView", doubleStringCodec)
+
+  val intStringCodec: StringCodec[Int] = new StringCodec[Int] {
+    def format(d: Int): String = d.toString
+    def parse(s: String): Xor[String, Int] = try {
+      Xor.Right(s.toInt)
+    } catch {
+      case e: NumberFormatException => Xor.Left("Valid whole number required")
+    }
+  }
+
+  val intView = AsStringView.component[Int]("intView", intStringCodec)
 
   val booleanView = labelledCursorView[Boolean]("booleanView") { p =>
     MuiCheckbox(
@@ -188,6 +188,7 @@ object View {
       onCheck = (e: ReactEventH, b: Boolean) => e.preventDefaultCB >> p.cursor.set(!p.cursor.model)
     )()
   }
+
 
   val booleanViewUnlabelled = cursorView[Boolean]("booleanView") { p =>
     MuiCheckbox(
