@@ -107,6 +107,8 @@ object View {
       def render(props: LabelledCursor[A], state: (String, Boolean)) = {
         val model = props.cursor.model
 
+        println("Render with props " + model + " and state " + state)
+
         // f we have had a prop change since the last time we set state,
         // and state does not now represent model, move to model
         val text = if (state._2 && !codec.parse(state._1).toOption.contains(model)) {
@@ -129,8 +131,10 @@ object View {
             val input = e.target.value
             val parsed = codec.parse(input)
             parsed match {
-              // If we have a parsed new model, and it is different to cursor's model, then set new model
-              case Xor.Right(newModel) if newModel != model => e.preventDefaultCB >> props.cursor.set(newModel)
+              // If we have a parsed new model, and it is different to cursor's model, then set new state and model
+              // We set the state so that if the input is a non-standard representation of the model, it will still be
+              // preserved, since it will be in place on our next render when we check it against the new prop.
+              case Xor.Right(newModel) if newModel != model => e.preventDefaultCB >> scope.setState((input, false)) >> props.cursor.set(newModel)
 
               // Otherwise just change state - we are editing without producing a valid new value,
               // but we may be on the way to a valid new value
