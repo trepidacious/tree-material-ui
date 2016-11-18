@@ -1,5 +1,6 @@
 package org.rebeam.tree.view
 
+import cats.data.Xor
 import org.rebeam.tree.TreeUtils._
 import chandu0101.scalajs.react.components.Implicits._
 import chandu0101.scalajs.react.components.materialui._
@@ -8,6 +9,7 @@ import japgolly.scalajs.react._
 import japgolly.scalajs.react.extra.Reusability
 
 import scala.scalajs.js
+import scala.scalajs.js.UndefOr
 
 object View {
 
@@ -64,8 +66,7 @@ object View {
 
   trait StringCodec[A] {
     def format(a: A): String
-    //TODO make into an Xor with error to display as validation
-    def parse(s: String): Option[A]
+    def parse(s: String): Xor[String, A]
   }
 
   /**
@@ -101,42 +102,65 @@ object View {
     */
   object AsStringView {
 
-    class Backend[A](scope: BackendScope[LabelledCursor[A], String])(implicit codec: StringCodec[A], encoder: Encoder[A]) {
+    class Backend[A](scope: BackendScope[LabelledCursor[A], (String, Boolean)])(implicit codec: StringCodec[A], encoder: Encoder[A]) {
 
-      def render(props: LabelledCursor[A], state: String) = {
+      def render(props: LabelledCursor[A], state: (String, Boolean)) = {
+        val model = props.cursor.model
+
+        // f we have had a prop change since the last time we set state,
+        // and state does not now represent model, move to model
+        val text = if (state._2 && !codec.parse(state._1).toOption.contains(model)) {
+          codec.format(model)
+
+        //If we have not had a prop change since we last set state, or state
+        // matches model anyway, just use state
+        } else {
+          state._1
+        }
+
+        val error: UndefOr[ReactNode] = codec.parse(text) match {
+          case Xor.Left(e) => e
+          case _ => js.undefined
+        }
+
         MuiTextField(
-          value = state,
+          value = text,
           onChange = (e: ReactEventI) => {
             val input = e.target.value
             val parsed = codec.parse(input)
             parsed match {
-              // If we have a parsed value, and it is different to cursor's model, then set model
-              case Some(d) if d != props.cursor.model => e.preventDefaultCB >> props.cursor.set(d)
+              // If we have a parsed new model, and it is different to cursor's model, then set new model
+              case Xor.Right(newModel) if newModel != model => e.preventDefaultCB >> props.cursor.set(newModel)
 
               // Otherwise just change state - we are editing without producing a valid new value,
               // but we may be on the way to a valid new value
-              case _ => e.preventDefaultCB >> scope.setState(input)
+              case _ => e.preventDefaultCB >> scope.setState((input, false))
             }
           },
+
+          //On blur, update state to match model if it does not parse to model
+          onBlur = (e: ReactEventI) => {
+            val parsed = codec.parse(state._1)
+            parsed match {
+              case Xor.Right(p) if p == model => Callback.empty
+              case _ => scope.setState((codec.format(model), false))
+            }
+          },
+          errorText = error,
           floatingLabelText = props.label: ReactNode
         )()
       }
     }
 
     def component[A](name: String, codec: StringCodec[A])(implicit encoder: Encoder[A]) = ReactComponentB[LabelledCursor[A]](name)
-      .getInitialState[String](scope => scope.props.cursor.model.toString)
+      .getInitialState[(String, Boolean)](scope => (scope.props.cursor.model.toString, false))
       .backend(new Backend[A](_)(codec, encoder))
       .render(s => s.backend.render(s.props, s.state))
       .componentWillReceiveProps(
-        scope => {
-          println("Will receive props " + scope.nextProps.cursor.model + " with state " + scope.currentState)
-          val nextModel = scope.nextProps.cursor.model
-          val currentModel = scope.currentProps.cursor.model
-          if (nextModel != currentModel && !codec.parse(scope.currentState).contains(nextModel)) {
-            scope.$.setState(codec.format(nextModel))
-          } else {
-            Callback.empty
-          }
+        scope => if (scope.currentProps.cursor.model != scope.nextProps.cursor.model) {
+          scope.$.modState(s => (s._1, true))
+        } else {
+          Callback.empty
         }
       )
       .build
@@ -144,7 +168,11 @@ object View {
 
   val doubleStringCodec: StringCodec[Double] = new StringCodec[Double] {
     def format(d: Double): String = d.toString
-    def parse(s: String): Option[Double] = s.toDoubleOpt
+    def parse(s: String): Xor[String, Double] = try {
+      Xor.Right(s.toDouble)
+    } catch {
+      case e: NumberFormatException => Xor.Left("Valid number required")
+    }
   }
 
   val doubleView = AsStringView.component[Double]("DoubleView", doubleStringCodec)
