@@ -30,7 +30,7 @@ object ServerDemoApp extends ServerApp {
     def genId(a: Address) = None
   }
 
-  val address = new ServerStore(Address(Street("OLD STREET", 1)))
+  val address = new ServerStore(Address(Street("OLD STREET", 1, 22.3)))
 
   val todoList = {
     val time = System.currentTimeMillis()

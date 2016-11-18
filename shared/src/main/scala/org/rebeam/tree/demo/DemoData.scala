@@ -18,7 +18,7 @@ object DemoData {
 
   @JsonCodec
   @Lenses
-  case class Street(name: String, number: Int)
+  case class Street(name: String, number: Int, temperature: Double)
 
   @JsonCodec
   @Lenses
@@ -49,7 +49,7 @@ object DemoData {
 //  implicit val streetEncoder: Encoder[Street] = deriveEncoder[Street]
 
   implicit val streetDeltaDecoder =
-    value[Street] or lensN(Street.name) or lensN(Street.number) or action[Street, StreetAction]
+    value[Street] or lensN(Street.name) or lensN(Street.number) or lensN(Street.temperature) or action[Street, StreetAction]
 
   implicit val addressDeltaDecoder = value[Address] or lensN(Address.street)
 

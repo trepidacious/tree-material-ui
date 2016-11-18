@@ -19,6 +19,7 @@ object DemoViews {
       <.p("Blah"),
       intView(c.zoomN(Street.number).label("Number")),
       textView(c.zoomN(Street.name).label("Name")),
+      doubleView(c.zoomN(Street.temperature).label("Temperature")),
       raisedButton("Number multiple", primary = true){
         c.act(StreetAction.NumberMultiple(10): StreetAction)
       },
