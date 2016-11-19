@@ -57,6 +57,7 @@ object View {
   trait StringCodec[A] {
     def format(a: A): String
     def parse(s: String): Xor[String, A]
+    def prefilter(s: String): String
   }
 
   /**
@@ -116,7 +117,7 @@ object View {
         MuiTextField(
           value = text,
           onChange = (e: ReactEventI) => {
-            val input = e.target.value
+            val input = codec.prefilter(e.target.value)
             val parsed = codec.parse(input)
             parsed match {
               // If we have a parsed new model, and it is different to cursor's model, then set new state and model
@@ -160,12 +161,14 @@ object View {
   }
 
   val doubleStringCodec: StringCodec[Double] = new StringCodec[Double] {
-    def format(d: Double): String = d.toString
-    def parse(s: String): Xor[String, Double] = try {
+    override def format(d: Double): String = d.toString
+    override def parse(s: String): Xor[String, Double] = try {
       Xor.Right(s.toDouble)
     } catch {
-      case e: NumberFormatException => Xor.Left("Valid number required")
+      case e: NumberFormatException => Xor.Left("Valid number required (e.g. 1, -1.1, 1.1E1)")
     }
+    //Remove anything but + - . e E or a digit
+    override def prefilter(s: String): String = s.replaceAll("""[^\+\-\.eE\d]""", "")
   }
 
   val doubleView = AsStringView.component[Double]("doubleView", doubleStringCodec)
@@ -175,8 +178,10 @@ object View {
     def parse(s: String): Xor[String, Int] = try {
       Xor.Right(s.toInt)
     } catch {
-      case e: NumberFormatException => Xor.Left("Valid whole number required")
+      case e: NumberFormatException => Xor.Left("Valid whole number required (e.g. 1, 100)")
     }
+    //Remove anything but + - or a digit
+    override def prefilter(s: String): String = s.replaceAll("""[^\+\-\d]""", "")
   }
 
   val intView = AsStringView.component[Int]("intView", intStringCodec)
