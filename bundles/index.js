@@ -35,3 +35,9 @@ window.mui.SvgIcons = require('material-ui/svg-icons/index');
 // rebeam: react-grid-layout in normal and responsive variants
 window.ReactGridLayout = require('react-grid-layout');
 window.ResponsiveReactGridLayout = require('react-grid-layout').Responsive;
+
+// rebeam: react-sortable-hoc
+window.Sortable = require('react-sortable-hoc');
+window.SortableContainer = window.Sortable.SortableContainer;
+window.SortableElement = window.Sortable.SortableElement;
+window.SortableHandle = window.Sortable.SortableHandle;

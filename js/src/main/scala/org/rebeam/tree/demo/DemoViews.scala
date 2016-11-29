@@ -61,7 +61,8 @@ object DemoViews {
     <.div (
       ^.margin := "24px",
       <.h3("Home"),
-      ReactGridLayoutDemo.c()
+      //ReactGridLayoutDemo.c()
+      SortableContainerDemo.c()
     )
   )
 

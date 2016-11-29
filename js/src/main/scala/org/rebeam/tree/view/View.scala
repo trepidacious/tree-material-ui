@@ -1,7 +1,6 @@
 package org.rebeam.tree.view
 
 import cats.data.Xor
-import org.rebeam.tree.TreeUtils._
 import chandu0101.scalajs.react.components.Implicits._
 import chandu0101.scalajs.react.components.materialui._
 import io.circe.Encoder

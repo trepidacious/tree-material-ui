@@ -43,6 +43,7 @@
     "react-grid-layout": "^0.13.9",
     "react-infinite": "^0.7.1",
     "react-select": "^1.0.0-beta",
+    "react-sortable-hoc": "^0.2.0",
     "react-spinner": "^0.2.3",
     "react-tagsinput": "^3.0.3",
     "react-tap-event-plugin": "^1.0.0",
