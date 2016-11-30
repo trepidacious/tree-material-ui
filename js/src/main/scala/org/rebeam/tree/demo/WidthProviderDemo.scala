@@ -7,10 +7,12 @@ import org.rebeam.tree.view.sortable._
 
 object WidthProviderDemo {
 
-  val helloView = ReactComponentB[Unit]("helloView")
-    .render(_ => <.div("Hello!"))
+  case class HelloData(firstName: String, lastName: String)
+
+  val helloView = ReactComponentB[HelloData]("helloView")
+    .render(d => <.div(s"Hello ${d.props.firstName} ${d.props.lastName}!"))
     .build
 
-  val widthHelloView = WidthProvider(measureBeforeMount = true)(helloView)
+  val widthHelloView = WidthProvider(measureBeforeMount = true)(HelloData("Higher", "OrderComponent"))(helloView)
 
 }

@@ -4,15 +4,16 @@ import japgolly.scalajs.react._
 
 import scala.scalajs.js
 
-case class WidthProvider(measureBeforeMount: Boolean = true) {
+case class WidthProvider[P](measureBeforeMount: Boolean = true)(wrappedProps: P) {
 
   def toJS = {
     val p = js.Dynamic.literal()
     p.updateDynamic("measureBeforeMount")(measureBeforeMount)
+    p.updateDynamic("v")(wrappedProps.asInstanceOf[js.Any])
     p
   }
 
-  def apply(wrappedComponent: ReactComponentC[_,_,_,_]) = {
+  def apply(wrappedComponent: ReactComponentC[P,_,_,_]) = {
 
     //SortableElement is a HOC, so we pass it a wrapped component to get back a SortableElement component
     val componentFactory = js.Dynamic.global.WidthProvider(wrappedComponent.factory)
