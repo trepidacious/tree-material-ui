@@ -32,9 +32,10 @@ window.mui          = require("material-ui");
 window.mui.Styles   = require("material-ui/styles");
 window.mui.SvgIcons = require('material-ui/svg-icons/index');
 
-// rebeam: react-grid-layout in normal and responsive variants
+// rebeam: react-grid-layout in normal and responsive variants, plus WidthProvider
 window.ReactGridLayout = require('react-grid-layout');
 window.ResponsiveReactGridLayout = require('react-grid-layout').Responsive;
+window.WidthProvider = require('react-grid-layout').WidthProvider;
 
 // rebeam: react-sortable-hoc
 window.Sortable = require('react-sortable-hoc');
