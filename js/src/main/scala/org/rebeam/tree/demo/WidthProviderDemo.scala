@@ -13,6 +13,9 @@ object WidthProviderDemo {
     .render(d => <.div(s"Hello ${d.props.firstName} ${d.props.lastName}!"))
     .build
 
-  val widthHelloView = WidthProvider(measureBeforeMount = true)(HelloData("Higher", "OrderComponent"))(helloView)
+//  val widthHelloView = WidthProvider(measureBeforeMount = true)(HelloData("Higher", "OrderComponent"))(helloView)
 
+  val widthHelloView = WidthProvider.wrap(helloView)
+
+  val widthBeforeMountHelloView = widthHelloView(WidthProvider.Props(true))
 }

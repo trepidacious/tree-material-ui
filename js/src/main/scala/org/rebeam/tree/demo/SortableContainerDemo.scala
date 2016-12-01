@@ -1,30 +1,40 @@
 package org.rebeam.tree.demo
 
-import chandu0101.scalajs.react.components.materialui._
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.prefix_<^._
 import org.rebeam.tree.view.sortable._
-import org.rebeam.tree.view._
-
-import scala.scalajs.js
 
 object SortableContainerDemo {
 
+  // Equivalent of ({value}) => <li>{value}</li> in original demo
+  val liView = ReactComponentB[String]("liView")
+    .render(d => <.li(s"${d.props}"))
+    .build
+
+  // As in original demo
+  val sortableItem = SortableElement.wrap(liView)
+
+  // Equivalent of the `({items}) =>` lambda passed to SortableContainer in original demo
+  val ulView = ReactComponentB[List[String]]("ulView")
+    .render(d => {
+      sortableItem(SortableElement.Props(index = 0))("value")
+      <.ul(
+        d.props.zipWithIndex.map {
+          case (value, index) =>
+            sortableItem(SortableElement.Props(index = index))(value)
+        }
+      )
+    })
+    .build
+
+  // As in original demo
+  val sortableList = SortableContainer.wrap(ulView)
+
+  // As in original SortableComponent
   class Backend(scope: BackendScope[Unit, List[String]]) {
-
-    def itemView(item: String) = View.staticView("ItemView")(<.li(item))
-
     def render(props: Unit, items: List[String]) = {
-      SortableContainer(
-        onSortEnd = p => scope.modState(s => s)
-      )
-      (
-        <.ul(
-          items.zipWithIndex.map{ case (item, index) => SortableElement(index = index)(itemView(item))}
-        )
-      )
+      sortableList(SortableContainer.Props(onSortEnd = p => scope.modState(s => s)))(items)
     }
-
   }
 
   val defaultItems = Range(0, 10).map("Item " + _).toList

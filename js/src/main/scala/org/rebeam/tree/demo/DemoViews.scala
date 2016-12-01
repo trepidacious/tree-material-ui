@@ -62,8 +62,10 @@ object DemoViews {
       ^.margin := "24px",
       <.h3("Home"),
 //      ReactGridLayoutDemo.c()
-//      SortableContainerDemo.c()
-        WidthProviderDemo.widthHelloView
+      SortableContainerDemo.c()
+//        WidthProviderDemo.widthBeforeMountHelloView(
+//          WidthProviderDemo.HelloData("Higher", "Order Component")
+//        )
     )
   )
 
