@@ -19,7 +19,6 @@ object SortableContainerDemo {
   // Equivalent of the `({items}) =>` lambda passed to SortableContainer in original demo
   val ulView = ReactComponentB[List[String]]("ulView")
     .render(d => {
-      sortableItem(SortableElement.Props(index = 0))("value")
       <.ul(
         d.props.zipWithIndex.map {
           case (value, index) =>

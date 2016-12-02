@@ -70,7 +70,7 @@ object SortableContainer {
     */
   def wrap[P](wrappedComponent: ReactComponentC[P,_,_,_]): Props => P => ReactComponentU_ = {
 
-    val componentFactoryFunction = js.Dynamic.global.SortableElement(wrappedComponent.factory)
+    val componentFactoryFunction = js.Dynamic.global.SortableContainer(wrappedComponent.factory)
     val componentFactory = React.asInstanceOf[js.Dynamic].createFactory(componentFactoryFunction)
 
     (props) => (wrappedProps) => {
