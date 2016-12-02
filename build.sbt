@@ -20,11 +20,7 @@ resolvers += Resolver.sonatypeRepo("snapshots")
 //SLF4J simple logger, y u log to System.err by default, even for info?
 javaOptions in ThisBuild := Seq("-Dorg.slf4j.simpleLogger.logFile=System.out")
 
-val scalajsReactVersion = "0.11.2"
-
 val scalajsReactComponentsVersion = "0.5.0"
-
-val reactVersion = "15.3.2"
 
 lazy val root = project.in(file(".")).
   aggregate(treeMaterialUiJS, treeMaterialUiJVM).

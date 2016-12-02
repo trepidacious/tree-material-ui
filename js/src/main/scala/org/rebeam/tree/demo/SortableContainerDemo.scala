@@ -8,7 +8,9 @@ object SortableContainerDemo {
 
   // Equivalent of ({value}) => <li>{value}</li> in original demo
   val liView = ReactComponentB[String]("liView")
-    .render(d => <.li(s"${d.props}"))
+    .render(d => {
+      <.li(s"${d.props}")
+    })
     .build
 
   // As in original demo
