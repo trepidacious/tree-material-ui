@@ -34,7 +34,14 @@ object SortableContainerDemo {
   // As in original SortableComponent
   class Backend(scope: BackendScope[Unit, List[String]]) {
     def render(props: Unit, items: List[String]) = {
-      sortableList(SortableContainer.Props(onSortEnd = p => scope.modState(s => s)))(items)
+      sortableList(
+        SortableContainer.Props(
+          onSortEnd = p =>
+            scope.modState(
+              l => p.updatedList(l)
+            ) >> Callback{println(p)}
+        )
+      )(items)
     }
   }
 

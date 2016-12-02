@@ -30,7 +30,7 @@ object SortableContainer {
     //getHelperDimensions <- undef or function({node, index, collection})
 
     //Note this function actually gets "{oldIndex, newIndex, collection}, e", but we don't have much use for the other arguments
-    onSortEnd: Permutation => Callback = p => Callback{}
+    onSortEnd: IndexChange => Callback = p => Callback{}
     //onSortStart <- undef or function({node, index, collection}, event)
     //onSortMove <- undef or function(event)
   ) {
@@ -47,7 +47,7 @@ object SortableContainer {
       hideSortableGhost.foreach(p.updateDynamic("hideSortableGhost")(_))
       lockToContainerEdges.foreach(p.updateDynamic("lockToContainerEdges")(_))
 
-      def permutationFromJS(p: PermutationJS): Permutation = Permutation(p.oldIndex, p.newIndex)
+      def permutationFromJS(p: PermutationJS): IndexChange = IndexChange(p.oldIndex, p.newIndex)
 
       val onSortEndJS: (PermutationJS) => Unit = pjs => {
         val p = permutationFromJS(pjs)
