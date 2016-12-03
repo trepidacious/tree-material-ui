@@ -36,7 +36,10 @@ lazy val treeMaterialUi = crossProject.in(file(".")).
     name := "tree-material-ui",
     version := "0.1-SNAPSHOT",
     libraryDependencies ++= Seq(
-      "org.rebeam"                  %%%  "tree"    % "0.1-SNAPSHOT"
+      "org.rebeam"                  %%%  "tree"    % "0.1-SNAPSHOT",
+
+      "org.log4s"   %% "log4s"                % "1.2.1",
+      "org.slf4j"   % "slf4j-simple"          % "1.7.21"
     ),
     //For @Lenses
     addCompilerPlugin("org.scalamacros" %% "paradise" % "2.1.0" cross CrossVersion.full)
