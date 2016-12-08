@@ -71,13 +71,11 @@ object SortableContainer {
   def wrap[P](wrappedComponent: ReactComponentC[P,_,_,_]): Props => P => ReactComponentU_ = {
 
     val component = js.Dynamic.global.SortableContainer(wrappedComponent.reactClass)
-//    val componentFactory = React.asInstanceOf[js.Dynamic].createFactory(component)
 
     (props) => (wrappedProps) => {
       val p = props.toJS
       p.updateDynamic("v")(wrappedProps.asInstanceOf[js.Any])
       React.asInstanceOf[js.Dynamic].createElement(component, p).asInstanceOf[ReactComponentU_]
-//      componentFactory(p).asInstanceOf[ReactComponentU_]
     }
   }
 
