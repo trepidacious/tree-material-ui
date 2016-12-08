@@ -17,10 +17,10 @@ object SortableElement {
     */
   def wrap[P](wrappedComponent: ReactComponentC[P,_,_,_]): Props => P => ReactComponentU_ = {
 
-    val componentFactoryFunction = js.Dynamic.global.SortableElement(wrappedComponent.factory)
-    val componentFactory = React.asInstanceOf[js.Dynamic].createFactory(componentFactoryFunction)
+    val component = js.Dynamic.global.SortableElement(wrappedComponent.reactClass)
+//    val componentFactory = React.asInstanceOf[js.Dynamic].createFactory(componentFactoryFunction)
 
-    (props) => (wrappedProps) => componentFactory(js.Dynamic.literal(
+    (props) => (wrappedProps) => React.asInstanceOf[js.Dynamic].createElement(component, js.Dynamic.literal(
       "index" -> props.index,
       "collection" -> props.collection,
       "disabled" -> props.disabled,

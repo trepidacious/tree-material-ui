@@ -138,8 +138,9 @@ object View {
               case _ => scope.setState((codec.format(model), false))
             }
           },
-          errorText = error,
-          floatingLabelText = props.label: ReactNode
+//          errorText = error,
+//          hintText = props.label: ReactNode
+            floatingLabelText = props.label: ReactNode
         )()
       }
     }
