@@ -22,9 +22,8 @@ object DemoRoutes {
   val routerConfig = RouterConfigDsl[Page].buildConfig { dsl =>
     import dsl._
 
-    //Dymanic route can also be:
+    //Dynamic route can also be:
     //      | dynamicRoute("#item" / int.caseClass[ItemPage]){case p@ItemPage(id) => p} ~> dynRender(itemPage(_))
-
 
     (trimSlashes
       | staticRoute(root,   Home) ~> render(DemoViews.homeView())
