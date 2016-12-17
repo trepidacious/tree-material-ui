@@ -20,14 +20,14 @@ object View {
     ReactComponentB[A](name).render_P(render).build
 
   //We are careful to ensure that cursors remain equal if they are reusable
-  implicit def cursorReuse[A]: Reusability[Cursor[A]] = Reusability.by_==
-  implicit def labelledCursorReuse[A]: Reusability[LabelledCursor[A]] = Reusability.by_==
+  implicit def cursorReuse[R, A]: Reusability[Cursor[R, A]] = Reusability.by_==
+  implicit def labelledCursorReuse[R, A]: Reusability[LabelledCursor[R, A]] = Reusability.by_==
 
-  def cursorView[A](name: String)(render: Cursor[A] => ReactElement) =
-    ReactComponentB[Cursor[A]](name).render_P(render).configure(Reusability.shouldComponentUpdate).build
+  def cursorView[R, A](name: String)(render: Cursor[R, A] => ReactElement) =
+    ReactComponentB[Cursor[R, A]](name).render_P(render).configure(Reusability.shouldComponentUpdate).build
 
-  def labelledCursorView[A](name: String)(render: LabelledCursor[A] => ReactElement) =
-    ReactComponentB[LabelledCursor[A]](name).render_P(render).configure(Reusability.shouldComponentUpdate).build
+  def labelledCursorView[R, A](name: String)(render: LabelledCursor[R, A] => ReactElement) =
+    ReactComponentB[LabelledCursor[R, A]](name).render_P(render).configure(Reusability.shouldComponentUpdate).build
 
   def staticView(name: String)(e: ReactElement) = ReactComponentB[Unit](name)
     .render(_ => e)
@@ -37,7 +37,7 @@ object View {
     MuiCircularProgress(mode = DeterminateIndeterminate.indeterminate)()
   )
 
-  val textView = labelledCursorView[String]("textView") { p =>
+  def textView[R] = labelledCursorView[R, String]("textView") { p =>
     MuiTextField(
       value = p.cursor.model,
       onChange = (e: ReactEventI) => e.preventDefaultCB >>  p.cursor.set(e.target.value),
@@ -45,7 +45,7 @@ object View {
     )()
   }
 
-  val textViewPlainLabel = labelledCursorView[String]("textViewPlainLabel") { p =>
+  def textViewPlainLabel[R] = labelledCursorView[R, String]("textViewPlainLabel") { p =>
     MuiTextField(
       value = p.cursor.model,
       onChange = (e: ReactEventI) => e.preventDefaultCB >>  p.cursor.set(e.target.value),
@@ -92,9 +92,9 @@ object View {
     */
   object AsStringView {
 
-    class Backend[A](scope: BackendScope[LabelledCursor[A], (String, Boolean)])(implicit codec: StringCodec[A], encoder: Encoder[A]) {
+    class Backend[R, A](scope: BackendScope[LabelledCursor[R, A], (String, Boolean)])(implicit codec: StringCodec[A], encoder: Encoder[A]) {
 
-      def render(props: LabelledCursor[A], state: (String, Boolean)) = {
+      def render(props: LabelledCursor[R, A], state: (String, Boolean)) = {
         val model = props.cursor.model
 
         // If we have had a prop change since the last time we set state,
@@ -145,9 +145,9 @@ object View {
       }
     }
 
-    def component[A](name: String, codec: StringCodec[A])(implicit encoder: Encoder[A]) = ReactComponentB[LabelledCursor[A]](name)
+    def component[R, A](name: String, codec: StringCodec[A])(implicit encoder: Encoder[A]) = ReactComponentB[LabelledCursor[R, A]](name)
       .getInitialState[(String, Boolean)](scope => (scope.props.cursor.model.toString, false))
-      .backend(new Backend[A](_)(codec, encoder))
+      .backend(new Backend[R, A](_)(codec, encoder))
       .render(s => s.backend.render(s.props, s.state))
       .componentWillReceiveProps(
         scope => if (scope.currentProps.cursor.model != scope.nextProps.cursor.model) {
@@ -171,7 +171,7 @@ object View {
     override def prefilter(s: String): String = s.replaceAll("""[^\+\-\.eE\d]""", "")
   }
 
-  val doubleView = AsStringView.component[Double]("doubleView", doubleStringCodec)
+  def doubleView[R] = AsStringView.component[R, Double]("doubleView", doubleStringCodec)
 
   val intStringCodec: StringCodec[Int] = new StringCodec[Int] {
     def format(d: Int): String = d.toString
@@ -184,9 +184,9 @@ object View {
     override def prefilter(s: String): String = s.replaceAll("""[^\+\-\d]""", "")
   }
 
-  val intView = AsStringView.component[Int]("intView", intStringCodec)
+  def intView[R] = AsStringView.component[R, Int]("intView", intStringCodec)
 
-  val booleanView = labelledCursorView[Boolean]("booleanView") { p =>
+  def booleanView[R] = labelledCursorView[R, Boolean]("booleanView") { p =>
     MuiCheckbox(
       label = p.label,
       checked = p.cursor.model,
@@ -195,7 +195,7 @@ object View {
   }
 
 
-  val booleanViewUnlabelled = cursorView[Boolean]("booleanView") { p =>
+  def booleanViewUnlabelled[R] = cursorView[R, Boolean]("booleanView") { p =>
     MuiCheckbox(
       checked = p.model,
       onCheck = (e: ReactEventH, b: Boolean) => e.preventDefaultCB >> p.set(!p.model)

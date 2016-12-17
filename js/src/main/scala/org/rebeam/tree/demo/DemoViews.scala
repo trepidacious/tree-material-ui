@@ -14,7 +14,7 @@ import scala.scalajs.js
 
 object DemoViews {
 
-  val streetView = cursorView[Street]("StreetView") { c =>
+  def streetView[R] = cursorView[R, Street]("StreetView") { c =>
     <.div(
       <.p("Blah"),
       intView(c.zoomN(Street.number).label("Number")),
@@ -43,9 +43,6 @@ object DemoViews {
 //    }
 //  }
 
-  implicit val addressIdGen = new ModelIdGen[Address] {
-    def genId(a: Address) = None
-  }
   val addressView = ServerRootComponent[Address](noAddress, "api/address") {
     addressCursor => {
       val streetCursor = addressCursor.zoomN(Address.street)
@@ -69,7 +66,7 @@ object DemoViews {
     )
   )
 
-  val todoView = cursorView[Todo]("TodoView") { c =>
+  def todoView[R] = cursorView[R, Todo]("TodoView") { c =>
 //    def tdText(xs: TagMod*) = <.td(^.cls := "mdl-data-table__cell--non-numeric")(xs)
 //
 //    def tdPriority(p: Priority) =
@@ -117,7 +114,7 @@ object DemoViews {
       )
     )
   }
-  val todoListTableView = cursorView[TodoList]("TodoListTableView") { c =>
+  def todoListTableView[R] = cursorView[R, TodoList]("TodoListTableView") { c =>
     MuiTable(
       selectable = false
     )(
@@ -154,7 +151,7 @@ object DemoViews {
     <.h3("Todo List"),
     spinner()
   )
-  val todoListView = WSRootComponent[TodoList](noTodoList, "api/todolist") {
+  val todoListView = ServerRootComponent[TodoList](noTodoList, "api/todolist") {
     c => {
       <.div(
         ^.margin := "24px",

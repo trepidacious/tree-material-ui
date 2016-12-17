@@ -26,10 +26,6 @@ object ServerDemoApp extends ServerApp {
 
 //  val address = new TreeStore(Address(Street("OLD STREET", 1)))
 
-  implicit val addressIdGen = new ModelIdGen[Address] {
-    def genId(a: Address) = None
-  }
-
   val address = new ServerStore(Address(Street("OLD STREET", 1, 22.3)))
 
   val todoList = {
