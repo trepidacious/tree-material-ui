@@ -1,10 +1,7 @@
 package org.rebeam.tree.demo
 
 import org.rebeam.tree._
-//This macro gets us LensN rather than just Lens
-
 import org.rebeam.lenses.macros.Lenses
-//import monocle.macros.Lenses
 import org.rebeam.tree.view.Color
 import io.circe._
 import io.circe.generic.semiauto._
@@ -13,6 +10,7 @@ import scala.language.higherKinds
 import BasicDeltaDecoders._
 import DeltaCodecs._
 import io.circe.generic.JsonCodec
+import org.rebeam.tree.sync.Sync.ModelIdGen
 
 object DemoData {
 
@@ -52,6 +50,12 @@ object DemoData {
     value[Street] or lensN(Street.name) or lensN(Street.number) or lensN(Street.temperature) or action[Street, StreetAction]
 
   implicit val addressDeltaDecoder = value[Address] or lensN(Address.street)
+
+  implicit val addressIdGen = new ModelIdGen[Address] {
+    def genId(a: Address) = None
+  }
+
+
 
   @JsonCodec
   sealed trait Priority
@@ -145,6 +149,10 @@ object DemoData {
 
   implicit val todoListDeltaDecoder =
       value[TodoList] or lensN(TodoList.name) or lensN(TodoList.items) or lensN(TodoList.email) or lensN(TodoList.color) or action[TodoList, TodoListAction]
+
+  implicit val todoListIdGen = new ModelIdGen[TodoList] {
+    def genId(a: TodoList) = None
+  }
 
 }
 

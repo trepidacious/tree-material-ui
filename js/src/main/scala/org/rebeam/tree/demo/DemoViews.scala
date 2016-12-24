@@ -33,19 +33,7 @@ object DemoViews {
     <.h3("Address"),
     spinner()
   )
-//  val addressView = WSRootComponent[Address](noAddress, "api/address") {
-//    addressCursor => {
-//      val streetCursor = addressCursor.zoomN(Address.street)
-//      <.div(
-//        <.h3("Address"),
-//        streetView(streetCursor)
-//      )
-//    }
-//  }
 
-  implicit val addressIdGen = new ModelIdGen[Address] {
-    def genId(a: Address) = None
-  }
   val addressView = ServerRootComponent[Address](noAddress, "api/address") {
     addressCursor => {
       val streetCursor = addressCursor.zoomN(Address.street)
@@ -70,26 +58,6 @@ object DemoViews {
   )
 
   val todoView = cursorView[Todo]("TodoView") { c =>
-//    def tdText(xs: TagMod*) = <.td(^.cls := "mdl-data-table__cell--non-numeric")(xs)
-//
-//    def tdPriority(p: Priority) =
-//      <.td(
-//        ^.classSet1(
-//          "mdl-data-table__cell--priority",
-//          "mdl-data-table__cell--priority-high" -> (p == High),
-//          "mdl-data-table__cell--priority-medium" -> (p == Medium),
-//          "mdl-data-table__cell--priority-low" -> (p == Low)
-//        ),
-//        ^.onClick --> c.act(TodoAction.CyclePriority: TodoAction),
-//        <.i(
-//          ^.cls := "material-icons",
-//          p match {
-//            case High => "star"
-//            case Medium => "star_half"
-//            case Low => "star_border"
-//          }
-//        )
-//      )
 
     val t = c.model
     val icon  = t.priority match {
@@ -98,7 +66,7 @@ object DemoViews {
       case Low => Mui.SvgIcons.ToggleStarBorder(color = Mui.Styles.colors.grey300)()
     }
 
-    MuiTableRow(key = t.id.toString)(
+    MuiTableRow(key = t.id.toString, style = js.Dynamic.literal("border-bottom" -> "0px"))(
       MuiTableRowColumn(style = js.Dynamic.literal("width" -> "40px"))(
         booleanViewUnlabelled(c.zoomN(Todo.completed))
       ),
@@ -154,7 +122,7 @@ object DemoViews {
     <.h3("Todo List"),
     spinner()
   )
-  val todoListView = WSRootComponent[TodoList](noTodoList, "api/todolist") {
+  val todoListView = ServerRootComponent[TodoList](noTodoList, "api/todolist") {
     c => {
       <.div(
         ^.margin := "24px",

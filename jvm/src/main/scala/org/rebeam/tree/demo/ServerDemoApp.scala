@@ -20,15 +20,9 @@ import scalaz.stream.async.unboundedQueue
 import scalaz.stream.time.awakeEvery
 import scalaz.stream.{DefaultScheduler, Exchange, Process, Sink}
 import DemoData._
-import org.rebeam.tree.sync.Sync.{ClientId, ModelId, ModelIdGen}
+import org.rebeam.tree.sync.Sync.ClientId
 
 object ServerDemoApp extends ServerApp {
-
-//  val address = new TreeStore(Address(Street("OLD STREET", 1)))
-
-  implicit val addressIdGen = new ModelIdGen[Address] {
-    def genId(a: Address) = None
-  }
 
   val address = new ServerStore(Address(Street("OLD STREET", 1, 22.3)))
 
@@ -50,7 +44,7 @@ object ServerDemoApp extends ServerApp {
     )
   }
 
-  val todoListStore = new TreeStore(todoList)
+  val todoListStore = new ServerStore(todoList)
 
   // TODO better way of doing this
   val nextClientId = new AtomicLong(0)
@@ -64,7 +58,7 @@ object ServerDemoApp extends ServerApp {
       Ok(System.getProperty("user.dir"))
 
     case GET -> Root / "todolist" =>
-      WS(TreeStoreValueExchange(todoListStore))
+      WS(ServerStoreValueExchange(todoListStore, ClientId(nextClientId.getAndIncrement())))
 
     case GET -> Root / "address" =>
       WS(ServerStoreValueExchange(address, ClientId(nextClientId.getAndIncrement())))
