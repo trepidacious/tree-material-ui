@@ -30,22 +30,23 @@
     "webpack-dev-server": "^1.9.0"
   },
   "dependencies": {
-    "material-ui": "0.15.2",
+    "material-ui": "0.16.5",
 
-    "react": "15.3.2",
-    "react-addons-create-fragment": "15.3.2",
-    "react-addons-css-transition-group": "15.3.2",
-    "react-addons-pure-render-mixin": "15.3.2",
-    "react-addons-transition-group": "15.3.2",
-    "react-addons-update": "15.3.2",
-    "react-dom": "15.3.2",
-    "react-tap-event-plugin": "1.0.0",
+    "react": "15.4.1",
+    "react-addons-create-fragment": "15.4.1",
+    "react-addons-css-transition-group": "15.4.1",
+    "react-addons-pure-render-mixin": "15.4.1",
+    "react-addons-transition-group": "15.4.1",
+    "react-addons-update": "15.4.1",
+    "react-dom": "15.4.1",
+    "react-tap-event-plugin": "2.0.1",
+
+    "react-sortable-hoc": "0.4.5",
 
     "react-geomicons": "^2.0.4",
     "react-grid-layout": "^0.13.9",
     "react-infinite": "^0.7.1",
     "react-select": "^1.0.0-beta",
-    "react-sortable-hoc": "^0.2.0",
     "react-spinner": "^0.2.3",
     "react-tagsinput": "^3.0.3",
 
