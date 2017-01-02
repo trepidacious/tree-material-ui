@@ -8,7 +8,8 @@ import DemoData._
 import chandu0101.scalajs.react.components.materialui._
 import japgolly.scalajs.react._
 import org.rebeam.tree.demo.DemoData.Priority._
-import org.rebeam.tree.sync.Sync.ModelIdGen
+import org.rebeam.tree.demo.DemoRoutes._
+import org.rebeam.tree.view.pages.Pages
 
 import scala.scalajs.js
 
@@ -71,7 +72,7 @@ object DemoViews {
         booleanViewUnlabelled(c.zoomN(Todo.completed))
       ),
       MuiTableRowColumn(style = js.Dynamic.literal("width" -> "40px"))(
-        "#" + t.id
+        "#" + t.id.value
       ),
       MuiTableRowColumn(style = js.Dynamic.literal("width" -> "100%"))(
         textViewPlainLabel(c.zoomN(Todo.name).label("Name"))
@@ -119,6 +120,7 @@ object DemoViews {
   }
 
   val noTodoList = <.div(
+    ^.margin := "24px",
     <.h3("Todo List"),
     spinner()
   )
@@ -128,8 +130,57 @@ object DemoViews {
         ^.margin := "24px",
         <.h3("Todo List"),
         textView(c.zoomN(TodoList.name).label("Name")),
-        textView(c.zoomN(TodoList.email).label("Email")),
+//        textView(c.zoomN(TodoList.email).label("Email")),
         todoListTableView(c)
+      )
+    }
+  }
+
+  val noTodoProject = <.div(
+    <.h3("Todo Project"),
+    spinner()
+  )
+
+  // This combines and stores the url and renderer, and will then produce a new element per page. This avoids
+  // changing state when changing pages, so we keep the same websocket etc.
+  val todoProjectViewFactory = ServerRootComponent.factory[TodoProject, Pages[TodoPage]](noTodoProject, "api/todoproject") {
+    cp => {
+      <.div(
+        ^.margin := "24px",
+        cp.p.current match {
+
+          case TodoProjectPage => <.div(
+            <.h2("Todo project"),
+            textView(cp.cursor.zoomN(TodoProject.name).label("Name")),
+            cp.cursor.model.lists.map(l =>
+              <.p(raisedButton(s"List #${l.id.value}, ${l.name} >", primary = true)(cp.p.set(TodoProjectListPage(l.id.value))))
+            )
+          )
+
+          case TodoProjectListPage(listId) =>
+            val listCursor = cp.cursor.zoomN(TodoProject.lists).zoomMatch(FindTodoListById(TodoListId(listId)))
+
+            val listNameView = listCursor
+              .map[TagMod](c => textView(c.zoomN(TodoList.name).label("Name")))
+              .getOrElse(<.div("List not found"))
+
+            <.div(
+              <.h2("Todo project"),
+              textView(cp.cursor.zoomN(TodoProject.name).label("Name")),
+              <.h3(s"Todo list #$listId"),
+              listNameView
+
+//              listCursor.map(c => textView(c.zoomN(TodoList.name).label("Name"))).getOrElse(<.div("List not found"))
+    //            textView(cap.cursor.zoomN(TodoProject.lists).zoomMatch(FindTodoListById(TodoListId(listId))).label("Name"))
+            )
+
+          case TodoProjectListItemPage(listId, todoId) => <.div(
+            <.h2("Todo project"),
+            textView(cp.cursor.zoomN(TodoProject.name).label("Name")),
+            <.h3(s"Todo list #$listId"),
+            <.h3(s"Todo item #$todoId")
+          )
+        }
       )
     }
   }

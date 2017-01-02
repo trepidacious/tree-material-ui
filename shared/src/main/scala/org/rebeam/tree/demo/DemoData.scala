@@ -66,9 +66,17 @@ object DemoData {
   }
 
   @JsonCodec
+  case class TodoId(value: Int) extends AnyVal {
+    def next: TodoId = TodoId(value + 1)
+  }
+  object TodoId {
+    val first: TodoId = TodoId(1)
+  }
+
+  @JsonCodec
   @Lenses
   case class Todo (
-                            id: Int,
+                            id: TodoId,
                             name: String,
                             created: Moment,
                             completed: Boolean = false,
@@ -95,18 +103,28 @@ object DemoData {
   }
 
   @JsonCodec
+  case class TodoListId(value: Int) extends AnyVal {
+    def next: TodoListId = TodoListId(value + 1)
+  }
+  object TodoListId {
+    val first: TodoListId = TodoListId(1)
+  }
+
+  @JsonCodec
   @Lenses
   case class TodoList (
-                                name: String,
-                                email: String,
-                                color: Color,
-                                items: List[Todo],
-                                nextId: Int = 1
-                              )
+    id: TodoListId,
+    name: String,
+    created: Moment,
+    priority: Priority = Priority.Medium,
+    color: Color = Color.White,
+    items: List[Todo] = Nil,
+    nextTodoId: TodoId = TodoId.first
+  )
 
   //Works with Cursor.zoomMatch to zoom to a particular Todo
   @JsonCodec
-  case class FindTodoById(id: Int) extends (Todo => Boolean) {
+  case class FindTodoById(id: TodoId) extends (Todo => Boolean) {
     def apply(t: Todo): Boolean = t.id == id
   }
 
@@ -116,8 +134,8 @@ object DemoData {
 
     case class CreateTodo(created: Moment, name: String = "New todo", priority: Priority = Priority.Medium) extends TodoListAction {
       def apply(l: TodoList): TodoList = {
-        val t = Todo(l.nextId, name, created, false, priority)
-        l.copy(items = t :: l.items, nextId = l.nextId + 1)
+        val t = Todo(l.nextTodoId, name, created, false, priority)
+        l.copy(items = t :: l.items, nextTodoId = l.nextTodoId.next)
       }
     }
 
@@ -125,10 +143,45 @@ object DemoData {
       def apply(l: TodoList): TodoList = l.copy(items = l.items.filterNot(_ == t))
     }
 
-    case class DeleteTodoById(id: Int) extends TodoListAction {
+    case class DeleteTodoById(id: TodoId) extends TodoListAction {
       def apply(l: TodoList): TodoList = l.copy(items = l.items.filterNot(_.id == id))
     }
   }
+
+  @JsonCodec
+  @Lenses
+  case class TodoProject (
+                        name: String,
+                        lists: List[TodoList],
+                        nextListId: TodoListId = TodoListId.first
+                      )
+
+  @JsonCodec
+  sealed trait TodoProjectAction extends Delta[TodoProject]
+  object TodoProjectAction {
+
+    case class CreateTodoList(created: Moment, name: String = "New todo list", priority: Priority = Priority.Medium) extends TodoProjectAction {
+      def apply(p: TodoProject): TodoProject = {
+        val t = TodoList(p.nextListId, name, created, priority)
+        p.copy(lists = t :: p.lists, nextListId = p.nextListId.next)
+      }
+    }
+
+    case class DeleteExactList(l: TodoList) extends TodoProjectAction {
+      def apply(p: TodoProject): TodoProject = p.copy(lists = p.lists.filterNot(_ == l))
+    }
+
+    case class DeleteListById(id: TodoListId) extends TodoProjectAction {
+      def apply(p: TodoProject): TodoProject = p.copy(lists = p.lists.filterNot(_.id == id))
+    }
+  }
+
+  //Works with Cursor.zoomMatch to zoom to a particular TodoList
+  @JsonCodec
+  case class FindTodoListById(id: TodoListId) extends (TodoList => Boolean) {
+    def apply(t: TodoList): Boolean = t.id == id
+  }
+
 
   //These don't have codecs in their own file
   implicit val colorDecoder: Decoder[Color] = deriveDecoder[Color]
@@ -148,10 +201,20 @@ object DemoData {
   implicit val listOfTodoDeltaDecoder = optionalI[Todo] or optionalMatch[Todo, FindTodoById]
 
   implicit val todoListDeltaDecoder =
-      value[TodoList] or lensN(TodoList.name) or lensN(TodoList.items) or lensN(TodoList.email) or lensN(TodoList.color) or action[TodoList, TodoListAction]
+      value[TodoList] or lensN(TodoList.name) or lensN(TodoList.items) or lensN(TodoList.priority) or lensN(TodoList.color) or action[TodoList, TodoListAction]
 
   implicit val todoListIdGen = new ModelIdGen[TodoList] {
     def genId(a: TodoList) = None
+  }
+
+  //This makes it possible to act on any List[TodoList] using an OptionalIDelta or an OptionalMatchDelta
+  implicit val listOfTodoListDeltaDecoder = optionalI[TodoList] or optionalMatch[TodoList, FindTodoListById]
+
+  implicit val todoProjectDeltaDecoder =
+    value[TodoProject] or lensN(TodoProject.name) or lensN(TodoProject.lists)
+
+  implicit val todoProjectIdGen = new ModelIdGen[TodoProject] {
+    def genId(a: TodoProject) = None
   }
 
 }

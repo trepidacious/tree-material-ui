@@ -26,13 +26,17 @@ object ServerDemoApp extends ServerApp {
 
   val address = new ServerStore(Address(Street("OLD STREET", 1, 22.3)))
 
-  val todoList = {
+  def todoListExample(id: TodoListId) = {
     val time = System.currentTimeMillis()
     TodoList(
-      "Todo", "trepidacious@gmail.com", MaterialColor.Amber(),
+      id,
+      s"Todo list ${id.value}",
+      Moment(time),
+      Priority.Medium,
+      MaterialColor.Amber(),
       (1 to 10).map(i => {
         Todo(
-          i, "Item " + i, Moment(time - 60000 * (10 - i)),
+          TodoId(i), "Item " + i, Moment(time - 60000 * (10 - i)),
           priority = i % 3 match {
             case 0 => Priority.Low
             case 1 => Priority.Medium
@@ -40,11 +44,17 @@ object ServerDemoApp extends ServerApp {
           }
         )
       }).toList,
-      11
+      TodoId(11)
     )
   }
 
+  val todoList = todoListExample(TodoListId.first)
+
   val todoListStore = new ServerStore(todoList)
+
+  val todoProject = TodoProject("Todo project", (1 to 10).map(i => todoListExample(TodoListId(i))).toList)
+
+  val todoProjectStore = new ServerStore(todoProject)
 
   // TODO better way of doing this
   val nextClientId = new AtomicLong(0)
@@ -59,6 +69,9 @@ object ServerDemoApp extends ServerApp {
 
     case GET -> Root / "todolist" =>
       WS(ServerStoreValueExchange(todoListStore, ClientId(nextClientId.getAndIncrement())))
+
+    case GET -> Root / "todoproject" =>
+      WS(ServerStoreValueExchange(todoProjectStore, ClientId(nextClientId.getAndIncrement())))
 
     case GET -> Root / "address" =>
       WS(ServerStoreValueExchange(address, ClientId(nextClientId.getAndIncrement())))
