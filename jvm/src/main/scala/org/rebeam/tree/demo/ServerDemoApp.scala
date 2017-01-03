@@ -26,7 +26,7 @@ object ServerDemoApp extends ServerApp {
 
   val address = new ServerStore(Address(Street("OLD STREET", 1, 22.3)))
 
-  def todoListExample(id: TodoListId) = {
+  def todoListExample(id: IdOf[TodoList]) = {
     val time = System.currentTimeMillis()
     TodoList(
       id,
@@ -36,7 +36,7 @@ object ServerDemoApp extends ServerApp {
       MaterialColor.Amber(),
       (1 to 10).map(i => {
         Todo(
-          TodoId(i), "Item " + i, Moment(time - 60000 * (10 - i)),
+          IdOf[Todo](i), "Item " + i, Moment(time - 60000 * (10 - i)),
           priority = i % 3 match {
             case 0 => Priority.Low
             case 1 => Priority.Medium
@@ -44,15 +44,15 @@ object ServerDemoApp extends ServerApp {
           }
         )
       }).toList,
-      TodoId(11)
+      IdOf[Todo](11)
     )
   }
 
-  val todoList = todoListExample(TodoListId.first)
+  val todoList = todoListExample(IdOf[TodoList](1))
 
   val todoListStore = new ServerStore(todoList)
 
-  val todoProject = TodoProject(TodoProjectId.first, "Todo project", (1 to 10).map(i => todoListExample(TodoListId(i))).toList)
+  val todoProject = TodoProject(TodoProjectId.first, "Todo project", (1 to 10).map(i => todoListExample(IdOf[TodoList](i))).toList)
 
   val todoProjectStore = new ServerStore(todoProject)
 

@@ -15,6 +15,12 @@ import org.rebeam.tree.sync.Sync.ModelIdGen
 object DemoData {
 
   @JsonCodec
+  case class IdOf[A](value: Int) extends AnyVal {
+    def next: IdOf[A] = IdOf[A](value + 1)
+    override def toString: String = s"#$value"
+  }
+
+  @JsonCodec
   @Lenses
   case class Street(name: String, number: Int, temperature: Double)
 
@@ -66,17 +72,9 @@ object DemoData {
   }
 
   @JsonCodec
-  case class TodoId(value: Int) extends AnyVal {
-    def next: TodoId = TodoId(value + 1)
-  }
-  object TodoId {
-    val first: TodoId = TodoId(1)
-  }
-
-  @JsonCodec
   @Lenses
   case class Todo (
-                            id: TodoId,
+                            id: IdOf[Todo],
                             name: String,
                             created: Moment,
                             completed: Boolean = false,
@@ -103,28 +101,20 @@ object DemoData {
   }
 
   @JsonCodec
-  case class TodoListId(value: Int) extends AnyVal {
-    def next: TodoListId = TodoListId(value + 1)
-  }
-  object TodoListId {
-    val first: TodoListId = TodoListId(1)
-  }
-
-  @JsonCodec
   @Lenses
   case class TodoList (
-    id: TodoListId,
+    id: IdOf[TodoList],
     name: String,
     created: Moment,
     priority: Priority = Priority.Medium,
     color: Color = Color.White,
     items: List[Todo] = Nil,
-    nextTodoId: TodoId = TodoId.first
+    nextTodoId: IdOf[Todo] = IdOf[Todo](1)
   )
 
   //Works with Cursor.zoomMatch to zoom to a particular Todo
   @JsonCodec
-  case class FindTodoById(id: TodoId) extends (Todo => Boolean) {
+  case class FindTodoById(id: IdOf[Todo]) extends (Todo => Boolean) {
     def apply(t: Todo): Boolean = t.id == id
   }
 
@@ -143,7 +133,7 @@ object DemoData {
       def apply(l: TodoList): TodoList = l.copy(items = l.items.filterNot(_ == t))
     }
 
-    case class DeleteTodoById(id: TodoId) extends TodoListAction {
+    case class DeleteTodoById(id: IdOf[Todo]) extends TodoListAction {
       def apply(l: TodoList): TodoList = l.copy(items = l.items.filterNot(_.id == id))
     }
   }
@@ -162,7 +152,7 @@ object DemoData {
                         id: TodoProjectId,
                         name: String,
                         lists: List[TodoList],
-                        nextListId: TodoListId = TodoListId.first
+                        nextListId: IdOf[TodoList] = IdOf[TodoList](1)
                       )
 
   @JsonCodec
@@ -180,14 +170,14 @@ object DemoData {
       def apply(p: TodoProject): TodoProject = p.copy(lists = p.lists.filterNot(_ == l))
     }
 
-    case class DeleteListById(id: TodoListId) extends TodoProjectAction {
+    case class DeleteListById(id: IdOf[TodoList]) extends TodoProjectAction {
       def apply(p: TodoProject): TodoProject = p.copy(lists = p.lists.filterNot(_.id == id))
     }
   }
 
   //Works with Cursor.zoomMatch to zoom to a particular TodoList
   @JsonCodec
-  case class FindTodoListById(id: TodoListId) extends (TodoList => Boolean) {
+  case class FindTodoListById(id: IdOf[TodoList]) extends (TodoList => Boolean) {
     def apply(t: TodoList): Boolean = t.id == id
   }
 

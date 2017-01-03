@@ -153,7 +153,7 @@ object DemoViews {
             <.h2("Todo project"),
             textView(cp.zoomN(TodoProject.name).label("Name")),
             cp.model.lists.map(l =>
-              <.p(raisedButton(s"List #${l.id.value}, ${l.name} >", primary = true)(cp.p.set(TodoProjectListPage(l.id))))
+              <.p(raisedButton(s"List ${l.id}, ${l.name} >", primary = true)(cp.p.set(TodoProjectListPage(l.id))))
             )
           )
 
@@ -167,7 +167,7 @@ object DemoViews {
             <.div(
               <.h2("Todo project"),
               textView(cp.zoomN(TodoProject.name).label("Name")),
-              <.h3(s"Todo list #$listId"),
+              <.h3(s"Todo list $listId"),
               listNameView
 
 //              listCursor.map(c => textView(c.zoomN(TodoList.name).label("Name"))).getOrElse(<.div("List not found"))
@@ -177,8 +177,8 @@ object DemoViews {
           case TodoProjectListItemPage(listId, todoId) => <.div(
             <.h2("Todo project"),
             textView(cp.zoomN(TodoProject.name).label("Name")),
-            <.h3(s"Todo list #$listId"),
-            <.h3(s"Todo item #$todoId")
+            <.h3(s"Todo list $listId"),
+            <.h3(s"Todo item $todoId")
           )
         }
       )

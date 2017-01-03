@@ -19,8 +19,8 @@ object DemoRoutes {
   sealed trait TodoPage extends Page
 
   case object TodoProjectPage extends TodoPage
-  case class TodoProjectListPage(listId: TodoListId) extends TodoPage
-  case class TodoProjectListItemPage(listId: TodoListId, todoId: TodoId) extends TodoPage
+  case class TodoProjectListPage(listId: IdOf[TodoList]) extends TodoPage
+  case class TodoProjectListItemPage(listId: IdOf[TodoList], todoId: IdOf[Todo]) extends TodoPage
 
   val title = "Tree Material UI"
 
@@ -49,11 +49,10 @@ object DemoRoutes {
     def dynRenderP[P <: Page](g: Pages[P] => ReactElement): P => Renderer =
       p => Renderer(r => g(Pages(p, r.narrow[P])))
 
-    val todoListId = int.pmap(i => Some(TodoListId(i)))(_.value)
-    val todoId = int.pmap(i => Some(TodoId(i)))(_.value)
+    def idOf[A] = int.pmap(i => Some(IdOf[A](i)))(_.value)
 
-    val todoProjectListItemRoute = ("#todo/list" / todoListId / "item" / todoId).caseClass[TodoProjectListItemPage]
-    val todoProjectListRoute = ("#todo/list" / todoListId).caseClass[TodoProjectListPage]
+    val todoProjectListItemRoute = ("#todo/list" / idOf[TodoList] / "item" / idOf[Todo]).caseClass[TodoProjectListItemPage]
+    val todoProjectListRoute = ("#todo/list" / idOf[TodoList]).caseClass[TodoProjectListPage]
 
     (trimSlashes
       | staticRoute(root,   HomePage) ~> render(DemoViews.homeView())
