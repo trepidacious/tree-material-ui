@@ -21,13 +21,13 @@ object View {
 
   //We are careful to ensure that cursors remain equal if they are reusable
   implicit def cursorReuse[A]: Reusability[Cursor[A]] = Reusability.by_==
-  implicit def labelledCursorReuse[A]: Reusability[LabelledCursor[A]] = Reusability.by_==
+  implicit def labelledCursorReuse[A]: Reusability[CursorL[A]] = Reusability.by_==
 
   def cursorView[A](name: String)(render: Cursor[A] => ReactElement) =
     ReactComponentB[Cursor[A]](name).render_P(render).configure(Reusability.shouldComponentUpdate).build
 
-  def labelledCursorView[A](name: String)(render: LabelledCursor[A] => ReactElement) =
-    ReactComponentB[LabelledCursor[A]](name).render_P(render).configure(Reusability.shouldComponentUpdate).build
+  def labelledCursorView[A](name: String)(render: CursorL[A] => ReactElement) =
+    ReactComponentB[CursorL[A]](name).render_P(render).configure(Reusability.shouldComponentUpdate).build
 
   def staticView(name: String)(e: ReactElement) = ReactComponentB[Unit](name)
     .render(_ => e)
@@ -39,16 +39,16 @@ object View {
 
   val textView = labelledCursorView[String]("textView") { p =>
     MuiTextField(
-      value = p.cursor.model,
-      onChange = (e: ReactEventI) => e.preventDefaultCB >>  p.cursor.set(e.target.value),
+      value = p.model,
+      onChange = (e: ReactEventI) => e.preventDefaultCB >>  p.set(e.target.value),
       floatingLabelText = p.label: ReactNode
     )()
   }
 
   val textViewPlainLabel = labelledCursorView[String]("textViewPlainLabel") { p =>
     MuiTextField(
-      value = p.cursor.model,
-      onChange = (e: ReactEventI) => e.preventDefaultCB >>  p.cursor.set(e.target.value),
+      value = p.model,
+      onChange = (e: ReactEventI) => e.preventDefaultCB >>  p.set(e.target.value),
       hintText = p.label: ReactNode
     )()
   }
@@ -92,10 +92,10 @@ object View {
     */
   object AsStringView {
 
-    class Backend[A](scope: BackendScope[LabelledCursor[A], (String, Boolean)])(implicit codec: StringCodec[A], encoder: Encoder[A]) {
+    class Backend[A](scope: BackendScope[CursorL[A], (String, Boolean)])(implicit codec: StringCodec[A], encoder: Encoder[A]) {
 
-      def render(props: LabelledCursor[A], state: (String, Boolean)) = {
-        val model = props.cursor.model
+      def render(props: CursorL[A], state: (String, Boolean)) = {
+        val model = props.model
 
         // If we have had a prop change since the last time we set state,
         // and state does not now represent model, move to model
@@ -122,7 +122,7 @@ object View {
               // If we have a parsed new model, and it is different to cursor's model, then set new state and model
               // We set the state so that if the input is a non-standard representation of the model, it will still be
               // preserved, since it will be in place on our next render when we check it against the new prop.
-              case Xor.Right(newModel) if newModel != model => e.preventDefaultCB >> scope.setState((input, false)) >> props.cursor.set(newModel)
+              case Xor.Right(newModel) if newModel != model => e.preventDefaultCB >> scope.setState((input, false)) >> props.set(newModel)
 
               // Otherwise just change state - we are editing without producing a valid new value,
               // but we may be on the way to a valid new value
@@ -145,12 +145,12 @@ object View {
       }
     }
 
-    def component[A](name: String, codec: StringCodec[A])(implicit encoder: Encoder[A]) = ReactComponentB[LabelledCursor[A]](name)
-      .getInitialState[(String, Boolean)](scope => (scope.props.cursor.model.toString, false))
+    def component[A](name: String, codec: StringCodec[A])(implicit encoder: Encoder[A]) = ReactComponentB[CursorL[A]](name)
+      .getInitialState[(String, Boolean)](scope => (scope.props.model.toString, false))
       .backend(new Backend[A](_)(codec, encoder))
       .render(s => s.backend.render(s.props, s.state))
       .componentWillReceiveProps(
-        scope => if (scope.currentProps.cursor.model != scope.nextProps.cursor.model) {
+        scope => if (scope.currentProps.model != scope.nextProps.model) {
           scope.$.modState(s => (s._1, true))
         } else {
           Callback.empty
@@ -189,8 +189,8 @@ object View {
   val booleanView = labelledCursorView[Boolean]("booleanView") { p =>
     MuiCheckbox(
       label = p.label,
-      checked = p.cursor.model,
-      onCheck = (e: ReactEventH, b: Boolean) => e.preventDefaultCB >> p.cursor.set(!p.cursor.model)
+      checked = p.model,
+      onCheck = (e: ReactEventH, b: Boolean) => e.preventDefaultCB >> p.set(!p.model)
     )()
   }
 

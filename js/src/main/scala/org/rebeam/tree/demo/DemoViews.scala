@@ -151,14 +151,14 @@ object DemoViews {
 
           case TodoProjectPage => <.div(
             <.h2("Todo project"),
-            textView(cp.cursor.zoomN(TodoProject.name).label("Name")),
-            cp.cursor.model.lists.map(l =>
+            textView(cp.zoomN(TodoProject.name).label("Name")),
+            cp.model.lists.map(l =>
               <.p(raisedButton(s"List #${l.id.value}, ${l.name} >", primary = true)(cp.p.set(TodoProjectListPage(l.id.value))))
             )
           )
 
           case TodoProjectListPage(listId) =>
-            val listCursor = cp.cursor.zoomN(TodoProject.lists).zoomMatch(FindTodoListById(TodoListId(listId)))
+            val listCursor = cp.zoomN(TodoProject.lists).zoomMatch(FindTodoListById(TodoListId(listId)))
 
             val listNameView = listCursor
               .map[TagMod](c => textView(c.zoomN(TodoList.name).label("Name")))
@@ -166,7 +166,7 @@ object DemoViews {
 
             <.div(
               <.h2("Todo project"),
-              textView(cp.cursor.zoomN(TodoProject.name).label("Name")),
+              textView(cp.zoomN(TodoProject.name).label("Name")),
               <.h3(s"Todo list #$listId"),
               listNameView
 
@@ -176,7 +176,7 @@ object DemoViews {
 
           case TodoProjectListItemPage(listId, todoId) => <.div(
             <.h2("Todo project"),
-            textView(cp.cursor.zoomN(TodoProject.name).label("Name")),
+            textView(cp.zoomN(TodoProject.name).label("Name")),
             <.h3(s"Todo list #$listId"),
             <.h3(s"Todo item #$todoId")
           )
