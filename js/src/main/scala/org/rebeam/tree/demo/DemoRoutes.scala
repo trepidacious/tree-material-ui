@@ -1,7 +1,7 @@
 package org.rebeam.tree.demo
 
 import japgolly.scalajs.react.{ReactComponentB, ReactElement, _}
-import japgolly.scalajs.react.extra.router.StaticDsl.Route
+import japgolly.scalajs.react.extra.router.StaticDsl.{Route, RouteB}
 import japgolly.scalajs.react.extra.router._
 import org.rebeam.tree.view.Navigation
 import org.rebeam.tree.view.pages._
@@ -14,7 +14,6 @@ object DemoRoutes {
   case object HomePage          extends Page
   case object TodoListPage      extends Page
   case object AddressPage       extends Page
-  case class ItemPage(id: Int) extends Page
 
   sealed trait TodoPage extends Page
 
@@ -24,26 +23,10 @@ object DemoRoutes {
 
   val title = "Tree Material UI"
 
-  val itemPage = ReactComponentB[ItemPage]("Item page")
-    .render(p => <.div(s"Info for item #${p.props.id}"))
-    .build
-
-  val todoPage = ReactComponentB[TodoPage]("Todo page")
-    .render(p => p.props match {
-      case TodoProjectPage => <.div("Todo project")
-      case TodoProjectListPage(listId) => <.div(s"Todo list #$listId")
-      case TodoProjectListItemPage(listId, todoId) => <.div(s"Todo list #$listId, item #$todoId")
-    })
-    .componentWillReceiveProps(s => Callback{println(s"Current ${s.currentProps}, next ${s.nextProps}")})
-    .build
-
-
+//    .componentWillReceiveProps(s => Callback{println(s"Current ${s.currentProps}, next ${s.nextProps}")})
 
   val routerConfig = RouterConfigDsl[Page].buildConfig { dsl =>
     import dsl._
-
-//    def renderP[A](g: RouterCtl[Page] => A)(implicit toRE: A => ReactElement): Renderer =
-//      Renderer(r => toRE(g(r)))
 
     //Provide a renderer for a view factory using Pages.
     def dynRenderP[P <: Page](g: Pages[P] => ReactElement): P => Renderer =
@@ -51,16 +34,17 @@ object DemoRoutes {
 
     def idOf[A] = int.pmap(i => Some(IdOf[A](i)))(_.value)
 
-    val todoProjectListItemRoute = ("#todo/list" / idOf[TodoList] / "item" / idOf[Todo]).caseClass[TodoProjectListItemPage]
+    def caseObject[A](s: String, a: A) = RouteB.literal(s).xmap(_ => a)(_ => ())
+
+    val todoProjectRoute = caseObject("#todo", TodoProjectPage)
     val todoProjectListRoute = ("#todo/list" / idOf[TodoList]).caseClass[TodoProjectListPage]
+    val todoProjectListItemRoute = ("#todo/list" / idOf[TodoList] / "item" / idOf[Todo]).caseClass[TodoProjectListItemPage]
 
     (trimSlashes
       | staticRoute(root,   HomePage) ~> render(DemoViews.homeView())
       | staticRoute("#address", AddressPage) ~> render(DemoViews.addressView)
       | staticRoute("#todolist", TodoListPage) ~> render(DemoViews.todoListView)
-      | dynamicRouteCT("#item" / int.caseClass[ItemPage]) ~> dynRender(itemPage(_))
-      // We use the "R" prefix to get access to the RouterCtl in the render, and pass it through in the PageCursor
-      | staticRoute("#todo", TodoProjectPage) ~> renderR(routerCtl => DemoViews.todoProjectViewFactory(Pages(TodoProjectPage, routerCtl.narrow[TodoPage])))
+      | dynamicRouteCT(todoProjectRoute) ~> dynRenderP[TodoPage](DemoViews.todoProjectViewFactory)
       | dynamicRouteCT(todoProjectListRoute) ~> dynRenderP[TodoPage](DemoViews.todoProjectViewFactory)
       | dynamicRouteCT(todoProjectListItemRoute) ~> dynRenderP[TodoPage](DemoViews.todoProjectViewFactory)
       )
