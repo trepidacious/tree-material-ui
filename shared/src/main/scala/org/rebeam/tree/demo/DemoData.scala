@@ -206,8 +206,10 @@ object DemoData {
     def genId(a: TodoList) = None
   }
 
-  //This makes it possible to act on any List[TodoList] using an OptionalIDelta or an OptionalMatchDelta
-  implicit val listOfTodoListDeltaDecoder = optionalI[TodoList] or optionalMatch[TodoList, FindTodoListById]
+  //FIXME stop editing list as a value, implement an action to do permutations for react-sortable-hoc drags
+  //This makes it possible to act on any List[TodoList] using a complete new list, an OptionalIDelta or an OptionalMatchDelta
+  implicit val listOfTodoListDeltaDecoder = value[List[TodoList]] or optionalI[TodoList] or optionalMatch[TodoList, FindTodoListById]
+
 
   implicit val todoProjectDeltaDecoder =
     value[TodoProject] or lensN(TodoProject.name) or lensN(TodoProject.lists)

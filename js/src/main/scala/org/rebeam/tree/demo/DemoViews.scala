@@ -10,6 +10,7 @@ import japgolly.scalajs.react._
 import org.rebeam.tree.demo.DemoData.Priority._
 import org.rebeam.tree.demo.DemoRoutes._
 import org.rebeam.tree.view.pages.Pages
+import org.rebeam.tree.view.sortable.{SortableContainer, SortableElement, SortableView}
 
 import scala.scalajs.js
 
@@ -141,6 +142,34 @@ object DemoViews {
     spinner()
   )
 
+  val todoListSummaryView = SortableElement.wrap(
+    ReactComponentB[(TodoList, Pages[TodoPage])]("todoListSummaryView")
+      .render(d => {
+        val list = d.props._1
+        <.div(
+          ^.className := "react-sortable-item",
+          SortableView.handle,
+          <.span(s"${list.id} ${list.name}")
+        )
+      })
+      .build
+  )
+
+  // Equivalent of the `({items}) =>` lambda passed to SortableContainer in original demo
+  val todoProjectListView = SortableContainer.wrap(
+    ReactComponentB[CursorP[TodoProject, Pages[TodoPage]]]("todoProjectListView")
+    .render(d => {
+      val project = d.props.model
+      <.div(
+        ^.className := "react-sortable-list",
+        project.lists.zipWithIndex.map {
+          case (list, index) => todoListSummaryView(SortableElement.Props(index = index))((list, d.props.p))
+        }
+      )
+    })
+    .build
+  )
+
   // This combines and stores the url and renderer, and will then produce a new element per page. This avoids
   // changing state when changing pages, so we keep the same websocket etc.
   val todoProjectViewFactory = ServerRootComponent.factory[TodoProject, Pages[TodoPage]](noTodoProject, "api/todoproject") {
@@ -152,9 +181,16 @@ object DemoViews {
           case TodoProjectPage => <.div(
             <.h2("Todo project"),
             textView(cp.zoomN(TodoProject.name).label("Name")),
-            cp.model.lists.map(l =>
-              <.p(raisedButton(s"List ${l.id}, ${l.name} >", primary = true)(cp.p.set(TodoProjectListPage(l.id))))
-            )
+//            cp.model.lists.map(l =>
+//              <.p(raisedButton(s"List ${l.id}, ${l.name} >", primary = true)(cp.p.set(TodoProjectListPage(l.id))))
+//            )
+            todoProjectListView(
+              SortableContainer.Props(
+                onSortEnd = p => cp.zoomN(TodoProject.lists).set(p.updatedList(cp.model.lists)),
+                useDragHandle = true,
+                helperClass = "react-sortable-handler"
+              )
+            )(cp)
           )
 
           case TodoProjectListPage(listId) =>
@@ -185,4 +221,64 @@ object DemoViews {
     }
   }
 
+
+  object SortableContainerDemo {
+
+    // Equivalent of ({value}) => <li>{value}</li> in original demo
+    val itemView = ReactComponentB[String]("liView")
+      .render(d => {
+        <.div(
+          ^.className := "react-sortable-item",
+          SortableView.handle,
+          <.span(s"${d.props}")
+        )
+      })
+      .build
+
+    // As in original demo
+    val sortableItem = SortableElement.wrap(itemView)
+
+    // Equivalent of the `({items}) =>` lambda passed to SortableContainer in original demo
+    val listView = ReactComponentB[List[String]]("listView")
+      .render(d => {
+        <.div(
+          ^.className := "react-sortable-list",
+          d.props.zipWithIndex.map {
+            case (value, index) =>
+              sortableItem(SortableElement.Props(index = index))(value)
+          }
+        )
+      })
+      .build
+
+    // As in original demo
+    val sortableList = SortableContainer.wrap(listView)
+
+    // As in original SortableComponent
+    class Backend(scope: BackendScope[Unit, List[String]]) {
+      def render(props: Unit, items: List[String]) = {
+        sortableList(
+          SortableContainer.Props(
+            onSortEnd = p =>
+              scope.modState(
+                l => p.updatedList(l)
+              ),
+            useDragHandle = true,
+            helperClass = "react-sortable-handler"
+          )
+        )(items)
+      }
+    }
+
+    val defaultItems = Range(0, 10).map("Item " + _).toList
+
+    val c = ReactComponentB[Unit]("SortableContainerDemo")
+      .initialState(defaultItems)
+      .backend(new Backend(_))
+      .render(s => s.backend.render(s.props, s.state))
+      .build
+
+  }
+
 }
+

@@ -43,7 +43,7 @@ object DemoRoutes {
     (trimSlashes
       | staticRoute(root,   HomePage) ~> render(DemoViews.homeView())
       | staticRoute("#address", AddressPage) ~> render(DemoViews.addressView)
-      | staticRoute("#todolist", TodoListPage) ~> render(DemoViews.todoListView)
+//      | staticRoute("#todolist", TodoListPage) ~> render(DemoViews.todoListView)
       | dynamicRouteCT(todoProjectRoute) ~> dynRenderP[TodoPage](DemoViews.todoProjectViewFactory)
       | dynamicRouteCT(todoProjectListRoute) ~> dynRenderP[TodoPage](DemoViews.todoProjectViewFactory)
       | dynamicRouteCT(todoProjectListItemRoute) ~> dynRenderP[TodoPage](DemoViews.todoProjectViewFactory)
@@ -51,12 +51,12 @@ object DemoRoutes {
 
       .notFound(redirectToPage(HomePage)(Redirect.Replace))
       .renderWith(layout)
-      .verify(HomePage, AddressPage, TodoListPage)
+      .verify(HomePage, AddressPage, TodoProjectPage)
   }
 
   val navs = Map(
     "Home" -> HomePage,
-    "Todo List" -> TodoListPage,
+    "Todo List" -> TodoProjectPage,
     "Address" -> AddressPage
   )
 
