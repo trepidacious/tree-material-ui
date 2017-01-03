@@ -149,8 +149,17 @@ object DemoData {
   }
 
   @JsonCodec
+  case class TodoProjectId(value: Int) extends AnyVal {
+    def next: TodoProjectId = TodoProjectId(value + 1)
+  }
+  object TodoProjectId {
+    val first: TodoProjectId = TodoProjectId(1)
+  }
+
+  @JsonCodec
   @Lenses
   case class TodoProject (
+                        id: TodoProjectId,
                         name: String,
                         lists: List[TodoList],
                         nextListId: TodoListId = TodoListId.first

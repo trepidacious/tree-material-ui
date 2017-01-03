@@ -52,7 +52,7 @@ object ServerDemoApp extends ServerApp {
 
   val todoListStore = new ServerStore(todoList)
 
-  val todoProject = TodoProject("Todo project", (1 to 10).map(i => todoListExample(TodoListId(i))).toList)
+  val todoProject = TodoProject(TodoProjectId.first, "Todo project", (1 to 10).map(i => todoListExample(TodoListId(i))).toList)
 
   val todoProjectStore = new ServerStore(todoProject)
 
