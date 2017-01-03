@@ -53,9 +53,9 @@ object DemoRoutes {
       | staticRoute("#todolist", TodoListPage) ~> render(DemoViews.todoListView)
       | dynamicRouteCT("#item" / int.caseClass[ItemPage]) ~> dynRender(itemPage(_))
       // We use the "R" prefix to get access to the RouterCtl in the render, and pass it through in the PageCursor
-      | staticRoute("#todo", TodoProjectPage) ~> renderR(routerCtl => DemoViews.todoProjectViewFactory(Pages(TodoProjectPage, p => routerCtl.set(p))))
-      | dynamicRouteCT(todoProjectListRoute) ~> dynRenderR((p, routerCtl) => DemoViews.todoProjectViewFactory(Pages(p, p => routerCtl.set(p)  )))
-      | dynamicRouteCT(todoProjectListItemRoute) ~> dynRenderR((p, routerCtl) => DemoViews.todoProjectViewFactory(Pages(p, p => routerCtl.set(p)  )))
+      | staticRoute("#todo", TodoProjectPage) ~> renderR(routerCtl => DemoViews.todoProjectViewFactory(Pages(TodoProjectPage, routerCtl.narrow[TodoPage])))
+      | dynamicRouteCT(todoProjectListRoute) ~> dynRenderR((p, routerCtl) => DemoViews.todoProjectViewFactory(Pages(p, routerCtl.narrow[TodoPage])))
+      | dynamicRouteCT(todoProjectListItemRoute) ~> dynRenderR((p, routerCtl) => DemoViews.todoProjectViewFactory(Pages(p, routerCtl.narrow[TodoPage])))
       )
 
       .notFound(redirectToPage(HomePage)(Redirect.Replace))

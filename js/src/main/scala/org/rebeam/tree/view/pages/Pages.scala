@@ -1,6 +1,15 @@
 package org.rebeam.tree.view.pages
 
-import japgolly.scalajs.react.Callback
+import japgolly.scalajs.react._
+import japgolly.scalajs.react.extra.router.RouterCtl
 
-case class Pages[P](current: P, set: P => Callback) {
+/**
+  * A current page, and a RouterCtl, e.g. to navigate to new pages
+  * @param current  The currently displayed page
+  * @param ctl      The RouterCtl
+  * @tparam P       The type of page
+  */
+case class Pages[P](current: P, ctl: RouterCtl[P]) {
+  def set(target: P): Callback = ctl.set(target)
 }
+
