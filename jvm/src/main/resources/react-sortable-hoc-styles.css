@@ -7,6 +7,7 @@
     margin-right: 8px;
     cursor: -webkit-grab;
     cursor:-moz-grab;
+    user-select: none;
 }
 
 .react-sortable-handler > .react-sortable-handle {
@@ -17,7 +18,7 @@
 .react-sortable-handle-svg {
     width: 24px;
     height: 24px;
-    opacity: 0.54;
+    opacity: 0.35;
     color: #000;
 }
 
