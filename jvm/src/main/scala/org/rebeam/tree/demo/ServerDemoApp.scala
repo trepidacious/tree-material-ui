@@ -33,7 +33,7 @@ object ServerDemoApp extends ServerApp {
       s"Todo list ${id.value}",
       Moment(time),
       Priority.Medium,
-      MaterialColor.Amber(),
+      MaterialColor.backgroundForIndex(id.value),
       (1 to 10).map(i => {
         Todo(
           IdOf[Todo](i), "Item " + i, Moment(time - 60000 * (10 - i)),

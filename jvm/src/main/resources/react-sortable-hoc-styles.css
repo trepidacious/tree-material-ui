@@ -4,7 +4,10 @@
     padding: 12px;
     width: 24px;
     height: 24px;
-    margin-right: 8px;
+    margin-right: 4px;
+    margin-left: 4px;
+    margin-top: 6px;
+    margin-bottom: 6px;
     cursor: -webkit-grab;
     cursor:-moz-grab;
     user-select: none;
@@ -33,15 +36,19 @@
     align-items: center;
     width: 100%;
     background-color: #FFF;
-    border-bottom: 1px solid #EEE;
+    /*border-bottom: 1px solid #EEE;*/
     box-sizing: border-box;
     user-select: none;
+
+    font-size: 16px;
+    justify-content: space-between;
+    padding-left: 16px;
 }
 
 .react-sortable-list {
     position: relative;
     z-index: 0;
     background-color: #F3F3F3;
-    border-top: 1px solid #EEE;
+    /*border-top: 1px solid #EEE;*/
     outline: none;
 }

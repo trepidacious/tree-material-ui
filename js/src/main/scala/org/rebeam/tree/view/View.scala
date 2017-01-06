@@ -10,6 +10,10 @@ import japgolly.scalajs.react.extra.Reusability
 import scala.scalajs.js
 import scala.scalajs.js.UndefOr
 
+import scala.language.implicitConversions
+
+import scala.scalajs.js
+
 object View {
 
   def touch(c: Callback): js.UndefOr[ReactTouchEventH => Callback] = {
@@ -210,5 +214,8 @@ object View {
       onTouchTap = touch(callback)
     )()
   }
+
+  implicit def materialColor2MuiColor(c: Color): MuiColor = c.toString().asInstanceOf[MuiColor]
+  implicit def materialColor2UndefOrMuiColor(c: Color): UndefOr[MuiColor] = c.toString().asInstanceOf[MuiColor]
 
 }

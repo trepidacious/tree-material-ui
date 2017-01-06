@@ -13,6 +13,7 @@ import org.rebeam.tree.view.pages.Pages
 import org.rebeam.tree.view.sortable.{SortableContainer, SortableElement, SortableView}
 
 import scala.scalajs.js
+import Mui.Styles.colors
 
 object DemoViews {
 
@@ -148,16 +149,21 @@ object DemoViews {
         val list = d.props._1
         val toList = d.props._2.set(TodoProjectListPage(list.id))
         <.div(
+          ^.onClick --> toList,
+          ^.cursor := "pointer",
           ^.className := "react-sortable-item",
-          SortableView.handle,
-          <.span(
-            ^.onClick --> toList,
-            ^.cursor := "pointer",
-            s"${list.id} ${list.name}"),
-
-          MuiIconButton(
-            onTouchTap = touch(toList)
-          )(Mui.SvgIcons.NavigationChevronRight()())
+          <.div(
+            MuiAvatar(
+              style = js.Dynamic.literal("margin-right" -> "16px"),
+              color = colors.white,
+              backgroundColor = list.color
+            )(s"${list.id.value}": ReactNode),
+            <.span(s"${list.name}")
+          ),
+//          MuiIconButton(
+//            onTouchTap = touch(toList)
+//          )(Mui.SvgIcons.NavigationChevronRight()()),
+          SortableView.handle
         )
       })
       .build
@@ -183,7 +189,6 @@ object DemoViews {
   val todoProjectViewFactory = ServerRootComponent.factory[TodoProject, Pages[TodoPage]](noTodoProject, "api/todoproject") {
     cp => {
       <.div(
-        ^.margin := "24px",
         cp.p.current match {
 
           case TodoProjectPage => <.div(
@@ -192,6 +197,7 @@ object DemoViews {
 //            cp.model.lists.map(l =>
 //              <.p(raisedButton(s"List ${l.id}, ${l.name} >", primary = true)(cp.p.set(TodoProjectListPage(l.id))))
 //            )
+            MuiSubheader()("Lists"),
             todoProjectListView(
               SortableContainer.Props(
                 onSortEnd = p => cp.zoomN(TodoProject.lists).set(p.updatedList(cp.model.lists)),
