@@ -148,6 +148,17 @@ object DemoViews {
       .render(d => {
         val list = d.props._1
         val toList = d.props._2.set(TodoProjectListPage(list.id))
+        val idString = s"${list.id.value}"
+        //Adapt font size to number of digits
+        val fontSize = idString.length match {
+          case 1 => 20
+          case 2 => 20
+          case 3 => 16
+          case 4 => 13
+          case 5 => 11
+          case 6 => 10
+          case _ => 8
+        }
         <.div(
           ^.onClick --> toList,
           ^.cursor := "pointer",
@@ -155,12 +166,12 @@ object DemoViews {
           <.div(
             ^.display := "flex",
             MuiAvatar(
-              style = js.Dynamic.literal("margin-right" -> "16px"),
+              style = js.Dynamic.literal("font-size" -> s"${fontSize}px"),
               color = colors.white,
               backgroundColor = list.color
-            )(s"${list.id.value}": ReactNode),
+            )(idString: ReactNode),
             <.div(
-//              ^.display := "flex",
+              ^.marginLeft := "16px",
               <.span(s"${list.name}"),
               <.br,
               <.span(
