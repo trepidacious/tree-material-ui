@@ -33,8 +33,8 @@ object ServerDemoApp extends ServerApp {
       s"Todo list ${id.value}",
       Moment(time),
       Priority.Medium,
-      MaterialColor.backgroundForIndex(id.value),
-      (1 to 10).map(i => {
+      MaterialColor.backgroundForIndex(id.value - 1),
+      (1 to 20).map(i => {
         Todo(
           IdOf[Todo](i), "Item " + i, Moment(time - 60000 * (10 - i)),
           priority = i % 3 match {
@@ -52,7 +52,7 @@ object ServerDemoApp extends ServerApp {
 
   val todoListStore = new ServerStore(todoList)
 
-  val todoProject = TodoProject(TodoProjectId.first, "Todo project", (1 to 10).map(i => todoListExample(IdOf[TodoList](i))).toList)
+  val todoProject = TodoProject(TodoProjectId.first, "Todo project", (1 to 20).map(i => todoListExample(IdOf[TodoList](i))).toList)
 
   val todoProjectStore = new ServerStore(todoProject)
 

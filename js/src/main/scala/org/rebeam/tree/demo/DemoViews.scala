@@ -153,12 +153,21 @@ object DemoViews {
           ^.cursor := "pointer",
           ^.className := "react-sortable-item",
           <.div(
+            ^.display := "flex",
             MuiAvatar(
               style = js.Dynamic.literal("margin-right" -> "16px"),
               color = colors.white,
               backgroundColor = list.color
             )(s"${list.id.value}": ReactNode),
-            <.span(s"${list.name}")
+            <.div(
+//              ^.display := "flex",
+              <.span(s"${list.name}"),
+              <.br,
+              <.span(
+                ^.color := "rgba(0, 0, 0, 0.541176)",
+                s"${list.items.size} item${if (list.items.size == 1) "" else "s"}"
+              )
+            )
           ),
 //          MuiIconButton(
 //            onTouchTap = touch(toList)
