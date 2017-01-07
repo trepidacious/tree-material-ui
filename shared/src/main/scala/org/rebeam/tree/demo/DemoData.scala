@@ -2,7 +2,7 @@ package org.rebeam.tree.demo
 
 import org.rebeam.tree._
 import org.rebeam.lenses.macros.Lenses
-import org.rebeam.tree.view.Color
+import org.rebeam.tree.view.{Color, MaterialColor}
 import io.circe._
 import io.circe.generic.semiauto._
 
@@ -107,7 +107,7 @@ object DemoData {
     name: String,
     created: Moment,
     priority: Priority = Priority.Medium,
-    color: Color = Color.White,
+    color: Color = MaterialColor.Grey(500),
     items: List[Todo] = Nil,
     nextTodoId: IdOf[Todo] = IdOf[Todo](1)
   )
@@ -151,7 +151,7 @@ object DemoData {
   case class TodoProject (
                         id: TodoProjectId,
                         name: String,
-                        color: Color = Color.White,
+                        color: Color = MaterialColor.Grey(500),
                         lists: List[TodoList],
                         nextListId: IdOf[TodoList] = IdOf[TodoList](1)
                       )
@@ -213,7 +213,7 @@ object DemoData {
 
 
   implicit val todoProjectDeltaDecoder =
-    value[TodoProject] or lensN(TodoProject.color) or lensN(TodoProject.name) or lensN(TodoProject.lists)
+    value[TodoProject] or lensN(TodoProject.color) or lensN(TodoProject.name) or lensN(TodoProject.lists) or action[TodoProject, TodoProjectAction]
 
   implicit val todoProjectIdGen = new ModelIdGen[TodoProject] {
     def genId(a: TodoProject) = None

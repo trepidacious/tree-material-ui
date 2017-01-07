@@ -26,29 +26,37 @@ object Navigation {
 
     def render(p: Props[P], s: State) = {
       <.div(
-        MuiAppBar(
-          title = p.title: ReactNode,
-          onLeftIconButtonTouchTap  = View.touch(toggleDrawerOpen),
-//          onRightIconButtonTouchTap = CallbackDebug.f1("onRightIconButtonTouchTap"),
-//          onTitleTouchTap           = CallbackDebug.f1("onTitleTouchTap"),
-          showMenuIconButton = true,
-          style = js.Dynamic.literal(
-            "position" -> "fixed",
-            "top" -> "0px",
-            "box-shadow" -> "none"
-          )
-        )(),
+        <.div(
+          ^.position := "fixed",
+          ^.top := "4px",
+          ^.left := "4px",
+          ^.zIndex := "1200",
+          MuiIconButton(onTouchTap = View.touch(toggleDrawerOpen), iconStyle = js.Dynamic.literal("color" -> "#FFF"))(Mui.SvgIcons.NavigationMenu()())
+        ),
+//        MuiAppBar(
+////          title = p.title: ReactNode,
+//          onLeftIconButtonTouchTap  = View.touch(toggleDrawerOpen),
+////          onRightIconButtonTouchTap = CallbackDebug.f1("onRightIconButtonTouchTap"),
+////          onTitleTouchTap           = CallbackDebug.f1("onTitleTouchTap"),
+//          showMenuIconButton = true,
+//          style = js.Dynamic.literal(
+//            "position" -> "fixed",
+//            "top" -> "0px",
+//            "box-shadow" -> "none",
+//            "background-color" -> "none"
+//          )
+//        )(),
         MuiDrawer(
           onRequestChange = onRequestChange,  //Toggle open state
           docked          = false,
           open            = s.drawerOpen
         )(
           //TODO get the color from Material-UI theme, or is there a component that does this?
-          <.div(
-            ^.backgroundColor := "#757575",
-            ^.color           := "rgb(255, 255, 255)",
-            ^.height          := "64px"
-          ),
+//          <.div(
+//            ^.backgroundColor := "#757575",
+//            ^.color           := "rgb(255, 255, 255)",
+//            ^.height          := "64px"
+//          ),
           MuiMenu()(
             p.navs.map {
               case (name, page) =>
@@ -67,7 +75,7 @@ object Navigation {
           )
         ),
         <.div(
-            ^.paddingTop    := "64px",
+//            ^.paddingTop    := "64px",
             p.resolution.render()
         )
       )
@@ -88,85 +96,5 @@ object Navigation {
     .backend(new Backend[P](_))
     .render(s => s.backend.render(s.props, s.state))
     .build
-
-
-
-
-//  def navMenu[P] = ReactComponentB[NavProps[P]]("Menu")
-//    .render_P { p =>
-//
-//      def nav(name: String, target: P) = {
-//        <.nav(
-//          ^.cls := "mdl-navigation mdl-layout--large-screen-only",
-//          ^.key := name,
-//          <.span(
-//            ^.classSet1(
-//              "mdl-navigation__link",
-//              "mdl-navigation__link--active" -> (p.page == target)
-//            ),
-//            name,
-//            p.routerCtl setOnClick target
-//          )
-//        )
-//      }
-//
-//      <.header(
-//        ^.cls := "mdl-layout__header",
-//        <.div(
-//          ^.cls := "mdl-layout__header-row",
-//
-//          // Title
-//          <.span(^.cls := "mdl-layout-title", p.title),
-//
-//          // Add spacer, to align navigation to the right
-//          <.div(^.cls := "mdl-layout-spacer")
-//        )(
-//          // Navigation. We hide it in small screens.
-//          p.navs.map(n => nav(n._1, n._2))
-//        )
-//      )
-//    }
-//    .configure(Reusability.shouldComponentUpdate)
-//    .build
-//
-//  def navDrawer[P] = ReactComponentB[NavProps[P]]("Drawer")
-//    .render_P { p =>
-//
-//      def nav(name: String, target: P) = {
-//        <.span(
-//          ^.classSet1(
-//            "mdl-navigation__link",
-//            "mdl-navigation__link--active" -> (p.page == target)
-//          ),
-//          ^.key := name,
-//          name,
-//          p.routerCtl setOnClick target
-//        )
-//      }
-//
-//      <.div(
-//        ^.cls := "mdl-layout__drawer",
-//        <.span(
-//          ^.cls := "mdl-layout-title",
-//          p.title
-//        ),
-//        <.nav(^.cls := "mdl-navigation")(
-//          p.navs.map(n => nav(n._1, n._2))
-//        )
-//      )
-//    }
-//    .configure(Reusability.shouldComponentUpdate)
-//    .build
-//
-//  val navLayout = <.div(^.cls := "mdl-layout mdl-js-layout mdl-layout--fixed-header")
-//
-//  def navContents(r: ReactElement) =
-//    <.main(
-//      ^.cls := "mdl-layout__content mdl-color-text--grey-600",
-//      <.div(
-//        ^.cls := "page-content",
-//        r
-//      )
-//    )
 
 }

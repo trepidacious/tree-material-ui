@@ -205,9 +205,9 @@ object DemoViews {
 //                ^.boxSizing := "border-box",
                 ^.boxShadow := "rgba(0, 0, 0, 0.117647) 0px 1px 6px, rgba(0, 0, 0, 0.117647) 0px 1px 4px",
                 ^.width := "100%",
-                ^.zIndex := "1050",
+                ^.zIndex := "1100",
                 ^.display := "flex",
-                ^.height := "96px",
+                ^.height := "128px",
                 <.div(
                   ^.width := "72px",
                   ^.height := "16px",
@@ -215,7 +215,7 @@ object DemoViews {
                   <.div(
                     ^.position := "absolute",
                     ^.left := "16px",
-                    ^.top := "76px",
+                    ^.top := "108px",
                     MuiFloatingActionButton(
                       backgroundColor = MaterialColor.DeepOrange.a200,
                       mini = true,
@@ -223,10 +223,16 @@ object DemoViews {
                     )(Mui.SvgIcons.ContentAdd()())
                   )
                 ),
-                textViewHero(cp.zoomN(TodoProject.name).label("Project name"))
+                <.div(
+//                  ^.paddingTop := "56px",
+                  ^.paddingTop := "64px",
+                  textViewHero(cp.zoomN(TodoProject.name).label("Project name"))
+                )
               ),
+
+              // Contents
               <.div(
-                ^.paddingTop := "96px",
+                ^.paddingTop := "128px",
                 MuiSubheader(inset = true)("Lists"),
                 todoProjectListView(
                   SortableContainer.Props(

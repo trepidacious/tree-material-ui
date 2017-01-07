@@ -55,10 +55,12 @@ object View {
     MuiTextField(
       value = p.model,
       onChange = (e: ReactEventI) => e.preventDefaultCB >>  p.set(e.target.value),
-      floatingLabelText = p.label: ReactNode,
+//      floatingLabelText = p.label: ReactNode,
+//      floatingLabelStyle = js.Dynamic.literal("font-size" -> "16px", "color" -> "rgba(255, 255, 255, 0.87"),
+      hintText = p.label: ReactNode,
+      hintStyle = js.Dynamic.literal("color" -> "rgba(255, 255, 255, 0.87"),
       style = js.Dynamic.literal("font-size" -> "24px"),
       inputStyle = js.Dynamic.literal("color" -> "rgba(255, 255, 255, 1.00"),
-      floatingLabelStyle = js.Dynamic.literal("font-size" -> "16px", "color" -> "rgba(255, 255, 255, 0.87"),
       underlineStyle = js.Dynamic.literal(
         "bottom" -> "4px"
       ),
