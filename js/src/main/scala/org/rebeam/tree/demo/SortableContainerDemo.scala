@@ -27,7 +27,7 @@ object SortableContainerDemo {
         ^.className := "react-sortable-list",
         d.props.zipWithIndex.map {
           case (value, index) =>
-            sortableItem(SortableElement.Props(index = index))(value)
+            sortableItem(SortableElement.Props(key = index, index = index))(value)
         }
       )
     })

@@ -6,9 +6,11 @@ import chandu0101.scalajs.react.components.materialui._
 import io.circe.Encoder
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.extra.Reusability
+import japgolly.scalajs.react.vdom.ReactStyle
 
-import scala.scalajs.js
 import scala.scalajs.js.UndefOr
+//import japgolly.scalajs.react.vdom.prefix_<^._
+import Mui.Styles.colors
 
 import scala.language.implicitConversions
 
@@ -46,6 +48,27 @@ object View {
       value = p.model,
       onChange = (e: ReactEventI) => e.preventDefaultCB >>  p.set(e.target.value),
       floatingLabelText = p.label: ReactNode
+    )()
+  }
+
+  val textViewHero = labelledCursorView[String]("textViewHero") { p =>
+    MuiTextField(
+      value = p.model,
+      onChange = (e: ReactEventI) => e.preventDefaultCB >>  p.set(e.target.value),
+      floatingLabelText = p.label: ReactNode,
+      style = js.Dynamic.literal("font-size" -> "24px"),
+      inputStyle = js.Dynamic.literal("color" -> "rgba(255, 255, 255, 1.00"),
+      floatingLabelStyle = js.Dynamic.literal("font-size" -> "16px", "color" -> "rgba(255, 255, 255, 0.87"),
+      underlineStyle = js.Dynamic.literal(
+        "bottom" -> "4px"
+      ),
+      underlineDisabledStyle = js.Dynamic.literal(
+        "bottom" -> "4px"
+      ),
+      underlineFocusStyle = js.Dynamic.literal(
+        "border-bottom" -> "2px solid rgb(224, 224, 224)",
+        "bottom" -> "4px"
+      )
     )()
   }
 
@@ -215,7 +238,29 @@ object View {
     )()
   }
 
-  implicit def materialColor2MuiColor(c: Color): MuiColor = c.toString().asInstanceOf[MuiColor]
-  implicit def materialColor2UndefOrMuiColor(c: Color): UndefOr[MuiColor] = c.toString().asInstanceOf[MuiColor]
+  implicit def color2MuiColor(c: Color): MuiColor = c.toString().asInstanceOf[MuiColor]
+  implicit def color2UndefOrMuiColor(c: Color): UndefOr[MuiColor] = c.toString().asInstanceOf[MuiColor]
+  implicit final val _react_styleColor  : ReactStyle.ValueType[Color] = ReactStyle.ValueType.stringValue
+
+  val avatarText = ReactComponentB[(String, Color)]("avatarText")
+    .render(d => {
+      val text = d.props._1
+      val color = d.props._2
+      //Adapt font size to number of digits
+      val fontSize = text.length match {
+        case 1 => 20
+        case 2 => 20
+        case 3 => 16
+        case 4 => 13
+        case 5 => 11
+        case 6 => 10
+        case _ => 8
+      }
+      MuiAvatar(
+        style = js.Dynamic.literal("font-size" -> s"${fontSize}px"),
+        color = colors.white,
+        backgroundColor = color
+      )(text: ReactNode)
+    }).build
 
 }

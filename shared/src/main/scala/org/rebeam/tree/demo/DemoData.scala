@@ -151,6 +151,7 @@ object DemoData {
   case class TodoProject (
                         id: TodoProjectId,
                         name: String,
+                        color: Color = Color.White,
                         lists: List[TodoList],
                         nextListId: IdOf[TodoList] = IdOf[TodoList](1)
                       )
@@ -212,7 +213,7 @@ object DemoData {
 
 
   implicit val todoProjectDeltaDecoder =
-    value[TodoProject] or lensN(TodoProject.name) or lensN(TodoProject.lists)
+    value[TodoProject] or lensN(TodoProject.color) or lensN(TodoProject.name) or lensN(TodoProject.lists)
 
   implicit val todoProjectIdGen = new ModelIdGen[TodoProject] {
     def genId(a: TodoProject) = None

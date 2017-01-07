@@ -1,6 +1,7 @@
 package org.rebeam.tree.demo
 
 import japgolly.scalajs.react.vdom.prefix_<^._
+import org.rebeam.tree.Moment
 import org.rebeam.tree.view.View._
 import org.rebeam.tree.view._
 import org.rebeam.tree.view.Cursor._
@@ -149,27 +150,13 @@ object DemoViews {
         val list = d.props._1
         val toList = d.props._2.set(TodoProjectListPage(list.id))
         val idString = s"${list.id.value}"
-        //Adapt font size to number of digits
-        val fontSize = idString.length match {
-          case 1 => 20
-          case 2 => 20
-          case 3 => 16
-          case 4 => 13
-          case 5 => 11
-          case 6 => 10
-          case _ => 8
-        }
         <.div(
           ^.onClick --> toList,
           ^.cursor := "pointer",
           ^.className := "react-sortable-item",
           <.div(
             ^.display := "flex",
-            MuiAvatar(
-              style = js.Dynamic.literal("font-size" -> s"${fontSize}px"),
-              color = colors.white,
-              backgroundColor = list.color
-            )(idString: ReactNode),
+            avatarText((idString, list.color)),
             <.div(
               ^.marginLeft := "16px",
               <.span(s"${list.name}"),
@@ -180,9 +167,6 @@ object DemoViews {
               )
             )
           ),
-//          MuiIconButton(
-//            onTouchTap = touch(toList)
-//          )(Mui.SvgIcons.NavigationChevronRight()()),
           SortableView.handle
         )
       })
@@ -197,12 +181,14 @@ object DemoViews {
       <.div(
         ^.className := "react-sortable-list",
         project.lists.zipWithIndex.map {
-          case (list, index) => todoListSummaryView(SortableElement.Props(index = index))((list, d.props.p))
+          case (list, index) => todoListSummaryView(SortableElement.Props(key = list.id.value, index = index))((list, d.props.p))
         }
       )
     })
     .build
   )
+
+
 
   // This combines and stores the url and renderer, and will then produce a new element per page. This avoids
   // changing state when changing pages, so we keep the same websocket etc.
@@ -211,21 +197,46 @@ object DemoViews {
       <.div(
         cp.p.current match {
 
-          case TodoProjectPage => <.div(
-            <.h2("Todo project"),
-            textView(cp.zoomN(TodoProject.name).label("Name")),
-//            cp.model.lists.map(l =>
-//              <.p(raisedButton(s"List ${l.id}, ${l.name} >", primary = true)(cp.p.set(TodoProjectListPage(l.id))))
-//            )
-            MuiSubheader()("Lists"),
-            todoProjectListView(
-              SortableContainer.Props(
-                onSortEnd = p => cp.zoomN(TodoProject.lists).set(p.updatedList(cp.model.lists)),
-                useDragHandle = true,
-                helperClass = "react-sortable-handler"
+          case TodoProjectPage =>
+            <.div(
+              <.div(
+                ^.position := "fixed",
+                ^.backgroundColor := Mui.Styles.colors.blueGrey500.toString,
+//                ^.boxSizing := "border-box",
+                ^.boxShadow := "rgba(0, 0, 0, 0.117647) 0px 1px 6px, rgba(0, 0, 0, 0.117647) 0px 1px 4px",
+                ^.width := "100%",
+                ^.zIndex := "1050",
+                ^.display := "flex",
+                ^.height := "96px",
+                <.div(
+                  ^.width := "72px",
+                  ^.height := "16px",
+                  ^.position := "relative",
+                  <.div(
+                    ^.position := "absolute",
+                    ^.left := "16px",
+                    ^.top := "76px",
+                    MuiFloatingActionButton(
+                      backgroundColor = MaterialColor.DeepOrange.a200,
+                      mini = true,
+                      onTouchTap = touch(cp.act(TodoProjectAction.CreateTodoList(Moment(0)): TodoProjectAction))
+                    )(Mui.SvgIcons.ContentAdd()())
+                  )
+                ),
+                textViewHero(cp.zoomN(TodoProject.name).label("Project name"))
+              ),
+              <.div(
+                ^.paddingTop := "96px",
+                MuiSubheader(inset = true)("Lists"),
+                todoProjectListView(
+                  SortableContainer.Props(
+                    onSortEnd = p => cp.zoomN(TodoProject.lists).set(p.updatedList(cp.model.lists)),
+                    useDragHandle = true,
+                    helperClass = "react-sortable-handler"
+                  )
+                )(cp)
               )
-            )(cp)
-          )
+            )
 
           case TodoProjectListPage(listId) =>
             val listCursor = cp.zoomN(TodoProject.lists).zoomMatch(FindTodoListById(listId))

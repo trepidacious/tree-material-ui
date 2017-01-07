@@ -5,7 +5,8 @@ import japgolly.scalajs.react._
 import scala.scalajs.js
 
 object SortableElement {
-  case class Props(index: Int,
+  case class Props(key: js.Any,
+                   index: Int,
                    collection: Int = 0,
                    disabled: Boolean = false)
 
@@ -20,6 +21,7 @@ object SortableElement {
     val component = js.Dynamic.global.SortableElement(wrappedComponent.reactClass)
 
     (props) => (wrappedProps) => React.asInstanceOf[js.Dynamic].createElement(component, js.Dynamic.literal(
+      "key" -> props.key,
       "index" -> props.index,
       "collection" -> props.collection,
       "disabled" -> props.disabled,

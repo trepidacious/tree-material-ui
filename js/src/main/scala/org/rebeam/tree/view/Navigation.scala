@@ -34,7 +34,8 @@ object Navigation {
           showMenuIconButton = true,
           style = js.Dynamic.literal(
             "position" -> "fixed",
-            "top" -> "0px"
+            "top" -> "0px",
+            "box-shadow" -> "none"
           )
         )(),
         MuiDrawer(

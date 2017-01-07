@@ -11,7 +11,7 @@ import org.http4s.server.staticcontent._
 import org.http4s.server.websocket._
 import org.http4s.websocket.WebsocketBits._
 import org.rebeam.tree.Moment
-import org.rebeam.tree.server.{ServerStore, ServerStoreValueExchange, TreeStore, TreeStoreValueExchange}
+import org.rebeam.tree.server.{ServerStore, ServerStoreValueExchange}
 import org.rebeam.tree.view.MaterialColor
 
 import scala.concurrent.duration._
@@ -52,7 +52,7 @@ object ServerDemoApp extends ServerApp {
 
   val todoListStore = new ServerStore(todoList)
 
-  val todoProject = TodoProject(TodoProjectId.first, "Todo project", (1 to 20).map(i => todoListExample(IdOf[TodoList](i))).toList)
+  val todoProject = TodoProject(TodoProjectId.first, "Todo project", MaterialColor.Indigo(), (1 to 20).map(i => todoListExample(IdOf[TodoList](i))).toList)
 
   val todoProjectStore = new ServerStore(todoProject)
 
