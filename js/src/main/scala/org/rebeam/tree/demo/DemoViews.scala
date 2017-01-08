@@ -192,7 +192,6 @@ object DemoViews {
   val TodoProjectList = cursorPView[List[TodoList], Pages[TodoPage]]("todoProjectListView") {
     cp => {
       <.div(
-        <.div(^.height := "16px"),
         ^.className := "react-sortable-list",
         cp.zoomAllIP.zipWithIndex.map {
           case (listCP, index) => todoListSummaryView(SortableElement.Props(key = listCP.model.id.value, index = index))(listCP)
