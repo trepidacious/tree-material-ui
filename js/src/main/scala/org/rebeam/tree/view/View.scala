@@ -9,7 +9,6 @@ import japgolly.scalajs.react.extra.Reusability
 import japgolly.scalajs.react.vdom.ReactStyle
 
 import scala.scalajs.js.UndefOr
-//import japgolly.scalajs.react.vdom.prefix_<^._
 import Mui.Styles.colors
 
 import scala.language.implicitConversions
@@ -31,13 +30,13 @@ object View {
   implicit def cursorPReuse[A, P]: Reusability[CursorP[A, P]] = Reusability.byRefOr_==
 
   def cursorView[A](name: String)(render: Cursor[A] => ReactElement) =
-    ReactComponentB[Cursor[A]](name).render_P(render).configure(Reusability.shouldComponentUpdateWithOverlay).build
+    ReactComponentB[Cursor[A]](name).render_P(render).configure(Reusability.shouldComponentUpdate).build
 
   def cursorLView[A](name: String)(render: CursorL[A] => ReactElement) =
-    ReactComponentB[CursorL[A]](name).render_P(render).configure(Reusability.shouldComponentUpdateWithOverlay).build
+    ReactComponentB[CursorL[A]](name).render_P(render).configure(Reusability.shouldComponentUpdate).build
 
   def cursorPView[A, P](name: String)(render: CursorP[A, P] => ReactElement) =
-    ReactComponentB[CursorP[A, P]](name).render_P(render).configure(Reusability.shouldComponentUpdateWithOverlay).build
+    ReactComponentB[CursorP[A, P]](name).render_P(render).configure(Reusability.shouldComponentUpdate).build
 
   def staticView(name: String)(e: ReactElement) = ReactComponentB[Unit](name)
     .render(_ => e)
@@ -189,7 +188,7 @@ object View {
           Callback.empty
         }
       )
-      .configure(Reusability.shouldComponentUpdateWithOverlay)
+      .configure(Reusability.shouldComponentUpdate)
       .build
   }
 
