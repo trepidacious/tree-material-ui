@@ -144,34 +144,36 @@ object DemoViews {
     spinner()
   )
 
-  val todoListSummaryView = SortableElement.wrap(
-    ReactComponentB[(TodoList, Pages[TodoPage])]("todoListSummaryView")
-      .render(d => {
-        val list = d.props._1
-        val toList = d.props._2.set(TodoProjectListPage(list.id))
-        val idString = s"${list.id.value}"
+  val TodoListSummary = cursorPView[TodoList, Pages[TodoPage]]("TodoListSummary"){
+    cp => {
+
+      val list = cp.model
+      val toList = cp.p.set(TodoProjectListPage(list.id))
+      val idString = s"${list.id.value}"
+      <.div(
+        ^.onClick --> toList,
+        ^.cursor := "pointer",
+        ^.className := "react-sortable-item",
         <.div(
-          ^.onClick --> toList,
-          ^.cursor := "pointer",
-          ^.className := "react-sortable-item",
+          ^.display := "flex",
+          avatarText((idString, list.color)),
           <.div(
-            ^.display := "flex",
-            avatarText((idString, list.color)),
-            <.div(
-              ^.marginLeft := "16px",
-              <.span(s"${list.name}"),
-              <.br,
-              <.span(
-                ^.color := "rgba(0, 0, 0, 0.541176)",
-                s"${list.items.size} item${if (list.items.size == 1) "" else "s"}"
-              )
+            ^.marginLeft := "16px",
+            <.span(s"${list.name}"),
+            <.br,
+            <.span(
+              ^.color := "rgba(0, 0, 0, 0.541176)",
+              s"${list.items.size} item${if (list.items.size == 1) "" else "s"}"
             )
-          ),
-          SortableView.handle
-        )
-      })
-      .build
-  )
+          )
+        ),
+        SortableView.handle
+      )
+
+    }
+  }
+
+  val todoListSummaryView = SortableElement.wrap(TodoListSummary)
 
   // Equivalent of the `({items}) =>` lambda passed to SortableContainer in original demo
 //  val todoProjectListView = SortableContainer.wrap(
@@ -189,12 +191,15 @@ object DemoViews {
 
   val TodoProjectList = cursorPView[List[TodoList], Pages[TodoPage]]("todoProjectListView") {
     cp => {
-      val lists = cp.model
       <.div(
+        <.div(^.height := "16px"),
         ^.className := "react-sortable-list",
-        lists.zipWithIndex.map {
-          case (list, index) => todoListSummaryView(SortableElement.Props(key = list.id.value, index = index))((list, cp.p))
+        cp.zoomAllIP.zipWithIndex.map {
+          case (listCP, index) => todoListSummaryView(SortableElement.Props(key = listCP.model.id.value, index = index))(listCP)
         }
+//        lists.zipWithIndex.map {
+//          case (list, index) => todoListSummaryView(SortableElement.Props(key = list.id.value, index = index))((list, cp.p))
+//        }
       )
     }
   }
