@@ -26,14 +26,18 @@ object View {
     ReactComponentB[A](name).render_P(render).build
 
   //We are careful to ensure that cursors remain equal if they are reusable
-  implicit def cursorReuse[A]: Reusability[Cursor[A]] = Reusability.by_==
-  implicit def labelledCursorReuse[A]: Reusability[CursorL[A]] = Reusability.by_==
+  implicit def cursorReuse[A]: Reusability[Cursor[A]] = Reusability.byRefOr_==
+  implicit def cursorLReuse[A]: Reusability[CursorL[A]] = Reusability.byRefOr_==
+  implicit def cursorPReuse[A, P]: Reusability[CursorP[A, P]] = Reusability.byRefOr_==
 
   def cursorView[A](name: String)(render: Cursor[A] => ReactElement) =
-    ReactComponentB[Cursor[A]](name).render_P(render).configure(Reusability.shouldComponentUpdate).build
+    ReactComponentB[Cursor[A]](name).render_P(render).configure(Reusability.shouldComponentUpdateWithOverlay).build
 
-  def labelledCursorView[A](name: String)(render: CursorL[A] => ReactElement) =
-    ReactComponentB[CursorL[A]](name).render_P(render).configure(Reusability.shouldComponentUpdate).build
+  def cursorLView[A](name: String)(render: CursorL[A] => ReactElement) =
+    ReactComponentB[CursorL[A]](name).render_P(render).configure(Reusability.shouldComponentUpdateWithOverlay).build
+
+  def cursorPView[A, P](name: String)(render: CursorP[A, P] => ReactElement) =
+    ReactComponentB[CursorP[A, P]](name).render_P(render).configure(Reusability.shouldComponentUpdateWithOverlay).build
 
   def staticView(name: String)(e: ReactElement) = ReactComponentB[Unit](name)
     .render(_ => e)
@@ -43,7 +47,7 @@ object View {
     MuiCircularProgress(mode = DeterminateIndeterminate.indeterminate)()
   )
 
-  val textView = labelledCursorView[String]("textView") { p =>
+  val textView = cursorLView[String]("textView") { p =>
     MuiTextField(
       value = p.model,
       onChange = (e: ReactEventI) => e.preventDefaultCB >>  p.set(e.target.value),
@@ -51,7 +55,7 @@ object View {
     )()
   }
 
-  val textViewHero = labelledCursorView[String]("textViewHero") { p =>
+  val textViewHero = cursorLView[String]("textViewHero") { p =>
     MuiTextField(
       value = p.model,
       onChange = (e: ReactEventI) => e.preventDefaultCB >>  p.set(e.target.value),
@@ -74,7 +78,7 @@ object View {
     )()
   }
 
-  val textViewPlainLabel = labelledCursorView[String]("textViewPlainLabel") { p =>
+  val textViewPlainLabel = cursorLView[String]("textViewPlainLabel") { p =>
     MuiTextField(
       value = p.model,
       onChange = (e: ReactEventI) => e.preventDefaultCB >>  p.set(e.target.value),
@@ -185,7 +189,7 @@ object View {
           Callback.empty
         }
       )
-      .configure(Reusability.shouldComponentUpdate)
+      .configure(Reusability.shouldComponentUpdateWithOverlay)
       .build
   }
 
@@ -215,7 +219,7 @@ object View {
 
   val intView = AsStringView.component[Int]("intView", intStringCodec)
 
-  val booleanView = labelledCursorView[Boolean]("booleanView") { p =>
+  val booleanView = cursorLView[Boolean]("booleanView") { p =>
     MuiCheckbox(
       label = p.label,
       checked = p.model,

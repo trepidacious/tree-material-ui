@@ -174,25 +174,37 @@ object DemoViews {
   )
 
   // Equivalent of the `({items}) =>` lambda passed to SortableContainer in original demo
-  val todoProjectListView = SortableContainer.wrap(
-    ReactComponentB[CursorP[TodoProject, Pages[TodoPage]]]("todoProjectListView")
-    .render(d => {
-      val project = d.props.model
+//  val todoProjectListView = SortableContainer.wrap(
+//    cursorPView[List[TodoList], Pages[TodoPage]]("todoProjectListView") {
+//      cp => {
+//        val lists = cp.model
+//        <.div(
+//          ^.className := "react-sortable-list",
+//          lists.zipWithIndex.map {
+//            case (list, index) => todoListSummaryView(SortableElement.Props(key = list.id.value, index = index))((list, cp.p))
+//          }
+//        )
+//      }
+//    )
+
+  val TodoProjectList = cursorPView[List[TodoList], Pages[TodoPage]]("todoProjectListView") {
+    cp => {
+      val lists = cp.model
       <.div(
         ^.className := "react-sortable-list",
-        project.lists.zipWithIndex.map {
-          case (list, index) => todoListSummaryView(SortableElement.Props(key = list.id.value, index = index))((list, d.props.p))
+        lists.zipWithIndex.map {
+          case (list, index) => todoListSummaryView(SortableElement.Props(key = list.id.value, index = index))((list, cp.p))
         }
       )
-    })
-    .build
-  )
+    }
+  }
 
+  val todoProjectListView = SortableContainer.wrap(TodoProjectList)
 
 
   // This combines and stores the url and renderer, and will then produce a new element per page. This avoids
   // changing state when changing pages, so we keep the same websocket etc.
-  val todoProjectViewFactory = ServerRootComponent.factory[TodoProject, Pages[TodoPage]](noTodoProject, "api/todoproject") {
+  val todoProjectView = cursorPView[TodoProject, Pages[TodoPage]]("TodoProject") {
     cp => {
       <.div(
         cp.p.current match {
@@ -202,7 +214,7 @@ object DemoViews {
               <.div(
                 ^.position := "fixed",
                 ^.backgroundColor := Mui.Styles.colors.blueGrey500.toString,
-//                ^.boxSizing := "border-box",
+                //                ^.boxSizing := "border-box",
                 ^.boxShadow := "rgba(0, 0, 0, 0.117647) 0px 1px 6px, rgba(0, 0, 0, 0.117647) 0px 1px 4px",
                 ^.width := "100%",
                 ^.zIndex := "1100",
@@ -224,7 +236,7 @@ object DemoViews {
                   )
                 ),
                 <.div(
-//                  ^.paddingTop := "56px",
+                  //                  ^.paddingTop := "56px",
                   ^.paddingTop := "64px",
                   textViewHero(cp.zoomN(TodoProject.name).label("Project name"))
                 )
@@ -240,7 +252,7 @@ object DemoViews {
                     useDragHandle = true,
                     helperClass = "react-sortable-handler"
                   )
-                )(cp)
+                )(cp.zoomN(TodoProject.lists).withP(cp.p))
               )
             )
 
@@ -257,8 +269,8 @@ object DemoViews {
               <.h3(s"Todo list $listId"),
               listNameView
 
-//              listCursor.map(c => textView(c.zoomN(TodoList.name).label("Name"))).getOrElse(<.div("List not found"))
-    //            textView(cap.cursor.zoomN(TodoProject.lists).zoomMatch(FindTodoListById(TodoListId(listId))).label("Name"))
+              //              listCursor.map(c => textView(c.zoomN(TodoList.name).label("Name"))).getOrElse(<.div("List not found"))
+              //            textView(cap.cursor.zoomN(TodoProject.lists).zoomMatch(FindTodoListById(TodoListId(listId))).label("Name"))
             )
 
           case TodoProjectListItemPage(listId, todoId) => <.div(
@@ -270,6 +282,12 @@ object DemoViews {
         }
       )
     }
+  }
+
+  // This combines and stores the url and renderer, and will then produce a new element per page. This avoids
+  // changing state when changing pages, so we keep the same websocket etc.
+  val todoProjectViewFactory = ServerRootComponent.factory[TodoProject, Pages[TodoPage]](noTodoProject, "api/todoproject") {
+    todoProjectView(_)
   }
 
 }

@@ -52,7 +52,9 @@ object ServerDemoApp extends ServerApp {
 
   val todoListStore = new ServerStore(todoList)
 
-  val todoProject = TodoProject(TodoProjectId.first, "Todo project", MaterialColor.Indigo(), (1 to 20).map(i => todoListExample(IdOf[TodoList](i))).toList, IdOf[TodoList](21))
+  val listCount = 2
+
+  val todoProject = TodoProject(TodoProjectId.first, "Todo project", MaterialColor.Indigo(), (1 to listCount).map(i => todoListExample(IdOf[TodoList](i))).toList, IdOf[TodoList](listCount + 1))
 
   val todoProjectStore = new ServerStore(todoProject)
 
