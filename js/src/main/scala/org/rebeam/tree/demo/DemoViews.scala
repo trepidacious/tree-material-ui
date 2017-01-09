@@ -194,6 +194,12 @@ object DemoViews {
     cp => {
       <.div(
         ^.className := "react-sortable-list",
+        ^.overflowY := "auto",
+        ^.width := "100%",
+//        ^.height := "400px",
+        ^.position := "absolute",
+        ^.top := "180px",
+        ^.bottom := "0px",
         // FIXME use zoomAllMatchesP
         cp.zoomAllIP.zipWithIndex.map {
           case (todoCP, index) => SortableTodoItemSummaryView(SortableElement.Props(key = todoCP.model.id.value, index = index))(todoCP)
@@ -222,7 +228,8 @@ object DemoViews {
           SortableContainer.Props(
             onSortEnd = p => cp.zoomN(TodoProject.lists).set(p.updatedList(cp.model.lists)),
             useDragHandle = true,
-            helperClass = "react-sortable-handler"
+            helperClass = "react-sortable-handler",
+            useWindowAsScrollContainer = true
           )
         )(cp.zoomN(TodoProject.lists).withP(cp.p))
       )
