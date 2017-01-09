@@ -10,8 +10,8 @@ import chandu0101.scalajs.react.components.materialui._
 import japgolly.scalajs.react._
 import org.rebeam.tree.demo.DemoData.Priority._
 import org.rebeam.tree.demo.DemoRoutes._
-import org.rebeam.tree.view.pages.Pages
-import org.rebeam.tree.view.sortable.{SortableContainer, SortableElement, SortableView}
+import org.rebeam.tree.view.pages.{Pages, Breadcrumbs}
+import org.rebeam.tree.view.sortable.{SortableContainer, SortableElement, SortableListItem, SortableView}
 
 import scala.scalajs.js
 
@@ -138,80 +138,71 @@ object DemoViews {
     }
   }
 
-  val noTodoProject = <.div(
-    <.h3("Todo Project"),
-    spinner()
-  )
-
-  val TodoListSummary = cursorPView[TodoList, Pages[TodoPage]]("TodoListSummary"){
+  val TodoListSummaryView = cursorPView[TodoList, Pages[TodoPage]]("TodoListSummaryView"){
     cp => {
-
       val list = cp.model
       val toList = cp.p.set(TodoProjectListPage(list.id))
       val idString = s"${list.id.value}"
-      <.div(
-        ^.onClick --> toList,
-        ^.cursor := "pointer",
-        ^.className := "react-sortable-item",
-        <.div(
-          ^.display := "flex",
-          avatarText((idString, list.color)),
-          <.div(
-            ^.marginLeft := "16px",
-            <.span(s"${list.name}"),
-            <.br,
-            <.span(
-              ^.color := "rgba(0, 0, 0, 0.541176)",
-              s"${list.items.size} item${if (list.items.size == 1) "" else "s"}"
-            )
-          )
-        ),
-        SortableView.handle
+      val contents = SortableListItem.twoLines(
+        s"${list.name}",
+        s"${list.items.size} item${if (list.items.size == 1) "" else "s"}"
       )
-
+      SortableListItem(toList, avatarText((idString, list.color)), contents)
     }
   }
 
-  val todoListSummaryView = SortableElement.wrap(TodoListSummary)
+  val SortableTodoListSummaryView = SortableElement.wrap(TodoListSummaryView)
 
-  // Equivalent of the `({items}) =>` lambda passed to SortableContainer in original demo
-//  val todoProjectListView = SortableContainer.wrap(
-//    cursorPView[List[TodoList], Pages[TodoPage]]("todoProjectListView") {
-//      cp => {
-//        val lists = cp.model
-//        <.div(
-//          ^.className := "react-sortable-list",
-//          lists.zipWithIndex.map {
-//            case (list, index) => todoListSummaryView(SortableElement.Props(key = list.id.value, index = index))((list, cp.p))
-//          }
-//        )
-//      }
-//    )
-
-  val TodoProjectList = cursorPView[List[TodoList], Pages[TodoPage]]("todoProjectListView") {
+  val TodoListsView = cursorPView[List[TodoList], Pages[TodoPage]]("TodoListView") {
     cp => {
       <.div(
         ^.className := "react-sortable-list",
+        // FIXME use zoomAllMatchesP
         cp.zoomAllIP.zipWithIndex.map {
-          case (listCP, index) => todoListSummaryView(SortableElement.Props(key = listCP.model.id.value, index = index))(listCP)
+          case (listCP, index) => SortableTodoListSummaryView(SortableElement.Props(key = listCP.model.id.value, index = index))(listCP)
         }
-//        lists.zipWithIndex.map {
-//          case (list, index) => todoListSummaryView(SortableElement.Props(key = list.id.value, index = index))((list, cp.p))
-//        }
       )
     }
   }
 
-  val todoProjectListView = SortableContainer.wrap(TodoProjectList)
+  val SortableTodoListsView = SortableContainer.wrap(TodoListsView)
 
 
-  val todoProjectView = cursorPView[TodoProject, Pages[TodoPage]]("TodoProject") {
+  val TodoItemSummaryView = cursorPView[Todo, Pages[TodoPage]]("TodoItemSummaryView"){
     cp => {
-      val fab = MuiFloatingActionButton(
-        backgroundColor = MaterialColor.DeepOrange.a200,
-        mini = true,
-        onTouchTap = touch(cp.act(TodoProjectAction.CreateTodoList(Moment(0)): TodoProjectAction))
-      )(Mui.SvgIcons.ContentAdd()())
+      val item = cp.model
+      val toItem = Callback{} //cp.p.set(TodoProjectListItemPage(list.id))
+      val idString = s"${item.id.value}"
+      val contents = SortableListItem.twoLines(
+        s"${item.name}",
+        ""
+      )
+      SortableListItem(toItem, avatarText((idString, MaterialColor.BlueGrey(500))), contents)
+    }
+  }
+
+  val SortableTodoItemSummaryView = SortableElement.wrap(TodoItemSummaryView)
+
+  val TodoItemsView = cursorPView[List[Todo], Pages[TodoPage]]("TodoItemsView") {
+    cp => {
+      <.div(
+        ^.className := "react-sortable-list",
+        // FIXME use zoomAllMatchesP
+        cp.zoomAllIP.zipWithIndex.map {
+          case (todoCP, index) => SortableTodoItemSummaryView(SortableElement.Props(key = todoCP.model.id.value, index = index))(todoCP)
+        }
+      )
+    }
+  }
+
+  val SortableTodoItemsView = SortableContainer.wrap(TodoItemsView)
+
+  val TodoProjectEmptyView = TitleBar(MaterialColor.BlueGrey(500), 128, None, Some(MuiCircularProgress(mode = DeterminateIndeterminate.indeterminate, color = Mui.Styles.colors.white)()), None)
+
+  val TodoProjectView = cursorPView[TodoProject, Pages[TodoPage]]("TodoProjectView") {
+    cp => {
+      //FIXME use actual creation time
+      val fab = TitleBar.addFAB(cp.act(TodoProjectAction.CreateTodoList(Moment(0)): TodoProjectAction))
 
       val title = <.div (
         ^.paddingTop := "64px",
@@ -220,7 +211,7 @@ object DemoViews {
 
       val contents = <.div(
         MuiSubheader(inset = true)("Lists"),
-        todoProjectListView(
+        SortableTodoListsView(
           SortableContainer.Props(
             onSortEnd = p => cp.zoomN(TodoProject.lists).set(p.updatedList(cp.model.lists)),
             useDragHandle = true,
@@ -233,33 +224,62 @@ object DemoViews {
     }
   }
 
+  val TodoListView = cursorPView[TodoProject, Pages[TodoPage]]("TodoListView") {
+    projectCP => {
+
+      projectCP.p.current match {
+        case TodoProjectListPage(listId) =>
+          val ocp = projectCP.zoomNP(TodoProject.lists).zoomMatchP(FindTodoListById(listId))
+
+          ocp match {
+            case Some(cp) =>
+
+              //FIXME use actual creation time
+              val fab = TitleBar.addFAB(cp.act(TodoListAction.CreateTodo(Moment(0)): TodoListAction))
+
+              val title =
+                Breadcrumbs.container(
+//                  Breadcrumbs.element(s"${projectCP.model.name}", projectCP.p.set(TodoProjectPage)),
+//                  Breadcrumbs.chevron,
+                  Breadcrumbs.back(projectCP.p.set(TodoProjectPage)),
+                  textViewHero(cp.zoomN(TodoList.name).label("List name"))
+                )
+
+              val contents =
+                <.div(
+                  MuiSubheader(inset = true)("Todo items"),
+                  SortableTodoItemsView(
+                    SortableContainer.Props(
+                      onSortEnd = p => cp.zoomN(TodoList.items).set(p.updatedList(cp.model.items)),
+                      useDragHandle = true,
+                      helperClass = "react-sortable-handler"
+                    )
+                  )(cp.zoomN(TodoList.items).withP(cp.p))
+                )
+
+              TitleBar(cp.model.color, 128, Some(fab), Some(title), Some(contents))
+
+            case None => <.div("List no longer exists")
+          }
+
+        case _ => <.div("Incorrect page")
+      }
+
+    }
+  }
 
   // This combines and stores the url and renderer, and will then produce a new element per page. This avoids
   // changing state when changing pages, so we keep the same websocket etc.
-  val todoProjectPagesView = cursorPView[TodoProject, Pages[TodoPage]]("TodoProject") {
+  val TodoProjectPagesView = cursorPView[TodoProject, Pages[TodoPage]]("TodoProjectPagesView") {
     cp => {
       <.div(
         cp.p.current match {
 
           case TodoProjectPage =>
-            todoProjectView(cp)
+            TodoProjectView(cp)
 
-          case TodoProjectListPage(listId) =>
-            val listCursor = cp.zoomN(TodoProject.lists).zoomMatch(FindTodoListById(listId))
-
-            val listNameView = listCursor
-              .map[TagMod](c => textView(c.zoomN(TodoList.name).label("Name")))
-              .getOrElse(<.div("List not found"))
-
-            <.div(
-              <.h2("Todo project"),
-              textView(cp.zoomN(TodoProject.name).label("Name")),
-              <.h3(s"Todo list $listId"),
-              listNameView
-
-              //              listCursor.map(c => textView(c.zoomN(TodoList.name).label("Name"))).getOrElse(<.div("List not found"))
-              //            textView(cap.cursor.zoomN(TodoProject.lists).zoomMatch(FindTodoListById(TodoListId(listId))).label("Name"))
-            )
+          case TodoProjectListPage(_) =>
+            TodoListView(cp)
 
           case TodoProjectListItemPage(listId, todoId) => <.div(
             <.h2("Todo project"),
@@ -274,8 +294,8 @@ object DemoViews {
 
   // This combines and stores the url and renderer, and will then produce a new element per page. This avoids
   // changing state when changing pages, so we keep the same websocket etc.
-  val todoProjectViewFactory = ServerRootComponent.factory[TodoProject, Pages[TodoPage]](noTodoProject, "api/todoproject") {
-    todoProjectPagesView(_)
+  val todoProjectViewFactory = ServerRootComponent.factory[TodoProject, Pages[TodoPage]](TodoProjectEmptyView, "api/todoproject") {
+    TodoProjectPagesView(_)
   }
 
 }

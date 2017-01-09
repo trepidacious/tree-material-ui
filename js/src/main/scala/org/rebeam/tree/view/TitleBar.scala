@@ -1,8 +1,13 @@
 package org.rebeam.tree.view
 
-import japgolly.scalajs.react.{ReactComponentB, ReactElement}
+import chandu0101.scalajs.react.components.materialui.{Mui, MuiFloatingActionButton}
+import japgolly.scalajs.react.{Callback, ReactComponentB, ReactElement}
 import japgolly.scalajs.react.vdom.prefix_<^._
+import org.rebeam.tree.Moment
+import org.rebeam.tree.demo.DemoData.TodoListAction
 import org.rebeam.tree.view.View._
+
+import scala.scalajs.js
 
 object TitleBar {
 
@@ -47,5 +52,14 @@ object TitleBar {
 
   def apply(color: Color, height: Int, listFAB: Option[ReactElement], title: Option[ReactElement], contents: Option[ReactElement]) =
     component(Props(color, height, listFAB, title, contents))
+
+  def addFAB(callback: Callback) = {
+    MuiFloatingActionButton(
+      backgroundColor = MaterialColor.White(),
+      mini = true,
+      iconStyle = js.Dynamic.literal("fill" -> "rgba(0,0,0, 0.54)"),
+      onTouchTap = touch(callback)
+    )(Mui.SvgIcons.ContentAdd()())
+  }
 
 }

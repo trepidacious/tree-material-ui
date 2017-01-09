@@ -65,14 +65,14 @@ object View {
       style = js.Dynamic.literal("font-size" -> "24px"),
       inputStyle = js.Dynamic.literal("color" -> "rgba(255, 255, 255, 1.00"),
       underlineStyle = js.Dynamic.literal(
-        "bottom" -> "4px"
+        "bottom" -> "6px"
       ),
       underlineDisabledStyle = js.Dynamic.literal(
-        "bottom" -> "4px"
+        "bottom" -> "6px"
       ),
       underlineFocusStyle = js.Dynamic.literal(
         "border-bottom" -> "2px solid rgb(224, 224, 224)",
-        "bottom" -> "4px"
+        "bottom" -> "6px"
       )
     )()
   }

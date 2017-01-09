@@ -197,8 +197,9 @@ object DemoData {
 
   implicit val todoDeltaDecoder = value[Todo] or lensN(Todo.name) or lensN(Todo.priority) or lensN(Todo.completed) or action[Todo, TodoAction]
 
+  //FIXME stop editing list as a value, implement an action to do permutations for react-sortable-hoc drags
   //This makes it possible to act on any List[Todo] using an OptionalIDelta or an OptionalMatchDelta
-  implicit val listOfTodoDeltaDecoder = optionalI[Todo] or optionalMatch[Todo, FindTodoById]
+  implicit val listOfTodoDeltaDecoder = value[List[Todo]] or optionalI[Todo] or optionalMatch[Todo, FindTodoById]
 
   implicit val todoListDeltaDecoder =
       value[TodoList] or lensN(TodoList.name) or lensN(TodoList.items) or lensN(TodoList.priority) or lensN(TodoList.color) or action[TodoList, TodoListAction]
