@@ -171,13 +171,20 @@ object DemoViews {
   val TodoItemSummaryView = cursorPView[Todo, Pages[TodoPage]]("TodoItemSummaryView"){
     cp => {
       val item = cp.model
+      //FIXME make this extract the required list id from Pages
       val toItem = Callback{} //cp.p.set(TodoProjectListItemPage(list.id))
       val idString = s"${item.id.value}"
-      val contents = SortableListItem.twoLines(
-        s"${item.name}",
-        ""
+//      val contents = SortableListItem.twoLines(
+//        s"${item.name}",
+//        ""
+//      )
+      val contents = textViewPlainLabel(cp.zoomN(Todo.name).label("Empty todo"))
+      val avatar = <.div(
+        ^.paddingLeft := "8px",
+        booleanViewUnlabelled(cp.zoomN(Todo.completed))
       )
-      SortableListItem(toItem, avatarText((idString, MaterialColor.BlueGrey(500))), contents)
+
+      SortableListItem(toItem, avatar, contents)
     }
   }
 

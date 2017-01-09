@@ -59,14 +59,14 @@ object Breadcrumbs {
       .render_P(p =>
 
         <.div(
-          ^.width := "36px",
+          ^.width := "48px",
           ^.height := "20px",
           ^.position := "relative",
           MuiIconButton(
             style = js.Dynamic.literal(
               "position" -> "absolute",
               "top" -> "-12px",
-              "left" -> "-12px"
+              "left" -> "0px"
             ),
             onTouchTap = touch(p.callback)
           )(
