@@ -14,7 +14,6 @@ import org.rebeam.tree.view.pages.Pages
 import org.rebeam.tree.view.sortable.{SortableContainer, SortableElement, SortableView}
 
 import scala.scalajs.js
-import Mui.Styles.colors
 
 object DemoViews {
 
@@ -206,59 +205,44 @@ object DemoViews {
   val todoProjectListView = SortableContainer.wrap(TodoProjectList)
 
 
+  val todoProjectView = cursorPView[TodoProject, Pages[TodoPage]]("TodoProject") {
+    cp => {
+      val fab = MuiFloatingActionButton(
+        backgroundColor = MaterialColor.DeepOrange.a200,
+        mini = true,
+        onTouchTap = touch(cp.act(TodoProjectAction.CreateTodoList(Moment(0)): TodoProjectAction))
+      )(Mui.SvgIcons.ContentAdd()())
+
+      val title = <.div (
+        ^.paddingTop := "64px",
+        textViewHero(cp.zoomN(TodoProject.name).label("Project name"))
+      )
+
+      val contents = <.div(
+        MuiSubheader(inset = true)("Lists"),
+        todoProjectListView(
+          SortableContainer.Props(
+            onSortEnd = p => cp.zoomN(TodoProject.lists).set(p.updatedList(cp.model.lists)),
+            useDragHandle = true,
+            helperClass = "react-sortable-handler"
+          )
+        )(cp.zoomN(TodoProject.lists).withP(cp.p))
+      )
+
+      TitleBar(MaterialColor.BlueGrey(500), 128, Some(fab), Some(title), Some(contents))
+    }
+  }
+
+
   // This combines and stores the url and renderer, and will then produce a new element per page. This avoids
   // changing state when changing pages, so we keep the same websocket etc.
-  val todoProjectView = cursorPView[TodoProject, Pages[TodoPage]]("TodoProject") {
+  val todoProjectPagesView = cursorPView[TodoProject, Pages[TodoPage]]("TodoProject") {
     cp => {
       <.div(
         cp.p.current match {
 
           case TodoProjectPage =>
-            <.div(
-              <.div(
-                ^.position := "fixed",
-                ^.backgroundColor := Mui.Styles.colors.blueGrey500.toString,
-                //                ^.boxSizing := "border-box",
-                ^.boxShadow := "rgba(0, 0, 0, 0.117647) 0px 1px 6px, rgba(0, 0, 0, 0.117647) 0px 1px 4px",
-                ^.width := "100%",
-                ^.zIndex := "1100",
-                ^.display := "flex",
-                ^.height := "128px",
-                <.div(
-                  ^.width := "72px",
-                  ^.height := "16px",
-                  ^.position := "relative",
-                  <.div(
-                    ^.position := "absolute",
-                    ^.left := "16px",
-                    ^.top := "108px",
-                    MuiFloatingActionButton(
-                      backgroundColor = MaterialColor.DeepOrange.a200,
-                      mini = true,
-                      onTouchTap = touch(cp.act(TodoProjectAction.CreateTodoList(Moment(0)): TodoProjectAction))
-                    )(Mui.SvgIcons.ContentAdd()())
-                  )
-                ),
-                <.div(
-                  //                  ^.paddingTop := "56px",
-                  ^.paddingTop := "64px",
-                  textViewHero(cp.zoomN(TodoProject.name).label("Project name"))
-                )
-              ),
-
-              // Contents
-              <.div(
-                ^.paddingTop := "128px",
-                MuiSubheader(inset = true)("Lists"),
-                todoProjectListView(
-                  SortableContainer.Props(
-                    onSortEnd = p => cp.zoomN(TodoProject.lists).set(p.updatedList(cp.model.lists)),
-                    useDragHandle = true,
-                    helperClass = "react-sortable-handler"
-                  )
-                )(cp.zoomN(TodoProject.lists).withP(cp.p))
-              )
-            )
+            todoProjectView(cp)
 
           case TodoProjectListPage(listId) =>
             val listCursor = cp.zoomN(TodoProject.lists).zoomMatch(FindTodoListById(listId))
@@ -291,7 +275,7 @@ object DemoViews {
   // This combines and stores the url and renderer, and will then produce a new element per page. This avoids
   // changing state when changing pages, so we keep the same websocket etc.
   val todoProjectViewFactory = ServerRootComponent.factory[TodoProject, Pages[TodoPage]](noTodoProject, "api/todoproject") {
-    todoProjectView(_)
+    todoProjectPagesView(_)
   }
 
 }
