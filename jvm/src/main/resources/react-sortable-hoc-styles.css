@@ -45,10 +45,10 @@
     padding-left: 16px;
 }
 
-.react-sortable-list {
+/*.react-sortable-list {
     position: relative;
     z-index: 0;
     background-color: #F3F3F3;
-    /*border-top: 1px solid #EEE;*/
     outline: none;
-}
+    -webkit-overflow-scrolling: touch;
+}*/

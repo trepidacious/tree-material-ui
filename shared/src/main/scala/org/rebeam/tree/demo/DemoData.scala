@@ -12,6 +12,8 @@ import DeltaCodecs._
 import io.circe.generic.JsonCodec
 import org.rebeam.tree.sync.Sync.ModelIdGen
 
+import scala.collection.mutable.ListBuffer
+
 object DemoData {
 
   @JsonCodec
@@ -136,6 +138,23 @@ object DemoData {
     case class DeleteTodoById(id: IdOf[Todo]) extends TodoListAction {
       def apply(l: TodoList): TodoList = l.copy(items = l.items.filterNot(_.id == id))
     }
+
+    case class TodoIndexChange(oldIndex: Int, newIndex: Int) extends TodoListAction {
+      def updatedList[A](l: List[A]) = {
+        if (oldIndex < 0 || oldIndex >= l.size || newIndex < 0 || newIndex >= l.size) {
+          l
+        } else {
+          val lb = ListBuffer(l: _*)
+          val e = lb.remove(oldIndex)
+          lb.insert(newIndex, e)
+          lb.toList
+        }
+      }
+      def apply(p: TodoList): TodoList = {
+        p.copy(items = updatedList(p.items))
+      }
+    }
+
   }
 
   @JsonCodec
@@ -174,6 +193,23 @@ object DemoData {
     case class DeleteListById(id: IdOf[TodoList]) extends TodoProjectAction {
       def apply(p: TodoProject): TodoProject = p.copy(lists = p.lists.filterNot(_.id == id))
     }
+
+    case class ListIndexChange(oldIndex: Int, newIndex: Int) extends TodoProjectAction {
+      def updatedList[A](l: List[A]) = {
+        if (oldIndex < 0 || oldIndex >= l.size || newIndex < 0 || newIndex >= l.size) {
+          l
+        } else {
+          val lb = ListBuffer(l: _*)
+          val e = lb.remove(oldIndex)
+          lb.insert(newIndex, e)
+          lb.toList
+        }
+      }
+      def apply(p: TodoProject): TodoProject = {
+        p.copy(lists = updatedList(p.lists))
+      }
+    }
+
   }
 
   //Works with Cursor.zoomMatch to zoom to a particular TodoList

@@ -6,12 +6,14 @@ import org.rebeam.tree.view.View._
 import org.rebeam.tree.view._
 import org.rebeam.tree.view.Cursor._
 import DemoData._
+import chandu0101.scalajs.react.components.ReactInfinite
 import chandu0101.scalajs.react.components.materialui._
 import japgolly.scalajs.react._
 import org.rebeam.tree.demo.DemoData.Priority._
 import org.rebeam.tree.demo.DemoRoutes._
-import org.rebeam.tree.view.pages.{Pages, Breadcrumbs}
-import org.rebeam.tree.view.sortable.{SortableContainer, SortableElement, SortableListItem, SortableView}
+import org.rebeam.tree.view.infinite.Infinite
+import org.rebeam.tree.view.pages.{Breadcrumbs, Pages}
+import org.rebeam.tree.view.sortable.{SortableContainer, SortableElement, SortableListItem}
 
 import scala.scalajs.js
 
@@ -154,15 +156,14 @@ object DemoViews {
   val SortableTodoListSummaryView = SortableElement.wrap(TodoListSummaryView)
 
   val TodoListsView = cursorPView[List[TodoList], Pages[TodoPage]]("TodoListView") {
-    cp => {
-      <.div(
-        ^.className := "react-sortable-list",
+    cp =>
         // FIXME use zoomAllMatchesP
-        cp.zoomAllIP.zipWithIndex.map {
-          case (listCP, index) => SortableTodoListSummaryView(SortableElement.Props(key = listCP.model.id.value, index = index))(listCP)
-        }
-      )
-    }
+        Infinite(elementHeight = 60, useWindowAsScrollContainer = true)(
+          MuiSubheader(inset = true, style = js.Dynamic.literal("height" -> "60px"))("Todo lists")
+          :: cp.zoomAllMatchesP(l => FindTodoListById(l.id)).zipWithIndex.map {
+            case (listCP, index) => SortableTodoListSummaryView(SortableElement.Props(key = listCP.model.id.value, index = index))(listCP)
+          }
+        )
   }
 
   val SortableTodoListsView = SortableContainer.wrap(TodoListsView)
@@ -191,21 +192,13 @@ object DemoViews {
   val SortableTodoItemSummaryView = SortableElement.wrap(TodoItemSummaryView)
 
   val TodoItemsView = cursorPView[List[Todo], Pages[TodoPage]]("TodoItemsView") {
-    cp => {
-      <.div(
-        ^.className := "react-sortable-list",
-        ^.overflowY := "auto",
-        ^.width := "100%",
-//        ^.height := "400px",
-        ^.position := "absolute",
-        ^.top := "180px",
-        ^.bottom := "0px",
-        // FIXME use zoomAllMatchesP
-        cp.zoomAllIP.zipWithIndex.map {
+    cp =>
+      Infinite(elementHeight = 60, useWindowAsScrollContainer = true)(
+        MuiSubheader(inset = true, style = js.Dynamic.literal("height" -> "60px"))("Todo items")
+          :: cp.zoomAllMatchesP(t => FindTodoById(t.id)).zipWithIndex.map {
           case (todoCP, index) => SortableTodoItemSummaryView(SortableElement.Props(key = todoCP.model.id.value, index = index))(todoCP)
         }
       )
-    }
   }
 
   val SortableTodoItemsView = SortableContainer.wrap(TodoItemsView)
@@ -223,10 +216,9 @@ object DemoViews {
       )
 
       val contents = <.div(
-        MuiSubheader(inset = true)("Lists"),
         SortableTodoListsView(
           SortableContainer.Props(
-            onSortEnd = p => cp.zoomN(TodoProject.lists).set(p.updatedList(cp.model.lists)),
+            onSortEnd = p => cp.act(TodoProjectAction.ListIndexChange(p.oldIndex, p.newIndex): TodoProjectAction),
             useDragHandle = true,
             helperClass = "react-sortable-handler",
             useWindowAsScrollContainer = true
@@ -261,12 +253,12 @@ object DemoViews {
 
               val contents =
                 <.div(
-                  MuiSubheader(inset = true)("Todo items"),
                   SortableTodoItemsView(
                     SortableContainer.Props(
-                      onSortEnd = p => cp.zoomN(TodoList.items).set(p.updatedList(cp.model.items)),
+                      onSortEnd = p => cp.act(TodoListAction.TodoIndexChange(p.oldIndex, p.newIndex): TodoListAction),
                       useDragHandle = true,
-                      helperClass = "react-sortable-handler"
+                      helperClass = "react-sortable-handler",
+                      useWindowAsScrollContainer = true
                     )
                   )(cp.zoomN(TodoList.items).withP(cp.p))
                 )

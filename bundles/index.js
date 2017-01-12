@@ -42,3 +42,7 @@ window.Sortable = require('react-sortable-hoc');
 window.SortableContainer = window.Sortable.SortableContainer;
 window.SortableElement = window.Sortable.SortableElement;
 window.SortableHandle = window.Sortable.SortableHandle;
+
+// rebeam: react-infinite
+var Infinite = require('react-infinite');
+window.Infinite = Infinite;

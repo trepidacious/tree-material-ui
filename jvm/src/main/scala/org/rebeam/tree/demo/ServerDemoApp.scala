@@ -34,7 +34,7 @@ object ServerDemoApp extends ServerApp {
       Moment(time),
       Priority.Medium,
       MaterialColor.backgroundForIndex(id.value - 1),
-      (1 to 20).map(i => {
+      (1 to itemCount).map(i => {
         Todo(
           IdOf[Todo](i), "Item " + i, Moment(time - 60000 * (10 - i)),
           priority = i % 3 match {
@@ -44,7 +44,7 @@ object ServerDemoApp extends ServerApp {
           }
         )
       }).toList,
-      IdOf[Todo](11)
+      IdOf[Todo](itemCount + 1)
     )
   }
 
@@ -52,7 +52,8 @@ object ServerDemoApp extends ServerApp {
 
   val todoListStore = new ServerStore(todoList)
 
-  val listCount = 10
+  val listCount = 1000
+  val itemCount = 10
 
   val todoProject = TodoProject(TodoProjectId.first, "Todo project", MaterialColor.Indigo(), (1 to listCount).map(i => todoListExample(IdOf[TodoList](i))).toList, IdOf[TodoList](listCount + 1))
 
