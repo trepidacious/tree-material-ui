@@ -3,8 +3,6 @@ package org.rebeam.tree.view
 import chandu0101.scalajs.react.components.materialui.{Mui, MuiFloatingActionButton}
 import japgolly.scalajs.react.{Callback, ReactComponentB, ReactElement}
 import japgolly.scalajs.react.vdom.prefix_<^._
-import org.rebeam.tree.Moment
-import org.rebeam.tree.demo.DemoData.TodoListAction
 import org.rebeam.tree.view.View._
 
 import scala.scalajs.js
@@ -17,6 +15,8 @@ object TitleBar {
     .render_P(p => {
 
       <.div(
+        ^.width := "100%",
+
         <.div(
           ^.position := "fixed",
           ^.backgroundColor := p.color,
@@ -43,7 +43,8 @@ object TitleBar {
 
         // Contents
         <.div(
-          ^.paddingTop := s"${p.height}px"
+          ^.paddingTop := s"${p.height}px",
+          ^.width := "100%"
         )(p.contents)
       )
 

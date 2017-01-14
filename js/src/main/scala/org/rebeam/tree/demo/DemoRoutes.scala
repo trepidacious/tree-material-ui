@@ -12,16 +12,22 @@ object DemoRoutes {
 
   sealed trait Page
   case object HomePage          extends Page
-  case object TodoListPage      extends Page
   case object AddressPage       extends Page
 
   sealed trait TodoPage extends Page
 
-  case object TodoProjectPage extends TodoPage
-  case class TodoProjectListPage(listId: IdOf[TodoList]) extends TodoPage
-  case class TodoProjectListItemPage(listId: IdOf[TodoList], todoId: IdOf[Todo]) extends TodoPage
+  sealed trait PageWithTodoProjectList extends TodoPage {
+    def listId: IdOf[TodoList]
+    def toItem(todoId: IdOf[Todo]) = TodoProjectListItemPage(listId, todoId)
+  }
 
-  val title = "Tree Material UI"
+  sealed trait PageWithTodoProjectListItem extends PageWithTodoProjectList {
+    def todoId: IdOf[Todo]
+  }
+
+  case object TodoProjectPage extends TodoPage
+  case class TodoProjectListPage(listId: IdOf[TodoList]) extends PageWithTodoProjectList
+  case class TodoProjectListItemPage(listId: IdOf[TodoList], todoId: IdOf[Todo]) extends PageWithTodoProjectListItem
 
 //    .componentWillReceiveProps(s => Callback{println(s"Current ${s.currentProps}, next ${s.nextProps}")})
 
@@ -29,7 +35,7 @@ object DemoRoutes {
     import dsl._
 
     //Provide a renderer for a view factory using Pages.
-    def dynRenderP[P <: Page](g: Pages[P] => ReactElement): P => Renderer =
+    def dynRenderP[P <: Page](g: Pages[P, P] => ReactElement): P => Renderer =
       p => Renderer(r => g(Pages(p, r.narrow[P])))
 
     def idOf[A] = int.pmap(i => Some(IdOf[A](i)))(_.value)
@@ -54,6 +60,8 @@ object DemoRoutes {
       .verify(HomePage, AddressPage, TodoProjectPage)
   }
 
+
+
   val navs = Map(
     "Home" -> HomePage,
     "Todo List" -> TodoProjectPage,
@@ -64,7 +72,7 @@ object DemoRoutes {
   val navigation = Navigation.apply[Page]
 
   def layout(ctl: RouterCtl[Page], r: Resolution[Page]) = {
-    val np = Navigation.Props(ctl, r, r.page, navs, title)
+    val np = Navigation.Props(ctl, r, r.page, navs)
     navigation(np)
   }
 

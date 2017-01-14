@@ -10,7 +10,7 @@ import scala.scalajs.js
 
 object Navigation {
 
-  case class Props[P](routerCtl: RouterCtl[P], resolution: Resolution[P], page: P, navs: Map[String, P], title: String)
+  case class Props[P](routerCtl: RouterCtl[P], resolution: Resolution[P], page: P, navs: Map[String, P])
 
   case class State(drawerOpen: Boolean)
 
@@ -86,7 +86,7 @@ object Navigation {
   //Reusable if all fields are equal except routerCtl, where we use its own reusability
   implicit def navPropsReuse[P]: Reusability[Props[P]] = Reusability.fn{
     case (a, b) if a eq b => true // First because most common case and fastest
-    case (a, b) if a.page == b.page && a.navs == b.navs && a.title == b.title && a.resolution == b.resolution => RouterCtl.reusability[P].test(a.routerCtl, b.routerCtl)
+    case (a, b) if a.page == b.page && a.navs == b.navs && a.resolution == b.resolution => RouterCtl.reusability[P].test(a.routerCtl, b.routerCtl)
     case _ => false
   }
 
