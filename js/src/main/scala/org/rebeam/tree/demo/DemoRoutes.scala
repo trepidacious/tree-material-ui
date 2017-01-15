@@ -1,12 +1,11 @@
 package org.rebeam.tree.demo
 
-import japgolly.scalajs.react.{ReactComponentB, ReactElement, _}
-import japgolly.scalajs.react.extra.router.StaticDsl.{Route, RouteB}
+import japgolly.scalajs.react._
+import japgolly.scalajs.react.extra.router.StaticDsl._
 import japgolly.scalajs.react.extra.router._
 import org.rebeam.tree.view.Navigation
 import org.rebeam.tree.view.pages._
 import org.rebeam.tree.demo.DemoData._
-import japgolly.scalajs.react.vdom.prefix_<^._
 
 object DemoRoutes {
 
@@ -49,10 +48,9 @@ object DemoRoutes {
     (trimSlashes
       | staticRoute(root,   HomePage) ~> render(DemoViews.homeView())
       | staticRoute("#address", AddressPage) ~> render(DemoViews.addressView)
-//      | staticRoute("#todolist", TodoListPage) ~> render(DemoViews.todoListView)
-      | dynamicRouteCT(todoProjectRoute) ~> dynRenderP[TodoPage](DemoViews.todoProjectViewFactory)
-      | dynamicRouteCT(todoProjectListRoute) ~> dynRenderP[TodoPage](DemoViews.todoProjectViewFactory)
-      | dynamicRouteCT(todoProjectListItemRoute) ~> dynRenderP[TodoPage](DemoViews.todoProjectViewFactory)
+      | dynamicRouteCT(todoProjectRoute) ~> dynRenderP[TodoPage](TodoPagesViews.todoProjectViewFactory)
+      | dynamicRouteCT(todoProjectListRoute) ~> dynRenderP[TodoPage](TodoPagesViews.todoProjectViewFactory)
+      | dynamicRouteCT(todoProjectListItemRoute) ~> dynRenderP[TodoPage](TodoPagesViews.todoProjectViewFactory)
       )
 
       .notFound(redirectToPage(HomePage)(Redirect.Replace))
@@ -67,7 +65,6 @@ object DemoRoutes {
     "Todo List" -> TodoProjectPage,
     "Address" -> AddressPage
   )
-
 
   val navigation = Navigation.apply[Page]
 
