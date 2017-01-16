@@ -18,10 +18,12 @@ object DemoRoutes {
   sealed trait PageWithTodoProjectList extends TodoPage {
     def listId: IdOf[TodoList]
     def toItem(todoId: IdOf[Todo]) = TodoProjectListItemPage(listId, todoId)
+    def back: TodoPage = TodoProjectPage
   }
 
   sealed trait PageWithTodoProjectListItem extends PageWithTodoProjectList {
     def todoId: IdOf[Todo]
+    override def back: TodoPage = TodoProjectListPage(listId)
   }
 
   case object TodoProjectPage extends TodoPage

@@ -68,9 +68,15 @@ object DemoData {
   @JsonCodec
   sealed trait Priority
   object Priority {
-    object Low extends Priority
-    object Medium extends Priority
-    object High extends Priority
+    object Low extends Priority {
+      override def toString = "low"
+    }
+    object Medium extends Priority {
+      override def toString = "medium"
+    }
+    object High extends Priority {
+      override def toString = "high"
+    }
   }
 
   @JsonCodec

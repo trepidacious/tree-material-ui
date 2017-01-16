@@ -74,10 +74,10 @@ object Navigation {
             }
           )
         ),
-        <.div(
+//        <.div(
 //            ^.paddingTop    := "64px",
             p.resolution.render()
-        )
+//        )
       )
     }
   }

@@ -7,6 +7,9 @@
 // rebeam: We can require any of the dependencies in package.json
 window.ReactDOM = require('react-dom');
 window.React    = require('react');
+window.React.addons = {};
+window.React.addons.CSSTransitionGroup = require('react-addons-css-transition-group');
+
 
 // rebeam: Improves click/tap performance, see
 //   https://github.com/callemall/material-ui#react-tap-event-plugin

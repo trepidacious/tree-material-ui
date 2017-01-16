@@ -1,6 +1,7 @@
 package org.rebeam.tree.demo
 
 import chandu0101.scalajs.react.components.materialui._
+import japgolly.scalajs.react.Addons.ReactCssTransitionGroup
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.prefix_<^._
 import org.rebeam.tree.Moment
@@ -27,10 +28,9 @@ object TodoPagesViews {
         s"${list.name}",
         s"${list.items.size} item${if (list.items.size == 1) "" else "s"}"
       )
-      SortableListItem(toList, avatarText((idString, list.color)), contents)
+      SortableListItem(avatarText((idString, list.color)), contents, toList)
     }
   }
-
   val SortableTodoListSummaryView = SortableElement.wrap(TodoListSummaryView)
 
   val TodoListsView = cursorPView[List[TodoList], Pages[TodoPage, TodoPage]]("TodoListView") {
@@ -43,32 +43,29 @@ object TodoPagesViews {
           }
         )
   }
-
   val SortableTodoListsView = SortableContainer.wrap(TodoListsView)
+
+
 
 
   val TodoItemSummaryView = cursorPView[Todo, Pages[PageWithTodoProjectList, TodoPage]]("TodoItemSummaryView"){
     cp => {
       val item = cp.model
-      //FIXME make this extract the required list id from Pages
-      val toItem = Callback{} //cp.p.set(TodoProjectListItemPage(list.id))
-      val idString = s"${item.id.value}"
-//      val contents = SortableListItem.twoLines(
-//        s"${item.name}",
-//        ""
-//      )
-      val contents = textViewPlainLabel(cp.zoomN(Todo.name).label("Empty todo"))
+      val toItem = cp.p.set(cp.p.current.toItem(item.id))
+//      val idString = s"${item.id.value}"
+      val contents = SortableListItem.twoLines(
+        s"${item.name}",
+        s"Priority ${item.priority}"
+      )
       val avatar = <.div(
         ^.paddingLeft := "8px",
         booleanViewUnlabelled(cp.zoomN(Todo.completed))
       )
 
-      SortableListItem(toItem, avatar, contents)
+      SortableListItem(avatar, contents, onClickContents = toItem)
     }
   }
-
   val SortableTodoItemSummaryView = SortableElement.wrap(TodoItemSummaryView)
-
   val TodoItemsView = cursorPView[List[Todo], Pages[PageWithTodoProjectList, TodoPage]]("TodoItemsView") {
     cp =>
       Infinite(elementHeight = 60, containerHeight = 400)( //useWindowAsScrollContainer = true)(
@@ -78,10 +75,13 @@ object TodoPagesViews {
         }
       )
   }
-
   val SortableTodoItemsView = SortableContainer.wrap(TodoItemsView)
 
+
+
   val TodoProjectEmptyView = TitleBar(MaterialColor.BlueGrey(500), 128, None, Some(MuiCircularProgress(mode = DeterminateIndeterminate.indeterminate, color = Mui.Styles.colors.white)()), None)
+
+
 
   val TodoProjectView = cursorPView[TodoProject, Pages[TodoPage, TodoPage]]("TodoProjectView") {
     cp => {
@@ -107,6 +107,8 @@ object TodoPagesViews {
       TitleBar(MaterialColor.BlueGrey(500), 128, Some(fab), Some(title), Some(contents))
     }
   }
+
+
 
   val TodoListView = cursorPView[TodoList, Pages[PageWithTodoProjectList, TodoPage]]("TodoListView") {
     cp => {
@@ -137,6 +139,27 @@ object TodoPagesViews {
     }
   }
 
+
+  val TodoView = cursorPView[Todo, Pages[TodoProjectListItemPage, TodoPage]]("TodoView") {
+    cp => {
+      val title =
+        Breadcrumbs.container(
+          //                  Breadcrumbs.element(s"${projectCP.model.name}", projectCP.p.set(TodoProjectPage)),
+          //                  Breadcrumbs.chevron,
+          Breadcrumbs.back(cp.p.set(cp.p.current.back)),
+          textViewHero(cp.zoomN(Todo.name).label("Todo name"))
+        )
+
+      val contents =
+        <.div(
+          "Contents todo!"
+        )
+
+      TitleBar(MaterialColor.BlueGrey(500), 128, None, Some(title), Some(contents))
+    }
+  }
+
+
   val TodoProjectPagesView = cursorPView[TodoProject, Pages[TodoPage, TodoPage]]("TodoProjectPagesView") {
     cp => {
       val page = cp.p.current
@@ -148,27 +171,42 @@ object TodoPagesViews {
         cp.zoomN(TodoProject.lists).zoomMatch(FindTodoListById(p.listId))
       )
 
+      val item = cp.zoomCT[Todo, TodoProjectListItemPage](p =>
+        cp.zoomN(TodoProject.lists).zoomMatch(FindTodoListById(p.listId)).flatMap(_.zoomN(TodoList.items).zoomMatch(FindTodoById(p.todoId)))
+      )
+
       val panes = List[Option[ReactElement]](
-        Some(TodoProjectView(cp)),
-        list.map(TodoListView(_)),
-        page match {
-          case TodoProjectListItemPage(listId, todoId) => Some(
-            <.div(
-              <.h2("Todo project"),
-              textView(cp.zoomN(TodoProject.name).label("Name")),
-              <.h3(s"Todo list $listId"),
-              <.h3(s"Todo item $todoId")
-            )
-          )
-          case _ => None
-        }
+        Some(TodoProjectView.withKey(0)(cp)),
+        list.map(TodoListView.withKey(1)(_)),
+        item.map(TodoView.withKey(2)(_))
       ).flatten
 
+      // We get an unavoidable extra div from the ReactCssTransitionGroup,
+      // so we set a class to allow us to style it with flex etc. using CSS
       <.div(
-        ^.position := "fixed",
-        ^.width := "100%",
-        ^.display := "flex"
-      )(panes.map(p => <.div(^.width:="100%", p)))
+//        ^.position := "fixed",
+//        ^.width := "100%",
+        ^.className := "tree-pages-view"
+      )(
+        ReactCssTransitionGroup(
+          "tree-pages-view",
+          appearTimeout = 500,
+          leaveTimeout = 500,
+          enterTimeout = 500,
+          component = "div")(
+            <.div(
+              ^.top:="0px",
+              ^.width:= "100%",
+              ^.height:= "100%",
+              ^.position:= "absolute",
+              ^.top:= "0",
+              ^.left:= "0",
+              ^.key:=panes.last.key,
+              panes.last
+            )
+//          panes
+          )
+      )
     }
   }
 

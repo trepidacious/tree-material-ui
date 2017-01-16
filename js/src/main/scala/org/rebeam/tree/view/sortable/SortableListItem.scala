@@ -5,7 +5,7 @@ import japgolly.scalajs.react.{Callback, ReactComponentB, ReactElement}
 
 object SortableListItem {
 
-  case class Props(onClick: Callback, leftIcon: ReactElement, content: ReactElement)
+  case class Props(leftIcon: ReactElement, content: ReactElement, onClick: Callback, onClickContents: Callback)
 
   val component = ReactComponentB[Props]("TitleBar")
     .render_P(p => {
@@ -20,6 +20,7 @@ object SortableListItem {
           p.leftIcon
         ),
         <.div(
+          ^.onClick --> p.onClickContents,
           ^.flex := "1 1 auto",
           p.content
         ),
@@ -32,8 +33,8 @@ object SortableListItem {
     })
     .build
 
-  def apply(onClick: Callback, leftIcon: ReactElement, content: ReactElement) =
-    component(Props(onClick, leftIcon, content))
+  def apply(leftIcon: ReactElement, content: ReactElement, onClick: Callback = Callback.empty, onClickContents: Callback = Callback.empty) =
+    component(Props(leftIcon, content, onClick, onClickContents))
 
   def twoLines(line1: String, line2: String) =
     <.div(
