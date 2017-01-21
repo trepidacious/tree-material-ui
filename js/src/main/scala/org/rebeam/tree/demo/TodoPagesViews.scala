@@ -190,9 +190,9 @@ object TodoPagesViews {
       )(
         ReactCssTransitionGroup(
           "tree-pages-view",
-          appearTimeout = 500,
-          leaveTimeout = 500,
-          enterTimeout = 500,
+          appearTimeout = 550,
+          leaveTimeout = 550,
+          enterTimeout = 550,
           component = "div")(
             <.div(
               ^.top:="0px",

@@ -14,3 +14,11 @@ A quick tour of the important parts:
 3. The `assets` directory is used for all bundles produced by WebPack.
 4. Scalajs compiler is configured to output fastopt and opt js files to `assets` as well.
 5. index.html contains minimal styles and html in javascript to display a loading screen, this is replaced by React UI when scalajs script runs (which may take a little while owing to size).
+
+## TODO
+
+- [ ] Direction of transition of pages set by relationship between them. Use a comparison typeclass that yields a direction from two pages. Provide an instance working on pages that implement "back".
+- [ ] Look at shadows - can we make them appear underneath (lower z) the thing casting them.
+- [ ] Responsive pages - provide a "no effort" implementation that displays layers alongside each other, animating them dropping in from above on enter, and down on leave.
+- [ ] ServerRootComponent undo/redo. If we do this, also include monitoring of the P in CursorP, so that we can restore the page that was displayed when the undone/redone action occurred.
+- [ ] Focus in pages. When going back from a detail page, the master page could remember the displayed detail "index" as a "focus". This could be used to e.g. scroll to that element in a list, so that when navigating backwards, we see the detail we just left in the master list. This is a lighter alternative to just keeping the master view around while displaying detail, and would work well with undo/redo. Focus might or might not update with scrolling.

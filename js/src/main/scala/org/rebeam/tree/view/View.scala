@@ -38,6 +38,9 @@ object View {
   def cursorPView[A, P](name: String)(render: CursorP[A, P] => ReactElement) =
     ReactComponentB[CursorP[A, P]](name).render_P(render).configure(Reusability.shouldComponentUpdate).build
 
+  def cursorPView[A, P](name: String, f: ComponentWillReceiveProps[CursorP[A, P], Unit, Unit, TopNode] => Callback)(render: CursorP[A, P] => ReactElement) =
+    ReactComponentB[CursorP[A, P]](name).render_P(render).componentWillReceiveProps(f).configure(Reusability.shouldComponentUpdate).build
+
   def staticView(name: String)(e: ReactElement) = ReactComponentB[Unit](name)
     .render(_ => e)
     .build
