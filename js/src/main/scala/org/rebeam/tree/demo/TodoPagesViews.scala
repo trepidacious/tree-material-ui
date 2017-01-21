@@ -1,8 +1,11 @@
 package org.rebeam.tree.demo
 
+import cats.data.Xor
 import chandu0101.scalajs.react.components.materialui._
+import io.circe.Encoder
 import japgolly.scalajs.react.Addons.ReactCssTransitionGroup
 import japgolly.scalajs.react._
+import japgolly.scalajs.react.extra.Reusability
 import japgolly.scalajs.react.vdom.prefix_<^._
 import org.rebeam.tree.Moment
 import org.rebeam.tree.demo.DemoData._
@@ -16,6 +19,7 @@ import org.rebeam.tree.view.pages.{Breadcrumbs, Pages}
 import org.rebeam.tree.view.sortable.{SortableContainer, SortableElement, SortableListItem}
 
 import scala.scalajs.js
+import scala.scalajs.js.UndefOr
 
 object TodoPagesViews {
 
@@ -159,11 +163,75 @@ object TodoPagesViews {
     }
   }
 
+  object PagesView {
 
-  val TodoProjectPagesView = cursorPView[TodoProject, Pages[TodoPage, TodoPage]]("TodoProjectPagesView") {
-    cp => {
-      val page = cp.p.current
+    sealed trait TransitionDirection {
+      def className: String
+    }
+    object TransitionDirection {
+      case object Left extends TransitionDirection {
+        def className = "left"
+      }
+      case object Right extends TransitionDirection {
+        def className = "right"
+      }
+      case object Down extends TransitionDirection {
+        def className = "down"
+      }
+      case object Up extends TransitionDirection {
+        def className = "up"
+      }
+    }
 
+    case class State(direction: TransitionDirection)
+
+    val stateReuse: Reusability[State] = Reusability.byRefOr_==
+
+    class Backend[M, P](scope: BackendScope[CursorP[M, Pages[P, P]], State])(renderToList: CursorP[M, Pages[P, P]] => List[ReactElement]) {
+
+      def render(cp: CursorP[M, Pages[P, P]], state: State): ReactElement = {
+        val panes = renderToList(cp)
+        // We get an unavoidable extra div from the ReactCssTransitionGroup,
+        // so we set a class to allow us to style it with flex etc. using CSS
+        <.div(^.className := "tree-pages-view")(
+          ReactCssTransitionGroup(
+            "tree-pages-view",
+            appearTimeout = 550,
+            leaveTimeout = 550,
+            enterTimeout = 550,
+            component = "div")(
+            <.div(
+              ^.top:="0px",
+              ^.width:= "100%",
+              ^.height:= "100%",
+              ^.position:= "absolute",
+              ^.top:= "0",
+              ^.left:= "0",
+              ^.key:=panes.last.key,
+              panes.last
+            )
+          )
+        )
+      }
+    }
+
+    def apply[M, P](name: String)(renderToList: CursorP[M, Pages[P, P]] => List[ReactElement]) = ReactComponentB[CursorP[M, Pages[P, P]]](name)
+      .getInitialState[State](_=> State(TransitionDirection.Left))
+      .backend(new Backend[M, P](_)(renderToList))
+      .render(s => s.backend.render(s.props, s.state))
+      .componentWillReceiveProps(
+//        scope => if (scope.currentProps.model != scope.nextProps.model) {
+//          scope.$.modState(s => (s._1, true))
+//        } else {
+          scope => Callback.empty
+//        }
+      )
+      .configure(Reusability.shouldComponentUpdate(cursorPReuse, stateReuse))
+      .build
+  }
+
+  val TodoProjectPagesView = PagesView[TodoProject, TodoPage]("TodoProjectPagesView"){
+    cp =>
       // Zoom from project to list. If Page is a PageWithTodoProjectList, we
       // will produce a cursor whose model is the specified list, and where
       // Pages have current page type PageWithTodoProjectList
@@ -175,39 +243,11 @@ object TodoPagesViews {
         cp.zoomN(TodoProject.lists).zoomMatch(FindTodoListById(p.listId)).flatMap(_.zoomN(TodoList.items).zoomMatch(FindTodoById(p.todoId)))
       )
 
-      val panes = List[Option[ReactElement]](
+      List[Option[ReactElement]](
         Some(TodoProjectView.withKey(0)(cp)),
         list.map(TodoListView.withKey(1)(_)),
         item.map(TodoView.withKey(2)(_))
       ).flatten
-
-      // We get an unavoidable extra div from the ReactCssTransitionGroup,
-      // so we set a class to allow us to style it with flex etc. using CSS
-      <.div(
-//        ^.position := "fixed",
-//        ^.width := "100%",
-        ^.className := "tree-pages-view"
-      )(
-        ReactCssTransitionGroup(
-          "tree-pages-view",
-          appearTimeout = 550,
-          leaveTimeout = 550,
-          enterTimeout = 550,
-          component = "div")(
-            <.div(
-              ^.top:="0px",
-              ^.width:= "100%",
-              ^.height:= "100%",
-              ^.position:= "absolute",
-              ^.top:= "0",
-              ^.left:= "0",
-              ^.key:=panes.last.key,
-              panes.last
-            )
-//          panes
-          )
-      )
-    }
   }
 
   // This combines and stores the url and renderer, and will then produce a new element per page. This avoids
