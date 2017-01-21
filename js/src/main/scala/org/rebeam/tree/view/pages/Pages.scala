@@ -52,6 +52,5 @@ object Pages {
     def zoomCT[N, D <: C] = new Zoomer[N, D]
 
   }
-
 }
 

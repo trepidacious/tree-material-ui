@@ -15,7 +15,7 @@ import org.rebeam.tree.view.View._
 import org.rebeam.tree.view._
 import org.rebeam.tree.view.infinite.Infinite
 import org.rebeam.tree.view.pages.Pages._
-import org.rebeam.tree.view.pages.{Breadcrumbs, Pages}
+import org.rebeam.tree.view.pages.{Breadcrumbs, Pages, PagesToTransition, PagesTransition}
 import org.rebeam.tree.view.sortable.{SortableContainer, SortableElement, SortableListItem}
 
 import scala.scalajs.js
@@ -165,29 +165,11 @@ object TodoPagesViews {
 
   object PagesView {
 
-    sealed trait TransitionDirection {
-      def className: String
-    }
-    object TransitionDirection {
-      case object Left extends TransitionDirection {
-        def className = "left"
-      }
-      case object Right extends TransitionDirection {
-        def className = "right"
-      }
-      case object Down extends TransitionDirection {
-        def className = "down"
-      }
-      case object Up extends TransitionDirection {
-        def className = "up"
-      }
-    }
-
-    case class State(direction: TransitionDirection)
+    case class State(direction: PagesTransition)
 
     val stateReuse: Reusability[State] = Reusability.byRefOr_==
 
-    class Backend[M, P](scope: BackendScope[CursorP[M, Pages[P, P]], State])(renderToList: CursorP[M, Pages[P, P]] => List[ReactElement]) {
+    class Backend[M, P](scope: BackendScope[CursorP[M, Pages[P, P]], State])(renderToList: CursorP[M, Pages[P, P]] => List[ReactElement])(transitions: PagesToTransition[P]) {
 
       def render(cp: CursorP[M, Pages[P, P]], state: State): ReactElement = {
         val panes = renderToList(cp)
@@ -195,7 +177,7 @@ object TodoPagesViews {
         // so we set a class to allow us to style it with flex etc. using CSS
         <.div(^.className := "tree-pages-view")(
           ReactCssTransitionGroup(
-            "tree-pages-view",
+            "tree-pages-view-" + state.direction.className,
             appearTimeout = 550,
             leaveTimeout = 550,
             enterTimeout = 550,
@@ -215,16 +197,12 @@ object TodoPagesViews {
       }
     }
 
-    def apply[M, P](name: String)(renderToList: CursorP[M, Pages[P, P]] => List[ReactElement]) = ReactComponentB[CursorP[M, Pages[P, P]]](name)
-      .getInitialState[State](_=> State(TransitionDirection.Left))
-      .backend(new Backend[M, P](_)(renderToList))
+    def apply[M, P](name: String)(renderToList: CursorP[M, Pages[P, P]] => List[ReactElement])(implicit transitions: PagesToTransition[P]) = ReactComponentB[CursorP[M, Pages[P, P]]](name)
+      .getInitialState[State](_=> State(PagesTransition.Left))
+      .backend(new Backend[M, P](_)(renderToList)(transitions))
       .render(s => s.backend.render(s.props, s.state))
       .componentWillReceiveProps(
-//        scope => if (scope.currentProps.model != scope.nextProps.model) {
-//          scope.$.modState(s => (s._1, true))
-//        } else {
-          scope => Callback.empty
-//        }
+        scope => scope.$.setState(State(transitions(scope.currentProps.p.current, scope.nextProps.p.current)))
       )
       .configure(Reusability.shouldComponentUpdate(cursorPReuse, stateReuse))
       .build

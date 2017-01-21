@@ -13,12 +13,14 @@ object DemoRoutes {
   case object HomePage          extends Page
   case object AddressPage       extends Page
 
-  sealed trait TodoPage extends Page
+  sealed trait TodoPage extends Page {
+    def back: TodoPage
+  }
 
   sealed trait PageWithTodoProjectList extends TodoPage {
     def listId: IdOf[TodoList]
     def toItem(todoId: IdOf[Todo]) = TodoProjectListItemPage(listId, todoId)
-    def back: TodoPage = TodoProjectPage
+    override def back: TodoPage = TodoProjectPage
   }
 
   sealed trait PageWithTodoProjectListItem extends PageWithTodoProjectList {
@@ -26,9 +28,17 @@ object DemoRoutes {
     override def back: TodoPage = TodoProjectListPage(listId)
   }
 
-  case object TodoProjectPage extends TodoPage
+  case object TodoProjectPage extends TodoPage {
+    override def back: TodoPage = TodoProjectPage
+  }
   case class TodoProjectListPage(listId: IdOf[TodoList]) extends PageWithTodoProjectList
   case class TodoProjectListItemPage(listId: IdOf[TodoList], todoId: IdOf[Todo]) extends PageWithTodoProjectListItem
+
+  implicit val transitions = new PagesToTransition[TodoPage] {
+    override def apply(from: TodoPage, to: TodoPage) = {
+      if (from == to.back) PagesTransition.Right else PagesTransition.Left
+    }
+  }
 
 //    .componentWillReceiveProps(s => Callback{println(s"Current ${s.currentProps}, next ${s.nextProps}")})
 
