@@ -1,5 +1,11 @@
 
-.tree-pages-view>div {
+/*
+ * tree-pages-view__outer-div is applied
+ * to the div holding the ReactCSSTransitionGroup-created div.
+ * We use this to set it up correctly to contain transitioning
+ * pages
+ */
+tree-pages-view__outer-div>div {
 /*    position: fixed;
     width: 100%;
     display: flex;*/
@@ -9,22 +15,18 @@
 
 }
 
-.tree-pages-view>single {
-    position: fixed;
-    width: 100%;
-}
 
-/* Enter & Leave */
+/* Enter and leave for leftwards movement*/
 
 /* Start of entering */
-.tree-pages-view-enter {
+.tree-pages-view__page--transition-left-enter {
   /*opacity: 0.01;*/
-  transform: translateX(100%);
-  -webkit-transform: translateX(100%);
+  transform: translateX(-100%);
+  -webkit-transform: translateX(-100%);
 }
 
 /* End of entering */
-.tree-pages-view-enter.tree-pages-view-enter-active {
+.tree-pages-view__page--transition-left-enter.tree-pages-view__page--transition-left-enter-active {
   /*opacity: 1;
   transition: opacity 500ms ease-in;*/
 
@@ -36,55 +38,14 @@
 }
 
 /* Start of leaving */
-.tree-pages-view-leave {
+.tree-pages-view__page--transition-left-leave {
   /*opacity: 1;*/
   transform: translateX(0%);
   -webkit-transform: translateX(0%);
 }
 
 /* End of leaving */
-.tree-pages-view-leave.tree-pages-view-leave-active {
-  /*opacity: 0.01;
-  transition: opacity 500ms ease-in;*/
-
-  transform: translateX(-100%);
-  -webkit-transform: translateX(-100%);
-
-  transition: transform 450ms cubic-bezier(0.445, 0.05, 0.55, 0.95);
-  -webkit-transition: transform 450ms cubic-bezier(0.445, 0.05, 0.55, 0.95);
-}
-
-
-
-
-/* Start of entering */
-.tree-pages-view-left-enter {
-  /*opacity: 0.01;*/
-  transform: translateX(-100%);
-  -webkit-transform: translateX(-100%);
-}
-
-/* End of entering */
-.tree-pages-view-left-enter.tree-pages-view-left-enter-active {
-  /*opacity: 1;
-  transition: opacity 500ms ease-in;*/
-
-  transform: translateX(0%);
-  -webkit-transform: translateX(0%);
-
-  transition: transform 450ms cubic-bezier(0.445, 0.05, 0.55, 0.95);
-  -webkit-transition: transform 450ms cubic-bezier(0.445, 0.05, 0.55, 0.95);
-}
-
-/* Start of leaving */
-.tree-pages-view-left-leave {
-  /*opacity: 1;*/
-  transform: translateX(0%);
-  -webkit-transform: translateX(0%);
-}
-
-/* End of leaving */
-.tree-pages-view-left-leave.tree-pages-view-left-leave-active {
+.tree-pages-view__page--transition-left-leave.tree-pages-view__page--transition-left-leave-active {
   /*opacity: 0.01;
   transition: opacity 500ms ease-in;*/
 
@@ -97,15 +58,18 @@
 
 
 
+/* Enter and leave for rightwards movement*/
+
+
 /* Start of entering */
-.tree-pages-view-right-enter {
+.tree-pages-view__page--transition-right-enter {
   /*opacity: 0.01;*/
   transform: translateX(100%);
   -webkit-transform: translateX(100%);
 }
 
 /* End of entering */
-.tree-pages-view-right-enter.tree-pages-view-right-enter-active {
+.tree-pages-view__page--transition-right-enter.tree-pages-view__page--transition-right-enter-active {
   /*opacity: 1;
   transition: opacity 500ms ease-in;*/
 
@@ -117,14 +81,14 @@
 }
 
 /* Start of leaving */
-.tree-pages-view-right-leave {
+.tree-pages-view__page--transition-right-leave {
   /*opacity: 1;*/
   transform: translateX(0%);
   -webkit-transform: translateX(0%);
 }
 
 /* End of leaving */
-.tree-pages-view-right-leave.tree-pages-view-right-leave-active {
+.tree-pages-view__page--transition-right-leave.tree-pages-view__page--transition-right-leave-active {
   /*opacity: 0.01;
   transition: opacity 500ms ease-in;*/
 

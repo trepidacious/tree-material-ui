@@ -1,7 +1,7 @@
 package org.rebeam.tree.view
 
-import chandu0101.scalajs.react.components.materialui.{Mui, MuiFloatingActionButton}
-import japgolly.scalajs.react.{Callback, ReactComponentB, ReactElement}
+import chandu0101.scalajs.react.components.materialui._
+import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.prefix_<^._
 import org.rebeam.tree.view.View._
 
@@ -9,7 +9,7 @@ import scala.scalajs.js
 
 object TitleBar {
 
-  case class Props(color: Color, height: Int, listFAB: Option[ReactElement], title: Option[ReactElement], contents: Option[ReactElement])
+  case class Props(color: Color, height: Int, listFAB: Option[ReactElement], title: Option[ReactElement], contents: Option[ReactElement], toolbar: Option[ReactElement])
 
   val component = ReactComponentB[Props]("TitleBar")
     .render_P(p => {
@@ -45,14 +45,26 @@ object TitleBar {
         <.div(
           ^.paddingTop := s"${p.height}px",
           ^.width := "100%"
-        )(p.contents)
+        )(p.contents),
+
+        //Optional toolbar
+        p.toolbar.map(
+          tb => <.div(
+            ^.position := "fixed",
+            ^.width := "100%",
+            ^.bottom := "0px",
+            ^.left := "0px",
+            tb
+          )
+        ).getOrElse(EmptyTag)
+
       )
 
     })
     .build
 
-  def apply(color: Color, height: Int, listFAB: Option[ReactElement], title: Option[ReactElement], contents: Option[ReactElement]) =
-    component(Props(color, height, listFAB, title, contents))
+  def apply(color: Color, height: Int, listFAB: Option[ReactElement], title: Option[ReactElement], contents: Option[ReactElement], toolbar: Option[ReactElement] = None) =
+    component(Props(color, height, listFAB, title, contents, toolbar))
 
   def addFAB(callback: Callback) = {
     MuiFloatingActionButton(

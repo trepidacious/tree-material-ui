@@ -19,9 +19,9 @@ object PagesView {
       val panes = renderToList(cp)
       // We get an unavoidable extra div from the ReactCssTransitionGroup,
       // so we set a class to allow us to style it with flex etc. using CSS
-      <.div(^.className := "tree-pages-view")(
+      <.div(^.className := "tree-pages-view__outer-div")(
         ReactCssTransitionGroup(
-          "tree-pages-view-" + state.direction.className,
+          "tree-pages-view__page--transition-" + state.direction.className,
           appearTimeout = 550,
           leaveTimeout = 550,
           enterTimeout = 550,

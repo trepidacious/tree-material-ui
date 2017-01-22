@@ -159,7 +159,19 @@ object TodoPagesViews {
           "Contents todo!"
         )
 
-      TitleBar(MaterialColor.BlueGrey(500), 128, None, Some(title), Some(contents))
+      val toolbar =
+        MuiToolbar()(
+          MuiToolbarGroup(key = "1")(
+            MuiRaisedButton(label = "Tool Left", secondary = true)()
+          ),
+          MuiToolbarGroup(key = "2")(
+            MuiToolbarTitle(text = "options")(),
+            MuiToolbarSeparator()(),
+            MuiRaisedButton(label = "Create Broadcast", primary = true)()
+          )
+        )
+
+      TitleBar(MaterialColor.BlueGrey(500), 128, None, Some(title), Some(contents), Some(toolbar))
     }
   }
 
