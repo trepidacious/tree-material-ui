@@ -9,7 +9,7 @@ import scala.scalajs.js
 
 object TitleBar {
 
-  case class Props(color: Color, height: Int, listFAB: Option[ReactElement], title: Option[ReactElement], contents: Option[ReactElement], toolbar: Option[ReactElement])
+  case class Props(color: Color, height: Int, listFAB: Option[ReactElement], title: Option[ReactElement], contents: Option[ReactElement], footer: Option[ReactElement])
 
   val component = ReactComponentB[Props]("TitleBar")
     .render_P(p => {
@@ -47,8 +47,8 @@ object TitleBar {
           ^.width := "100%"
         )(p.contents),
 
-        //Optional toolbar
-        p.toolbar.map(
+        //Optional footer
+        p.footer.map(
           tb => <.div(
             ^.position := "fixed",
             ^.width := "100%",
@@ -63,8 +63,8 @@ object TitleBar {
     })
     .build
 
-  def apply(color: Color, height: Int, listFAB: Option[ReactElement], title: Option[ReactElement], contents: Option[ReactElement], toolbar: Option[ReactElement] = None) =
-    component(Props(color, height, listFAB, title, contents, toolbar))
+  def apply(color: Color, height: Int, listFAB: Option[ReactElement], title: Option[ReactElement], contents: Option[ReactElement], footer: Option[ReactElement] = None) =
+    component(Props(color, height, listFAB, title, contents, footer))
 
   def addFAB(callback: Callback) = {
     MuiFloatingActionButton(
