@@ -13,7 +13,7 @@ object Breadcrumbs {
   val container = ReactComponentB[Unit]("PathBreadcrumbs")
     .render_C(children => {
       <.div(
-        ^.paddingTop := "64px",
+        ^.paddingTop := "8px",
         ^.display := "flex",
         ^.alignItems := "baseline"
       )(children)

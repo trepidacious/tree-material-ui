@@ -161,6 +161,12 @@ object DemoData {
       }
     }
 
+    case object Archive extends TodoListAction {
+      def apply(p: TodoList): TodoList = {
+        p.copy(items = p.items.filterNot(todo => todo.completed))
+      }
+    }
+
   }
 
   @JsonCodec

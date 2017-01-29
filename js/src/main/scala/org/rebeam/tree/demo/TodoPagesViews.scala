@@ -83,17 +83,16 @@ object TodoPagesViews {
 
 
 
-  val TodoProjectEmptyView = TitleBar(MaterialColor.BlueGrey(500), 128, None, Some(MuiCircularProgress(mode = DeterminateIndeterminate.indeterminate, color = Mui.Styles.colors.white)()), None)
+  val TodoProjectEmptyView = PageLayout(MaterialColor.BlueGrey(500), 128, "Loading project...", None, Some(MuiCircularProgress(mode = DeterminateIndeterminate.indeterminate, color = Mui.Styles.colors.white)()), None)
 
 
 
   val TodoProjectView = cursorPView[TodoProject, Pages[TodoPage, TodoPage]]("TodoProjectView") {
     cp => {
       //FIXME use actual creation time
-      val fab = TitleBar.addFAB(cp.act(TodoProjectAction.CreateTodoList(Moment(0)): TodoProjectAction))
+      val fab = PageLayout.addFAB(cp.act(TodoProjectAction.CreateTodoList(Moment(0)): TodoProjectAction))
 
-      val title = <.div (
-        ^.paddingTop := "64px",
+      val title = Breadcrumbs.container(
         textViewHero(cp.zoomN(TodoProject.name).label("Project name"))
       )
 
@@ -108,7 +107,7 @@ object TodoPagesViews {
         )(cp.zoomNP(TodoProject.lists))
       )
 
-      TitleBar(MaterialColor.BlueGrey(500), 128, Some(fab), Some(title), Some(contents))
+      PageLayout(MaterialColor.BlueGrey(500), 128, "", Some(fab), Some(title), Some(contents))
     }
   }
 
@@ -117,7 +116,7 @@ object TodoPagesViews {
   val TodoListView = cursorPView[TodoList, Pages[PageWithTodoProjectList, TodoPage]]("TodoListView") {
     cp => {
       //FIXME use actual creation time
-      val fab = TitleBar.addFAB(cp.act(TodoListAction.CreateTodo(Moment(0)): TodoListAction))
+      val fab = PageLayout.addFAB(cp.act(TodoListAction.CreateTodo(Moment(0)): TodoListAction))
 
       val title =
         Breadcrumbs.container(
@@ -139,7 +138,9 @@ object TodoPagesViews {
           )(cp.zoomN(TodoList.items).withP(cp.p))
         )
 
-      TitleBar(cp.model.color, 128, Some(fab), Some(title), Some(contents))
+      PageLayout(cp.model.color, 128, "", Some(fab), Some(title), Some(contents), iconButtons = List(
+        ToolbarIconButton(Mui.SvgIcons.ContentArchive()(), cp.act(TodoListAction.Archive: TodoListAction))
+      ))
     }
   }
 
@@ -171,7 +172,9 @@ object TodoPagesViews {
           )
         )
 
-      TitleBar(MaterialColor.BlueGrey(500), 128, None, Some(title), Some(contents), Some(toolbar))
+      PageLayout(MaterialColor.BlueGrey(500), 128, "", None, Some(title), Some(contents), Some(toolbar), List(
+        ToolbarIconButton(Mui.SvgIcons.ActionDelete()(), Callback.empty)
+      ))
     }
   }
 
