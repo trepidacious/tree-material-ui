@@ -16,6 +16,7 @@ object PageLayout {
 
       <.div(
         ^.width := "100%",
+        ^.height := "100%",
         ^.position := "relative",
 
         <.div(
@@ -68,7 +69,8 @@ object PageLayout {
         // Contents
         <.div(
           ^.paddingTop := s"${p.height}px",
-          ^.width := "100%"
+          ^.width := "100%",
+          ^.height := "100%"
         )(p.contents),
 
         // Optional footer

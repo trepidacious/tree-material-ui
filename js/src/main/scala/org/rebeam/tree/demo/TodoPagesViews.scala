@@ -127,16 +127,14 @@ object TodoPagesViews {
         )
 
       val contents =
-        <.div(
-          SortableTodoItemsView(
-            SortableContainer.Props(
-              onSortEnd = p => cp.act(TodoListAction.TodoIndexChange(p.oldIndex, p.newIndex): TodoListAction),
-              useDragHandle = true,
-              helperClass = "react-sortable-handler"//,
+        SortableTodoItemsView(
+          SortableContainer.Props(
+            onSortEnd = p => cp.act(TodoListAction.TodoIndexChange(p.oldIndex, p.newIndex): TodoListAction),
+            useDragHandle = true,
+            helperClass = "react-sortable-handler"//,
 //                      useWindowAsScrollContainer = true
-            )
-          )(cp.zoomN(TodoList.items).withP(cp.p))
-        )
+          )
+        )(cp.zoomN(TodoList.items).withP(cp.p))
 
       PageLayout(cp.model.color, 128, "", Some(fab), Some(title), Some(contents), iconButtons = List(
         ToolbarIconButton(Mui.SvgIcons.ContentArchive()(), cp.act(TodoListAction.Archive: TodoListAction))

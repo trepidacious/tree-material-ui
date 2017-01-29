@@ -28,11 +28,10 @@ object PagesView {
           component = "div")(
           <.div(
             ^.top:="0px",
+            ^.left:= "0px",
             ^.width:= "100%",
             ^.height:= "100%",
             ^.position:= "absolute",
-            ^.top:= "0",
-            ^.left:= "0",
             ^.key:=panes.last.key,
             panes.last
           )
