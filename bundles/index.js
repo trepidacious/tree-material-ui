@@ -49,3 +49,6 @@ window.SortableHandle = window.Sortable.SortableHandle;
 // rebeam: react-infinite
 var Infinite = require('react-infinite');
 window.Infinite = Infinite;
+
+// rebeam: react-measure
+window.Measure = require('react-measure');

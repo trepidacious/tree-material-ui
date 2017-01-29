@@ -14,6 +14,7 @@ import org.rebeam.tree.view.Cursor._
 import org.rebeam.tree.view.View._
 import org.rebeam.tree.view._
 import org.rebeam.tree.view.infinite.Infinite
+import org.rebeam.tree.view.measure.MeasureDemo
 import org.rebeam.tree.view.pages.Pages._
 import org.rebeam.tree.view.pages._
 import org.rebeam.tree.view.sortable._
@@ -153,10 +154,10 @@ object TodoPagesViews {
           textViewHero(cp.zoomN(Todo.name).label("Todo name"))
         )
 
-      val contents =
-        <.div(
-          "Contents todo!"
-        )
+      val contents = MeasureDemo.c()
+//        <.div(
+//          "Contents todo!"
+//        )
 
       val toolbar =
         MuiToolbar()(
