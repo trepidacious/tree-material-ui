@@ -1,3 +1,7 @@
+.tree-infinite--height-100-percent {
+    height: 100% !important;
+}
+
 
 /*
  * tree-pages-view__outer-div is applied

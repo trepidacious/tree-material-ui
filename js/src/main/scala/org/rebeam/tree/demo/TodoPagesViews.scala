@@ -14,7 +14,7 @@ import org.rebeam.tree.view.Cursor._
 import org.rebeam.tree.view.View._
 import org.rebeam.tree.view._
 import org.rebeam.tree.view.infinite.Infinite
-import org.rebeam.tree.view.measure.MeasureDemo
+import org.rebeam.tree.view.measure.{CursorPHeightView, MeasureDemo}
 import org.rebeam.tree.view.pages.Pages._
 import org.rebeam.tree.view.pages._
 import org.rebeam.tree.view.sortable._
@@ -38,10 +38,18 @@ object TodoPagesViews {
   }
   val SortableTodoListSummaryView = SortableElement.wrap(TodoListSummaryView)
 
-  val TodoListsView = cursorPView[List[TodoList], Pages[TodoPage, TodoPage]]("TodoListView") {
-    cp =>
-        // FIXME use zoomAllMatchesP
-      Infinite(elementHeight = 60, containerHeight = 400)( //useWindowAsScrollContainer = true)(
+  // Use a height view to get us the height of the rendered element as an extra part of prop.
+  // This lets us scale the Infinite list appropriately to fill space.
+  val TodoListsView = CursorPHeightView[List[TodoList], Pages[TodoPage, TodoPage]]("TodoListView") {
+    (cp, height) =>
+      val h: Int = height.map(_.toInt).getOrElse(60)
+      // We need to apply a style by class to get the Infinite to be 100% height rather than the
+      // "height: containerHeight" inline style it sets on itself. This allows it to resize to fill
+      // available space, then be measured by Measure, which adjusts the containerHeight. This is
+      // neater than wrapping in a "height: 100%" div, and also works with react-sortable-hoc, which
+      // expects the top level component to be the one containing the sortable elements. Using a div
+      // breaks this and so breaks the nice feature where dragging to container edge starts scrolling.
+      Infinite(elementHeight = 60, containerHeight = h, className = "tree-infinite--height-100-percent")( //useWindowAsScrollContainer = true)(
           MuiSubheader(inset = true, style = js.Dynamic.literal("height" -> "60px"))("Todo lists")
           :: cp.zoomAllMatchesP(l => FindTodoListById(l.id)).zipWithIndex.map {
             case (listCP, index) => SortableTodoListSummaryView(SortableElement.Props(key = listCP.model.id.value, index = index))(listCP)
@@ -71,15 +79,18 @@ object TodoPagesViews {
     }
   }
   val SortableTodoItemSummaryView = SortableElement.wrap(TodoItemSummaryView)
-  val TodoItemsView = cursorPView[List[Todo], Pages[PageWithTodoProjectList, TodoPage]]("TodoItemsView") {
-    cp =>
-      Infinite(elementHeight = 60, containerHeight = 400)( //useWindowAsScrollContainer = true)(
+
+  val TodoItemsView = CursorPHeightView[List[Todo], Pages[PageWithTodoProjectList, TodoPage]]("TodoItemsView") {
+    (cp, height) =>
+      val h: Int = height.map(_.toInt).getOrElse(60)
+      Infinite(elementHeight = 60, containerHeight = h, className = "tree-infinite--height-100-percent")( //useWindowAsScrollContainer = true)(
         MuiSubheader(inset = true, style = js.Dynamic.literal("height" -> "60px"))("Todo items")
           :: cp.zoomAllMatchesP(t => FindTodoById(t.id)).zipWithIndex.map {
           case (todoCP, index) => SortableTodoItemSummaryView(SortableElement.Props(key = todoCP.model.id.value, index = index))(todoCP)
         }
       )
   }
+
   val SortableTodoItemsView = SortableContainer.wrap(TodoItemsView)
 
 
@@ -97,7 +108,7 @@ object TodoPagesViews {
         textViewHero(cp.zoomN(TodoProject.name).label("Project name"))
       )
 
-      val contents = <.div(
+      val contents =
         SortableTodoListsView(
           SortableContainer.Props(
             onSortEnd = p => cp.act(TodoProjectAction.ListIndexChange(p.oldIndex, p.newIndex): TodoProjectAction),
@@ -106,7 +117,6 @@ object TodoPagesViews {
 //            useWindowAsScrollContainer = true
           )
         )(cp.zoomNP(TodoProject.lists))
-      )
 
       PageLayout(MaterialColor.BlueGrey(500), 128, "", Some(fab), Some(title), Some(contents))
     }
@@ -159,19 +169,7 @@ object TodoPagesViews {
 //          "Contents todo!"
 //        )
 
-      val toolbar =
-        MuiToolbar()(
-          MuiToolbarGroup(key = "1")(
-            MuiRaisedButton(label = "Tool Left", secondary = true)()
-          ),
-          MuiToolbarGroup(key = "2")(
-            MuiToolbarTitle(text = "options")(),
-            MuiToolbarSeparator()(),
-            MuiRaisedButton(label = "Create Broadcast", primary = true)()
-          )
-        )
-
-      PageLayout(MaterialColor.BlueGrey(500), 128, "", None, Some(title), Some(contents), Some(toolbar), List(
+      PageLayout(MaterialColor.BlueGrey(500), 128, "", None, Some(title), Some(contents), iconButtons = List(
         ToolbarIconButton(Mui.SvgIcons.ActionDelete()(), Callback.empty)
       ))
     }

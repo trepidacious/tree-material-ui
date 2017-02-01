@@ -15,6 +15,8 @@ object Measure {
     val height: Double                      = js.native
   }
 
+  def height(onMeasure: Dimensions => Callback): Measure = Measure(whitelist = List("height"), shouldMeasure = true, onMeasure = onMeasure)
+
 }
 
 case class Measure(
