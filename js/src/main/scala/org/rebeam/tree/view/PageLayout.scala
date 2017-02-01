@@ -14,80 +14,88 @@ object PageLayout {
   private val component = ReactComponentB[Props]("PageLayout")
     .render_P(p => {
 
+      //Full size container
       <.div(
         ^.width := "100%",
         ^.height := "100%",
-        ^.position := "relative",
 
+        // Optional FAB - this animates by scaling
+        p.listFAB.map(
+          fab => <.div(
+            ^.className := "tree-pages-view__content--scale",
+            ^.position := "absolute",
+            ^.left := "16px",
+            ^.top := s"${p.height - 20}px",
+            ^.zIndex := "1150"
+          )(fab)
+        ).getOrElse(EmptyTag),
+
+        //Everything else animates by sliding
         <.div(
-          ^.position := "absolute",
-          ^.top := "0px",
-          ^.left := "0px",
-          ^.backgroundColor := p.color,
-//        ^.boxSizing := "border-box",
-          ^.boxShadow := "rgba(0, 0, 0, 0.117647) 0px 1px 6px, rgba(0, 0, 0, 0.117647) 0px 1px 4px",
+          ^.className := "tree-pages-view__content--slide",
           ^.width := "100%",
-          ^.zIndex := "1100",
-//          ^.display := "flex",
-          ^.height := s"${p.height}px",
+          ^.height := "100%",
+          ^.position := "relative",
 
-          // Layout the toolbar with flex
           <.div(
             ^.position := "absolute",
             ^.top := "0px",
             ^.left := "0px",
+            ^.backgroundColor := p.color,
+            //        ^.boxSizing := "border-box",
+            ^.boxShadow := "rgba(0, 0, 0, 0.117647) 0px 1px 6px, rgba(0, 0, 0, 0.117647) 0px 1px 4px",
             ^.width := "100%",
-            ^.display := "flex",
+            ^.zIndex := "1100",
+            //          ^.display := "flex",
+            ^.height := s"${p.height}px",
+
+            // Layout the toolbar with flex
             <.div(
-              ^.flex := "0 0 72px"
+              ^.position := "absolute",
+              ^.top := "0px",
+              ^.left := "0px",
+              ^.width := "100%",
+              ^.display := "flex",
+              <.div(
+                ^.flex := "0 0 72px"
+              ),
+              Title(p.toolbarText),
+              <.div(
+                ^.flex := "0 0 auto",
+                ^.paddingTop := "4px",
+                ^.paddingRight := "4px"
+              )(p.iconButtons)
             ),
-            Title(p.toolbarText),
             <.div(
-              ^.flex := "0 0 auto",
-              ^.paddingTop := "4px",
-              ^.paddingRight := "4px"
-            )(p.iconButtons)
+              ^.position := "absolute",
+              ^.top := "56px",
+              ^.left := "72px",
+              p.title
+            )
           ),
+
+          // Contents
           <.div(
             ^.position := "absolute",
-            ^.top := "56px",
-            ^.left := "72px",
-            p.title
-          )
-        ),
-
-        // Optional FAB
-        p.listFAB.map(
-          fab => <.div(
-            ^.position := "absolute",
-            ^.zIndex := "1150",
-            ^.left := "16px",
-            ^.top := s"${p.height - 20}px"
-          )(fab)
-        ).getOrElse(EmptyTag),
-
-        // Contents
-        <.div(
-          ^.position := "absolute",
-          ^.top := s"${p.height}px",
-          ^.bottom := "0px",
-          ^.left := "0px",
-          ^.width := "100%"
-        )(p.contents),
-
-        // Optional footer
-        p.footer.map(
-          tb => <.div(
-            ^.position := "fixed",
-            ^.width := "100%",
+            ^.top := s"${p.height}px",
             ^.bottom := "0px",
             ^.left := "0px",
-            tb
-          )
-        ).getOrElse(EmptyTag)
+            ^.width := "100%"
+          )(p.contents),
 
+          // Optional footer
+          p.footer.map(
+            tb => <.div(
+              ^.position := "fixed",
+              ^.width := "100%",
+              ^.bottom := "0px",
+              ^.left := "0px",
+              tb
+            )
+          ).getOrElse(EmptyTag)
+
+        )
       )
-
     })
     .build
 

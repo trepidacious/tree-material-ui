@@ -27,12 +27,12 @@ object PagesView {
           enterTimeout = 550,
           component = "div")(
           <.div(
-            ^.top:="0px",
-            ^.left:= "0px",
-            ^.width:= "100%",
-            ^.height:= "100%",
-            ^.position:= "absolute",
-            ^.key:=panes.last.key,
+            ^.top :="0px",
+            ^.left := "0px",
+            ^.width := "100%",
+            ^.height := "100%",
+            ^.position := "absolute",
+            ^.key := panes.last.key,
             panes.last
           )
         )
