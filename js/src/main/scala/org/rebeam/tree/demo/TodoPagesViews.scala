@@ -58,9 +58,6 @@ object TodoPagesViews {
   }
   val SortableTodoListsView = SortableContainer.wrap(TodoListsView)
 
-
-
-
   val TodoItemSummaryView = cursorPView[Todo, Pages[PageWithTodoProjectList, TodoPage]]("TodoItemSummaryView"){
     cp => {
       val item = cp.model
@@ -93,11 +90,7 @@ object TodoPagesViews {
 
   val SortableTodoItemsView = SortableContainer.wrap(TodoItemsView)
 
-
-
   val TodoProjectEmptyView = PageLayout(MaterialColor.BlueGrey(500), 128, "Loading project...", None, Some(MuiCircularProgress(mode = DeterminateIndeterminate.indeterminate, color = Mui.Styles.colors.white)()), None)
-
-
 
   val TodoProjectView = cursorPView[TodoProject, Pages[TodoPage, TodoPage]]("TodoProjectView") {
     cp => {
