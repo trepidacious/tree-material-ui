@@ -86,7 +86,19 @@
 /* Scaling transitions */
 
 /* Keyframes for scaling in and out */
-@keyframes tree-pages-view__scale-keyframes {
+@keyframes tree-pages-view__scale-in-keyframes {
+  0%   {transform: scale(0,0) rotate(-30deg);}
+  50%  {transform: scale(0,0) rotate(-30deg);}
+  100% {transform: scale(1,1) rotate(  0deg);}
+}
+
+@keyframes tree-pages-view__scale-out-keyframes {
+  0%   {transform: scale(1,1) rotate(  0deg);}
+  50%  {transform: scale(0,0) rotate(  0deg);}
+  100% {transform: scale(0,0) rotate(  0deg);}
+}
+
+@keyframes tree-pages-view__quickfade-keyframes {
   0%   {transform: scale(0,0); opacity: 0.0;}
   15%  {transform: scale(0,0); opacity: 1.0;}
   40%  {transform: scale(0,0);}
@@ -100,31 +112,30 @@
 
 /* Start of entering */
 .tree-pages-view__page--transition-left-enter .tree-pages-view__content--scale {
-  transform: scale(0, 0);
-  -webkit-transform: scale(0, 0);
+  transform: scale(0, 0) rotate(-30deg);
+  -webkit-transform: scale(0, 0) rotate(-30deg);
 }
 
 /* End of entering */
 .tree-pages-view__page--transition-left-enter.tree-pages-view__page--transition-left-enter-active .tree-pages-view__content--scale {
-  animation-name: tree-pages-view__scale-keyframes;
+  animation-name: tree-pages-view__scale-in-keyframes;
   animation-duration: 0.45s;
   animation-fill-mode: both;
-  animation-timing-function: ease;
+  animation-timing-function: cubic-bezier(0.4, 0.0, 0.2, 1);
 }
 
 /* Start of leaving */u
 .tree-pages-view__page--transition-left-leave .tree-pages-view__content--scale {
-  transform: scale(1, 1);
-  -webkit-transform: scale(1, 1);
+  transform: scale(1, 1) rotate(0deg);
+  -webkit-transform: scale(1, 1) rotate(0deg);
 }
 
 /* End of leaving */
 .tree-pages-view__page--transition-left-leave.tree-pages-view__page--transition-left-leave-active .tree-pages-view__content--scale {
-  animation-name: tree-pages-view__scale-keyframes;
+  animation-name: tree-pages-view__scale-out-keyframes;
   animation-duration: 0.45s;
   animation-fill-mode: both;
-  animation-timing-function: ease;
-  animation-direction: reverse;
+  animation-timing-function: cubic-bezier(0.4, 0.0, 0.2, 1);
 }
 
 
@@ -133,29 +144,28 @@
 
 /* Start of entering */
 .tree-pages-view__page--transition-right-enter .tree-pages-view__content--scale {
-  transform: scale(0, 0);
-  -webkit-transform: scale(0, 0);
+  transform: scale(0, 0) rotate(-30deg);
+  -webkit-transform: scale(0, 0) rotate(-30deg);
 }
 
 /* End of entering */
 .tree-pages-view__page--transition-right-enter.tree-pages-view__page--transition-right-enter-active .tree-pages-view__content--scale {
-  animation-name: tree-pages-view__scale-keyframes;
+  animation-name: tree-pages-view__scale-in-keyframes;
   animation-duration: 0.45s;
   animation-fill-mode: both;
-  animation-timing-function: ease;
+  animation-timing-function: cubic-bezier(0.4, 0.0, 0.2, 1);
 }
 
 /* Start of leaving */
 .tree-pages-view__page--transition-right-leave .tree-pages-view__content--scale {
-  transform: scale(1, 1);
-  -webkit-transform: scale(1, 1);
+  transform: scale(1, 1) rotate(0deg);
+  -webkit-transform: scale(1, 1) rotate(0deg);
 }
 
 /* End of leaving */
 .tree-pages-view__page--transition-right-leave.tree-pages-view__page--transition-right-leave-active .tree-pages-view__content--scale {
-  animation-name: tree-pages-view__scale-keyframes;
+  animation-name: tree-pages-view__scale-out-keyframes;
   animation-duration: 0.45s;
   animation-fill-mode: both;
-  animation-timing-function: ease;
-  animation-direction: reverse;
+  animation-timing-function: cubic-bezier(0.4, 0.0, 0.2, 1);
 }
