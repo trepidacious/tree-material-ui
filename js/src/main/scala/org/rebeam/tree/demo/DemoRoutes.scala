@@ -87,6 +87,6 @@ object DemoRoutes {
 
   val baseUrl = BaseUrl.fromWindowOrigin_/
 
-  def router = Router(baseUrl, routerConfig.logToConsole)
+  def router = Router(baseUrl, routerConfig)
 
 }

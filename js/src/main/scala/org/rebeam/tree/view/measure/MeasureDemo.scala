@@ -11,7 +11,7 @@ object MeasureDemo {
       Measure(
         shouldMeasure = true,
         whitelist = List("width", "height"),
-        onMeasure = d => Callback{println(d)} >> scope.setState(d)
+        onMeasure = d => scope.setState(d)
       )(
         <.div(
           ^.width := "100%",
