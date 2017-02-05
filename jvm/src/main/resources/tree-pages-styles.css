@@ -6,16 +6,13 @@
 
 /* Start of entering */
 .tree-pages-view__page--transition-left-enter .tree-pages-view__content--slide {
-  /*opacity: 0.01;*/
+  will-change: transform;
   transform: translateX(-100%);
   -webkit-transform: translateX(-100%);
 }
 
 /* End of entering */
 .tree-pages-view__page--transition-left-enter.tree-pages-view__page--transition-left-enter-active .tree-pages-view__content--slide {
-  /*opacity: 1;
-  transition: opacity 500ms ease-in;*/
-
   transform: translateX(0%);
   -webkit-transform: translateX(0%);
 
@@ -25,16 +22,13 @@
 
 /* Start of leaving */
 .tree-pages-view__page--transition-left-leave .tree-pages-view__content--slide {
-  /*opacity: 1;*/
+  will-change: transform;
   transform: translateX(0%);
   -webkit-transform: translateX(0%);
 }
 
 /* End of leaving */
 .tree-pages-view__page--transition-left-leave.tree-pages-view__page--transition-left-leave-active .tree-pages-view__content--slide {
-  /*opacity: 0.01;
-  transition: opacity 500ms ease-in;*/
-
   transform: translateX(100%);
   -webkit-transform: translateX(100%);
 
@@ -46,16 +40,13 @@
 
 /* Start of entering */
 .tree-pages-view__page--transition-right-enter .tree-pages-view__content--slide {
-  /*opacity: 0.01;*/
+  will-change: transform;
   transform: translateX(100%);
   -webkit-transform: translateX(100%);
 }
 
 /* End of entering */
 .tree-pages-view__page--transition-right-enter.tree-pages-view__page--transition-right-enter-active .tree-pages-view__content--slide {
-  /*opacity: 1;
-  transition: opacity 500ms ease-in;*/
-
   transform: translateX(0%);
   -webkit-transform: translateX(0%);
 
@@ -65,16 +56,13 @@
 
 /* Start of leaving */
 .tree-pages-view__page--transition-right-leave .tree-pages-view__content--slide {
-  /*opacity: 1;*/
+  will-change: transform;
   transform: translateX(0%);
   -webkit-transform: translateX(0%);
 }
 
 /* End of leaving */
 .tree-pages-view__page--transition-right-leave.tree-pages-view__page--transition-right-leave-active .tree-pages-view__content--slide {
-  /*opacity: 0.01;
-  transition: opacity 500ms ease-in;*/
-
   transform: translateX(-100%);
   -webkit-transform: translateX(-100%);
 
@@ -112,6 +100,7 @@
 
 /* Start of entering */
 .tree-pages-view__page--transition-left-enter .tree-pages-view__content--scale {
+  will-change: transform;
   transform: scale(0, 0) rotate(-30deg);
   -webkit-transform: scale(0, 0) rotate(-30deg);
 }
@@ -126,6 +115,7 @@
 
 /* Start of leaving */u
 .tree-pages-view__page--transition-left-leave .tree-pages-view__content--scale {
+  will-change: transform;
   transform: scale(1, 1) rotate(0deg);
   -webkit-transform: scale(1, 1) rotate(0deg);
 }
@@ -144,6 +134,7 @@
 
 /* Start of entering */
 .tree-pages-view__page--transition-right-enter .tree-pages-view__content--scale {
+  will-change: transform;
   transform: scale(0, 0) rotate(-30deg);
   -webkit-transform: scale(0, 0) rotate(-30deg);
 }
@@ -158,6 +149,7 @@
 
 /* Start of leaving */
 .tree-pages-view__page--transition-right-leave .tree-pages-view__content--scale {
+  will-change: transform;
   transform: scale(1, 1) rotate(0deg);
   -webkit-transform: scale(1, 1) rotate(0deg);
 }
