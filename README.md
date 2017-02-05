@@ -19,7 +19,8 @@ A quick tour of the important parts:
 
 - [X] Direction of transition of pages set by relationship between them. Use a comparison typeclass that yields a direction from two pages. Provide an instance working on pages that implement "back".
 - [ ] Look at shadows - can we make them appear underneath (lower z) the thing casting them?
-- [ ] Responsive pages - provide a "no effort" implementation that displays layers alongside each other, animating them dropping in from above on enter, and down on leave.
+- [ ] Responsive pages - provide a "no effort" implementation for larger screens that displays layers alongside each other, animating them dropping in from above on enter, and down on leave.
 - [ ] ServerRootComponent undo/redo. If we do this, also include monitoring of the P in CursorP, so that we can restore the page that was displayed when the undone/redone action occurred.
 - [ ] Focus in pages. When going back from a detail page, the master page could remember the displayed detail "index" as a "focus". This could be used to e.g. scroll to that element in a list, so that when navigating backwards, we see the detail we just left in the master list. This is a lighter alternative to just keeping the master view around while displaying detail, and would work well with undo/redo. Focus might or might not update with scrolling.
 - [ ] Websocket re-open on close with exponential backoff.
+- [ ] Connect server model up to database.
