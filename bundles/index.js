@@ -52,3 +52,4 @@ window.Infinite = Infinite;
 
 // rebeam: react-measure
 window.Measure = require('react-measure');
+

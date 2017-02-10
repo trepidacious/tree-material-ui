@@ -22,6 +22,8 @@ javaOptions in ThisBuild := Seq("-Dorg.slf4j.simpleLogger.logFile=System.out")
 
 val scalajsReactComponentsVersion = "0.5.0"
 
+val assetsDir = file("assets")
+
 lazy val root = project.in(file(".")).
   aggregate(treeMaterialUiJS, treeMaterialUiJVM).
   settings(
@@ -55,15 +57,23 @@ lazy val treeMaterialUi = crossProject.in(file(".")).
     //Scalajs dependencies that are used on the client only
     libraryDependencies ++= Seq(
       "com.github.chandu0101.scalajs-react-components"  %%% "core"                  % scalajsReactComponentsVersion,
-      "com.github.japgolly.scalacss"                    %%% "ext-react"             % "0.5.0"
+      "com.github.japgolly.scalacss"                    %%% "ext-react"             % "0.5.0",
+      "eu.unicredit"                                    %%% "paths-scala-js"        % "0.4.5"
     ),
 
-    // Output compiled scala-js to assets directory
-    artifactPath in (Compile, fastOptJS) :=
-      file("assets") / ((moduleName in fastOptJS).value + "-fastopt.js"),
+    crossTarget in (Compile, fullOptJS) := assetsDir,
+    crossTarget in (Compile, fastOptJS) := assetsDir,
+    crossTarget in (Compile, packageJSDependencies) := assetsDir,
+//    crossTarget in (Compile, packageLauncher) := assetsDir,
 
-    artifactPath in (Compile, fullOptJS) :=
-      file("assets") / ((moduleName in fullOptJS).value + "-opt.js"),
+    // Output compiled scala-js to assets directory
+//    artifactPath in (Compile, fastOptJS) :=
+//      file("assets") / ((moduleName in fastOptJS).value + "-fastopt.js"),
+//
+//    artifactPath in (Compile, fullOptJS) :=
+//      file("assets") / ((moduleName in fullOptJS).value + "-opt.js"),
+
+
 
     // We get javascript dependencies from webpack
     jsDependencies ++= Seq()

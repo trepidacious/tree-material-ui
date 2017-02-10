@@ -2,6 +2,7 @@ package org.rebeam.tree.demo
 
 import cats.data.Xor
 import chandu0101.scalajs.react.components.materialui._
+import demo.components.BarDemo
 import io.circe.Encoder
 import japgolly.scalajs.react.Addons.ReactCssTransitionGroup
 import japgolly.scalajs.react._
@@ -157,7 +158,16 @@ object TodoPagesViews {
           textViewHero(cp.zoomN(Todo.name).label("Todo name"))
         )
 
-      val contents = MeasureDemo.c()
+      val contents = BarDemo.BarChart(
+        BarDemo.Stats(
+          values = List(
+            List(1, 2.0, 3, 4),
+            List(2, 3.0, 1, 4),
+            List(2, 2.5, 3, 3)
+          ),
+          labels = List("2009", "2010", "2011", "2012")
+        )
+      )
 //        <.div(
 //          "Contents todo!"
 //        )
