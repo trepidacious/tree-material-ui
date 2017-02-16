@@ -50,7 +50,7 @@ object TodoPagesViews {
       // neater than wrapping in a "height: 100%" div, and also works with react-sortable-hoc, which
       // expects the top level component to be the one containing the sortable elements. Using a div
       // breaks this and so breaks the nice feature where dragging to container edge starts scrolling.
-      Infinite(elementHeight = 60, containerHeight = h, className = "tree-infinite--height-100-percent")( //useWindowAsScrollContainer = true)(
+      Infinite(elementHeight = 60, containerHeight = h, className = "tree-infinite--height-100-percent")(
           MuiSubheader(inset = true, style = js.Dynamic.literal("height" -> "60px"))("Todo lists")
           :: cp.zoomAllMatchesP(l => FindTodoListById(l.id)).zipWithIndex.map {
             case (listCP, index) => SortableTodoListSummaryView(SortableElement.Props(key = listCP.model.id.value, index = index))(listCP)
@@ -81,7 +81,7 @@ object TodoPagesViews {
   val TodoItemsView = CursorPHeightView[List[Todo], Pages[PageWithTodoProjectList, TodoPage]]("TodoItemsView") {
     (cp, height) =>
       val h: Int = height.map(_.toInt).getOrElse(60)
-      Infinite(elementHeight = 60, containerHeight = h, className = "tree-infinite--height-100-percent")( //useWindowAsScrollContainer = true)(
+      Infinite(elementHeight = 60, containerHeight = h, className = "tree-infinite--height-100-percent")(
         MuiSubheader(inset = true, style = js.Dynamic.literal("height" -> "60px"))("Todo items")
           :: cp.zoomAllMatchesP(t => FindTodoById(t.id)).zipWithIndex.map {
           case (todoCP, index) => SortableTodoItemSummaryView(SortableElement.Props(key = todoCP.model.id.value, index = index))(todoCP)
@@ -107,8 +107,7 @@ object TodoPagesViews {
           SortableContainer.Props(
             onSortEnd = p => cp.act(TodoProjectAction.ListIndexChange(p.oldIndex, p.newIndex): TodoProjectAction),
             useDragHandle = true,
-            helperClass = "react-sortable-handler"//,
-//            useWindowAsScrollContainer = true
+            helperClass = "react-sortable-handler",
           )
         )(cp.zoomNP(TodoProject.lists))
 
