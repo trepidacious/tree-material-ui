@@ -107,7 +107,7 @@ object TodoPagesViews {
           SortableContainer.Props(
             onSortEnd = p => cp.act(TodoProjectAction.ListIndexChange(p.oldIndex, p.newIndex): TodoProjectAction),
             useDragHandle = true,
-            helperClass = "react-sortable-handler",
+            helperClass = "react-sortable-handler"
           )
         )(cp.zoomNP(TodoProject.lists))
 
