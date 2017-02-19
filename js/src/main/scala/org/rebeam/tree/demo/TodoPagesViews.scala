@@ -37,33 +37,19 @@ object TodoPagesViews {
       SortableListItem(avatarText((idString, list.color)), contents, toList)
     }
   }
-  val SortableTodoListSummaryView = SortableElement.wrap(TodoListSummaryView)
 
-  // Use a height view to get us the height of the rendered element as an extra part of prop.
-  // This lets us scale the Infinite list appropriately to fill space.
-  val TodoListsView = CursorPHeightView[List[TodoList], Pages[TodoPage, TodoPage]]("TodoListView") {
-    (cp, height) =>
-      val h: Int = height.map(_.toInt).getOrElse(60)
-      // We need to apply a style by class to get the Infinite to be 100% height rather than the
-      // "height: containerHeight" inline style it sets on itself. This allows it to resize to fill
-      // available space, then be measured by Measure, which adjusts the containerHeight. This is
-      // neater than wrapping in a "height: 100%" div, and also works with react-sortable-hoc, which
-      // expects the top level component to be the one containing the sortable elements. Using a div
-      // breaks this and so breaks the nice feature where dragging to container edge starts scrolling.
-      Infinite(elementHeight = 60, containerHeight = h, className = "tree-infinite--height-100-percent")(
-          MuiSubheader(inset = true, style = js.Dynamic.literal("height" -> "60px"))("Todo lists")
-          :: cp.zoomAllMatchesP(l => FindTodoListById(l.id)).zipWithIndex.map {
-            case (listCP, index) => SortableTodoListSummaryView(SortableElement.Props(key = listCP.model.id.value, index = index))(listCP)
-          }
-        )
-  }
-  val SortableTodoListsView = SortableContainer.wrap(TodoListsView)
+  val TodoListsView = ListView[TodoList, TodoPage, TodoPage, FindTodoListById](
+    "TodoListView",
+    l => FindTodoListById(l.id),
+    l => l.id.value,
+    TodoListSummaryView,
+    "Todo lists"
+  )
 
   val TodoItemSummaryView = cursorPView[Todo, Pages[PageWithTodoProjectList, TodoPage]]("TodoItemSummaryView"){
     cp => {
       val item = cp.model
       val toItem = cp.p.set(cp.p.current.toItem(item.id))
-//      val idString = s"${item.id.value}"
       val contents = SortableListItem.twoLines(
         s"${item.name}",
         s"Priority ${item.priority}"
@@ -76,20 +62,14 @@ object TodoPagesViews {
       SortableListItem(avatar, contents, onClickContents = toItem)
     }
   }
-  val SortableTodoItemSummaryView = SortableElement.wrap(TodoItemSummaryView)
 
-  val TodoItemsView = CursorPHeightView[List[Todo], Pages[PageWithTodoProjectList, TodoPage]]("TodoItemsView") {
-    (cp, height) =>
-      val h: Int = height.map(_.toInt).getOrElse(60)
-      Infinite(elementHeight = 60, containerHeight = h, className = "tree-infinite--height-100-percent")(
-        MuiSubheader(inset = true, style = js.Dynamic.literal("height" -> "60px"))("Todo items")
-          :: cp.zoomAllMatchesP(t => FindTodoById(t.id)).zipWithIndex.map {
-          case (todoCP, index) => SortableTodoItemSummaryView(SortableElement.Props(key = todoCP.model.id.value, index = index))(todoCP)
-        }
-      )
-  }
-
-  val SortableTodoItemsView = SortableContainer.wrap(TodoItemsView)
+  val TodoItemsView = ListView[Todo, PageWithTodoProjectList, TodoPage, FindTodoById](
+    "TodoItemsView",
+    todo => FindTodoById(todo.id),
+    todo => todo.id.value,
+    TodoItemSummaryView,
+    "Todo items"
+  )
 
   val TodoProjectEmptyView = PageLayout(MaterialColor.BlueGrey(500), 128, "Loading project...", None, Some(MuiCircularProgress(mode = DeterminateIndeterminate.indeterminate, color = Mui.Styles.colors.white)()), None)
 
@@ -103,12 +83,8 @@ object TodoPagesViews {
       )
 
       val contents =
-        SortableTodoListsView(
-          SortableContainer.Props(
-            onSortEnd = p => cp.act(TodoProjectAction.ListIndexChange(p.oldIndex, p.newIndex): TodoProjectAction),
-            useDragHandle = true,
-            helperClass = "react-sortable-handler"
-          )
+        TodoListsView(
+          p => cp.act(TodoProjectAction.ListIndexChange(p.oldIndex, p.newIndex): TodoProjectAction)
         )(cp.zoomNP(TodoProject.lists))
 
       PageLayout(MaterialColor.BlueGrey(500), 128, "", Some(fab), Some(title), Some(contents))
@@ -131,14 +107,9 @@ object TodoPagesViews {
         )
 
       val contents =
-        SortableTodoItemsView(
-          SortableContainer.Props(
-            onSortEnd = p => cp.act(TodoListAction.TodoIndexChange(p.oldIndex, p.newIndex): TodoListAction),
-            useDragHandle = true,
-            helperClass = "react-sortable-handler"//,
-//                      useWindowAsScrollContainer = true
-          )
-        )(cp.zoomN(TodoList.items).withP(cp.p))
+        TodoItemsView(
+          p => cp.act(TodoListAction.TodoIndexChange(p.oldIndex, p.newIndex): TodoListAction)
+        )(cp.zoomNP(TodoList.items))
 
       PageLayout(cp.model.color, 128, "", Some(fab), Some(title), Some(contents), iconButtons = List(
         ToolbarIconButton(Mui.SvgIcons.ContentArchive()(), cp.act(TodoListAction.Archive: TodoListAction))

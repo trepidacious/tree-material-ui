@@ -10,9 +10,9 @@ import japgolly.scalajs.react.vdom.ReactStyle
 
 import scala.scalajs.js.UndefOr
 import Mui.Styles.colors
+import japgolly.scalajs.react.ReactComponentC.ReqProps
 
 import scala.language.implicitConversions
-
 import scala.scalajs.js
 
 object View {
@@ -35,7 +35,7 @@ object View {
   def cursorLView[A](name: String)(render: CursorL[A] => ReactElement) =
     ReactComponentB[CursorL[A]](name).render_P(render).configure(Reusability.shouldComponentUpdate).build
 
-  def cursorPView[A, P](name: String)(render: CursorP[A, P] => ReactElement) =
+  def cursorPView[A, P](name: String)(render: CursorP[A, P] => ReactElement): ReqProps[CursorP[A, P], Unit, Unit, TopNode] =
     ReactComponentB[CursorP[A, P]](name).render_P(render).configure(Reusability.shouldComponentUpdate).build
 
   def staticView(name: String)(e: ReactElement) = ReactComponentB[Unit](name)
