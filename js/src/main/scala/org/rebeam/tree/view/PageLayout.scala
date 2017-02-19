@@ -101,7 +101,7 @@ object PageLayout {
 
   def apply(
        color: Color,
-       height: Int,
+       height: Int = 128,
        toolbarText: String = "",
        listFAB: Option[ReactElement] = None,
        title: Option[ReactElement] = None,

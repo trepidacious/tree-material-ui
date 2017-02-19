@@ -91,8 +91,6 @@ object TodoPagesViews {
     }
   }
 
-
-
   val TodoListView = cursorPView[TodoList, Pages[PageWithTodoProjectList, TodoPage]]("TodoListView") {
     cp => {
       //FIXME use actual creation time
@@ -111,9 +109,18 @@ object TodoPagesViews {
           p => cp.act(TodoListAction.TodoIndexChange(p.oldIndex, p.newIndex): TodoListAction)
         )(cp.zoomNP(TodoList.items))
 
-      PageLayout(cp.model.color, 128, "", Some(fab), Some(title), Some(contents), iconButtons = List(
-        ToolbarIconButton(Mui.SvgIcons.ContentArchive()(), cp.act(TodoListAction.Archive: TodoListAction))
-      ))
+      val buttons = List(
+        ToolbarIconButton(
+          Mui.SvgIcons.ContentArchive()(),
+          cp.act(TodoListAction.Archive: TodoListAction)
+        )
+      )
+
+      PageLayout(cp.model.color,
+        listFAB = Some(fab),
+        title = Some(title),
+        contents = Some(contents),
+        iconButtons = buttons)
     }
   }
 
