@@ -6,7 +6,7 @@ import chandu0101.scalajs.react.components.materialui._
 import io.circe.Encoder
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.extra.Reusability
-import japgolly.scalajs.react.vdom.ReactStyle
+import japgolly.scalajs.react.vdom.{ReactStyle, ReactTagOf}
 
 import scala.scalajs.js.UndefOr
 import Mui.Styles.colors
@@ -14,6 +14,8 @@ import japgolly.scalajs.react.ReactComponentC.ReqProps
 
 import scala.language.implicitConversions
 import scala.scalajs.js
+import japgolly.scalajs.react.vdom.prefix_<^._
+import org.scalajs.dom.html.Span
 
 object View {
 
@@ -61,9 +63,9 @@ object View {
 //      floatingLabelText = p.label: ReactNode,
 //      floatingLabelStyle = js.Dynamic.literal("font-size" -> "16px", "color" -> "rgba(255, 255, 255, 0.87"),
       hintText = p.label: ReactNode,
-      hintStyle = js.Dynamic.literal("color" -> "rgba(255, 255, 255, 0.87"),
+      hintStyle = js.Dynamic.literal("color" -> "rgba(255, 255, 255, 0.87)"),
       style = js.Dynamic.literal("font-size" -> "24px"),
-      inputStyle = js.Dynamic.literal("color" -> "rgba(255, 255, 255, 1.00"),
+      inputStyle = js.Dynamic.literal("color" -> "rgba(255, 255, 255, 1.00)"),
       underlineStyle = js.Dynamic.literal(
         "bottom" -> "6px"
       ),
@@ -76,6 +78,12 @@ object View {
       )
     )()
   }
+
+  def labelHero(s: String): ReactTagOf[Span] = <.span(
+    ^.fontSize := "24px",
+    ^.color := "rgba(255, 255, 255, 1.00)",
+    s
+  )
 
   val textViewPlainLabel = cursorLView[String]("textViewPlainLabel") { p =>
     MuiTextField(
