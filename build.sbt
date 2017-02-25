@@ -66,15 +66,6 @@ lazy val treeMaterialUi = crossProject.in(file(".")).
     crossTarget in (Compile, packageJSDependencies) := assetsDir,
 //    crossTarget in (Compile, packageLauncher) := assetsDir,
 
-    // Output compiled scala-js to assets directory
-//    artifactPath in (Compile, fastOptJS) :=
-//      file("assets") / ((moduleName in fastOptJS).value + "-fastopt.js"),
-//
-//    artifactPath in (Compile, fullOptJS) :=
-//      file("assets") / ((moduleName in fullOptJS).value + "-opt.js"),
-
-
-
     // We get javascript dependencies from webpack
     jsDependencies ++= Seq()
   )

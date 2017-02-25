@@ -1,6 +1,6 @@
 package org.rebeam.tree.demo
 
-import cats.data.Xor
+import cats.syntax.either._
 import chandu0101.scalajs.react.components.materialui._
 import demo.components.BarDemo
 import io.circe.Encoder

@@ -1,6 +1,6 @@
 package org.rebeam.tree.view
 
-import cats.data.Xor
+import cats.syntax.either._
 import chandu0101.scalajs.react.components.Implicits._
 import chandu0101.scalajs.react.components.materialui._
 import io.circe.Encoder
@@ -95,7 +95,7 @@ object View {
 
   trait StringCodec[A] {
     def format(a: A): String
-    def parse(s: String): Xor[String, A]
+    def parse(s: String): Either[String, A]
     def prefilter(s: String): String
   }
 
@@ -149,7 +149,7 @@ object View {
         }
 
         val error: UndefOr[ReactNode] = codec.parse(text) match {
-          case Xor.Left(e) => e
+          case Left(e) => e
           case _ => js.undefined
         }
 
@@ -162,7 +162,7 @@ object View {
               // If we have a parsed new model, and it is different to cursor's model, then set new state and model
               // We set the state so that if the input is a non-standard representation of the model, it will still be
               // preserved, since it will be in place on our next render when we check it against the new prop.
-              case Xor.Right(newModel) if newModel != model => e.preventDefaultCB >> scope.setState((input, false)) >> props.set(newModel)
+              case Right(newModel) if newModel != model => e.preventDefaultCB >> scope.setState((input, false)) >> props.set(newModel)
 
               // Otherwise just change state - we are editing without producing a valid new value,
               // but we may be on the way to a valid new value
@@ -174,7 +174,7 @@ object View {
           onBlur = (e: ReactEventI) => {
             val parsed = codec.parse(state._1)
             parsed match {
-              case Xor.Right(p) if p == model => Callback.empty
+              case Right(p) if p == model => Callback.empty
               case _ => scope.setState((codec.format(model), false))
             }
           },
@@ -202,10 +202,10 @@ object View {
 
   val doubleStringCodec: StringCodec[Double] = new StringCodec[Double] {
     override def format(d: Double): String = d.toString
-    override def parse(s: String): Xor[String, Double] = try {
-      Xor.Right(s.toDouble)
+    override def parse(s: String): Either[String, Double] = try {
+      Right(s.toDouble)
     } catch {
-      case e: NumberFormatException => Xor.Left("Valid number required (e.g. 1, -1.1, 1.1E1)")
+      case e: NumberFormatException => Left("Valid number required (e.g. 1, -1.1, 1.1E1)")
     }
     //Remove anything but + - . e E or a digit
     override def prefilter(s: String): String = s.replaceAll("""[^\+\-\.eE\d]""", "")
@@ -215,10 +215,10 @@ object View {
 
   val intStringCodec: StringCodec[Int] = new StringCodec[Int] {
     def format(d: Int): String = d.toString
-    def parse(s: String): Xor[String, Int] = try {
-      Xor.Right(s.toInt)
+    def parse(s: String): Either[String, Int] = try {
+      Right(s.toInt)
     } catch {
-      case e: NumberFormatException => Xor.Left("Valid whole number required (e.g. 1, 100)")
+      case e: NumberFormatException => Left("Valid whole number required (e.g. 1, 100)")
     }
     //Remove anything but + - or a digit
     override def prefilter(s: String): String = s.replaceAll("""[^\+\-\d]""", "")
