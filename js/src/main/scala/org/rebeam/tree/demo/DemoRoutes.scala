@@ -6,6 +6,7 @@ import japgolly.scalajs.react.extra.router._
 import org.rebeam.tree.view.Navigation
 import org.rebeam.tree.view.pages._
 import org.rebeam.tree.demo.DemoData._
+import org.rebeam.tree.sync.Sync._
 
 object DemoRoutes {
 
@@ -18,21 +19,21 @@ object DemoRoutes {
   }
 
   sealed trait PageWithTodoProjectList extends TodoPage {
-    def listId: IdOf[TodoList]
-    def toItem(todoId: IdOf[Todo]) = TodoProjectListItemPage(listId, todoId)
+    def listId: Guid[TodoList]
+    def toItem(todoId: Guid[Todo]) = TodoProjectListItemPage(listId, todoId)
     override def back: TodoPage = TodoProjectPage
   }
 
   sealed trait PageWithTodoProjectListItem extends PageWithTodoProjectList {
-    def todoId: IdOf[Todo]
+    def todoId: Guid[Todo]
     override def back: TodoPage = TodoProjectListPage(listId)
   }
 
   case object TodoProjectPage extends TodoPage {
     override def back: TodoPage = TodoProjectPage
   }
-  case class TodoProjectListPage(listId: IdOf[TodoList]) extends PageWithTodoProjectList
-  case class TodoProjectListItemPage(listId: IdOf[TodoList], todoId: IdOf[Todo]) extends PageWithTodoProjectListItem
+  case class TodoProjectListPage(listId: Guid[TodoList]) extends PageWithTodoProjectList
+  case class TodoProjectListItemPage(listId: Guid[TodoList], todoId: Guid[Todo]) extends PageWithTodoProjectListItem
 
   implicit val transitions = new PagesToTransition[TodoPage] {
     override def apply(from: TodoPage, to: TodoPage) = {
@@ -49,13 +50,13 @@ object DemoRoutes {
     def dynRenderP[P <: Page](g: Pages[P, P] => ReactElement): P => Renderer =
       p => Renderer(r => g(Pages(p, r.narrow[P])))
 
-    def idOf[A] = int.pmap(i => Some(IdOf[A](i)))(_.value)
+    def guid[A] = (long ~ "-" ~ long ~ "-" ~ long).xmap(t => Guid[A](ClientId(t._1), ClientDeltaId(t._2), t._3))(g => (g.clientId.id, g.clientDeltaId.id, g.id))
 
     def caseObject[A](s: String, a: A) = RouteB.literal(s).xmap(_ => a)(_ => ())
 
     val todoProjectRoute = caseObject("#todo", TodoProjectPage)
-    val todoProjectListRoute = ("#todo/list" / idOf[TodoList]).caseClass[TodoProjectListPage]
-    val todoProjectListItemRoute = ("#todo/list" / idOf[TodoList] / "item" / idOf[Todo]).caseClass[TodoProjectListItemPage]
+    val todoProjectListRoute = ("#todo/list" / guid[TodoList]).caseClass[TodoProjectListPage]
+    val todoProjectListItemRoute = ("#todo/list" / guid[TodoList] / "item" / guid[Todo]).caseClass[TodoProjectListItemPage]
 
     (trimSlashes
       | staticRoute(root,   HomePage) ~> render(DemoViews.homeView())

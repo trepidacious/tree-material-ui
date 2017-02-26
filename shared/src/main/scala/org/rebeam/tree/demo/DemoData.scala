@@ -10,17 +10,12 @@ import scala.language.higherKinds
 import BasicDeltaDecoders._
 import DeltaCodecs._
 import io.circe.generic.JsonCodec
-import org.rebeam.tree.sync.Sync.ModelIdGen
+import org.rebeam.tree.Delta._
+import org.rebeam.tree.sync.Sync._
 
 import scala.collection.mutable.ListBuffer
 
 object DemoData {
-
-  @JsonCodec
-  case class IdOf[A](value: Int) extends AnyVal {
-    def next: IdOf[A] = IdOf[A](value + 1)
-    override def toString: String = s"#$value"
-  }
 
   @JsonCodec
   @Lenses
@@ -42,17 +37,17 @@ object DemoData {
   sealed trait StreetAction extends Delta[Street]
   object StreetAction {
     case class NumberMultiple(multiple: Int) extends StreetAction {
-      def apply(s: Street): Street = s.copy(number = s.name.length * multiple)
+      def apply(s: Street): DeltaIO[Street] = pure(s.copy(number = s.name.length * multiple))
     }
 
     case object Capitalise extends StreetAction {
-      def apply(s: Street): Street = s.copy(name = s.name.toLowerCase.capitalize)
+      def apply(s: Street): DeltaIO[Street] = pure(s.copy(name = s.name.toLowerCase.capitalize))
     }
   }
 
   // Alternative to @JsonCodec
-//  implicit val streetDecoder: Decoder[Street] = deriveDecoder[Street]
-//  implicit val streetEncoder: Encoder[Street] = deriveEncoder[Street]
+  //  implicit val streetDecoder: Decoder[Street] = deriveDecoder[Street]
+  //  implicit val streetEncoder: Encoder[Street] = deriveEncoder[Street]
 
   implicit val streetDeltaDecoder =
     value[Street] or lensN(Street.name) or lensN(Street.number) or lensN(Street.temperature) or action[Street, StreetAction]
@@ -62,8 +57,6 @@ object DemoData {
   implicit val addressIdGen = new ModelIdGen[Address] {
     def genId(a: Address) = None
   }
-
-
 
   @JsonCodec
   sealed trait Priority
@@ -82,7 +75,7 @@ object DemoData {
   @JsonCodec
   @Lenses
   case class Todo (
-                            id: IdOf[Todo],
+                            id: Guid[Todo],
                             name: String,
                             created: Moment,
                             completed: Boolean = false,
@@ -96,33 +89,34 @@ object DemoData {
 //      def apply(t: Todo): Todo = t.copy(completed = Some(completed))
 //    }
     case object CyclePriority extends TodoAction {
-      def apply(t: Todo): Todo = t.copy(priority =
-        if (t.priority == Priority.Low) {
-          Priority.Medium
-        } else if (t.priority == Priority.Medium) {
-          Priority.High
-        } else {
-          Priority.Low
-        }
-      )
+      def apply(t: Todo): DeltaIO[Todo] = pure {
+        t.copy(priority =
+          if (t.priority == Priority.Low) {
+            Priority.Medium
+          } else if (t.priority == Priority.Medium) {
+            Priority.High
+          } else {
+            Priority.Low
+          }
+        )
+      }
     }
   }
 
   @JsonCodec
   @Lenses
   case class TodoList (
-    id: IdOf[TodoList],
+    id: Guid[TodoList],
     name: String,
     created: Moment,
     priority: Priority = Priority.Medium,
     color: Color = MaterialColor.Grey(500),
-    items: List[Todo] = Nil,
-    nextTodoId: IdOf[Todo] = IdOf[Todo](1)
+    items: List[Todo] = Nil
   )
 
   //Works with Cursor.zoomMatch to zoom to a particular Todo
   @JsonCodec
-  case class FindTodoById(id: IdOf[Todo]) extends (Todo => Boolean) {
+  case class FindTodoById(id: Guid[Todo]) extends (Todo => Boolean) {
     def apply(t: Todo): Boolean = t.id == id
   }
 
@@ -131,18 +125,20 @@ object DemoData {
   object TodoListAction {
 
     case class CreateTodo(created: Moment, name: String = "New todo", priority: Priority = Priority.Medium) extends TodoListAction {
-      def apply(l: TodoList): TodoList = {
-        val t = Todo(l.nextTodoId, name, created, false, priority)
-        l.copy(items = t :: l.items, nextTodoId = l.nextTodoId.next)
+      def apply(l: TodoList): DeltaIO[TodoList] = for {
+        id <- getId[Todo]
+      } yield {
+        val t = Todo(id, name, created, completed = false, priority)
+        l.copy(items = t :: l.items)
       }
     }
 
     case class DeleteExactTodo(t: Todo) extends TodoListAction {
-      def apply(l: TodoList): TodoList = l.copy(items = l.items.filterNot(_ == t))
+      def apply(l: TodoList): DeltaIO[TodoList] = pure(l.copy(items = l.items.filterNot(_ == t)))
     }
 
-    case class DeleteTodoById(id: IdOf[Todo]) extends TodoListAction {
-      def apply(l: TodoList): TodoList = l.copy(items = l.items.filterNot(_.id == id))
+    case class DeleteTodoById(id: Guid[Todo]) extends TodoListAction {
+      def apply(l: TodoList): DeltaIO[TodoList] = pure(l.copy(items = l.items.filterNot(_.id == id)))
     }
 
     case class TodoIndexChange(oldIndex: Int, newIndex: Int) extends TodoListAction {
@@ -156,13 +152,13 @@ object DemoData {
           lb.toList
         }
       }
-      def apply(p: TodoList): TodoList = {
+      def apply(p: TodoList): DeltaIO[TodoList] = pure {
         p.copy(items = updatedList(p.items))
       }
     }
 
     case object Archive extends TodoListAction {
-      def apply(p: TodoList): TodoList = {
+      def apply(p: TodoList): DeltaIO[TodoList] = pure {
         p.copy(items = p.items.filterNot(todo => todo.completed))
       }
     }
@@ -170,21 +166,12 @@ object DemoData {
   }
 
   @JsonCodec
-  case class TodoProjectId(value: Int) extends AnyVal {
-    def next: TodoProjectId = TodoProjectId(value + 1)
-  }
-  object TodoProjectId {
-    val first: TodoProjectId = TodoProjectId(1)
-  }
-
-  @JsonCodec
   @Lenses
   case class TodoProject (
-                        id: TodoProjectId,
+                        id: Guid[TodoProject],
                         name: String,
                         color: Color = MaterialColor.Grey(500),
-                        lists: List[TodoList],
-                        nextListId: IdOf[TodoList] = IdOf[TodoList](1)
+                        lists: List[TodoList]
                       )
 
   @JsonCodec
@@ -192,18 +179,20 @@ object DemoData {
   object TodoProjectAction {
 
     case class CreateTodoList(created: Moment, name: String = "New todo list", priority: Priority = Priority.Medium) extends TodoProjectAction {
-      def apply(p: TodoProject): TodoProject = {
-        val t = TodoList(p.nextListId, name, created, priority)
-        p.copy(lists = t :: p.lists, nextListId = p.nextListId.next)
+      def apply(p: TodoProject): DeltaIO[TodoProject] = for {
+        id <- getId[TodoList]
+      } yield {
+        val t = TodoList(id, name, created, priority)
+        p.copy(lists = t :: p.lists)
       }
     }
 
     case class DeleteExactList(l: TodoList) extends TodoProjectAction {
-      def apply(p: TodoProject): TodoProject = p.copy(lists = p.lists.filterNot(_ == l))
+      def apply(p: TodoProject): DeltaIO[TodoProject] = pure(p.copy(lists = p.lists.filterNot(_ == l)))
     }
 
-    case class DeleteListById(id: IdOf[TodoList]) extends TodoProjectAction {
-      def apply(p: TodoProject): TodoProject = p.copy(lists = p.lists.filterNot(_.id == id))
+    case class DeleteListById(id: Guid[TodoList]) extends TodoProjectAction {
+      def apply(p: TodoProject): DeltaIO[TodoProject] = pure(p.copy(lists = p.lists.filterNot(_.id == id)))
     }
 
     case class ListIndexChange(oldIndex: Int, newIndex: Int) extends TodoProjectAction {
@@ -217,7 +206,7 @@ object DemoData {
           lb.toList
         }
       }
-      def apply(p: TodoProject): TodoProject = {
+      def apply(p: TodoProject): DeltaIO[TodoProject] = pure {
         p.copy(lists = updatedList(p.lists))
       }
     }
@@ -226,7 +215,7 @@ object DemoData {
 
   //Works with Cursor.zoomMatch to zoom to a particular TodoList
   @JsonCodec
-  case class FindTodoListById(id: IdOf[TodoList]) extends (TodoList => Boolean) {
+  case class FindTodoListById(id: Guid[TodoList]) extends (TodoList => Boolean) {
     def apply(t: TodoList): Boolean = t.id == id
   }
 

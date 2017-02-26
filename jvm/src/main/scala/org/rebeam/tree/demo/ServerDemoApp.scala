@@ -20,44 +20,64 @@ import scalaz.stream.async.unboundedQueue
 import scalaz.stream.time.awakeEvery
 import scalaz.stream.{DefaultScheduler, Exchange, Process, Sink}
 import DemoData._
-import org.rebeam.tree.sync.Sync.ClientId
+import org.rebeam.tree.Delta._
+import org.rebeam.tree.sync.Sync._
+import org.rebeam.tree.sync.DeltaIORun._
+
+import cats.instances.list._
+import cats.syntax.traverse._
 
 object ServerDemoApp extends ServerApp {
 
   val address = new ServerStore(Address(Street("OLD STREET", 1, 22.3)))
 
-  def todoListExample(id: IdOf[TodoList]) = {
+  val listCount = 1000
+  val itemCount = 10
+
+  def todoListIO(listIndex: Int): DeltaIO[TodoList] = for {
+    id <- getId[TodoList]
+    todoIds <- (1 to itemCount).toList.map(_ => getId[Todo]).sequence
+  } yield {
     val time = System.currentTimeMillis()
     TodoList(
       id,
-      s"Todo list ${id.value}",
+      s"Todo list ${listIndex}",
       Moment(time),
       Priority.Medium,
-      MaterialColor.backgroundForIndex(id.value - 1),
+      MaterialColor.backgroundForIndex(id.id.toInt - 1),
       (1 to itemCount).map(i => {
         Todo(
-          IdOf[Todo](i), "Item " + i, Moment(time - 60000 * (10 - i)),
+          todoIds(i-1),
+          "Todo " + i,
+          Moment(time - 60000 * (10 - i)),
           priority = i % 3 match {
             case 0 => Priority.Low
             case 1 => Priority.Medium
             case _ => Priority.High
           }
         )
-      }).toList,
-      IdOf[Todo](itemCount + 1)
+      }).toList
     )
   }
 
-  val todoList = todoListExample(IdOf[TodoList](1))
+  val todoProjectIO: DeltaIO[TodoProject] = for{
+    id <- getId[TodoProject]
+    lists <- (1 to listCount).toList.map(i => todoListIO(i)).sequence
+  } yield {
+    TodoProject(
+      id,
+      "Todo project",
+      MaterialColor.Indigo(),
+      lists
+    )
+  }
 
-  val todoListStore = new ServerStore(todoList)
 
-  val listCount = 1000
-  val itemCount = 10
-
-  val todoProject = TodoProject(TodoProjectId.first, "Todo project", MaterialColor.Indigo(), (1 to listCount).map(i => todoListExample(IdOf[TodoList](i))).toList, IdOf[TodoList](listCount + 1))
+  val todoProject = todoProjectIO.runWithId(DeltaId(ClientId(-1), ClientDeltaId(0)))
 
   val todoProjectStore = new ServerStore(todoProject)
+
+  val todoListStore = new ServerStore(todoProject.lists.head)
 
   // TODO better way of doing this
   val nextClientId = new AtomicLong(0)

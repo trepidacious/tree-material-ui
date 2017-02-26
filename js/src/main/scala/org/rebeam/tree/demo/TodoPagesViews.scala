@@ -29,7 +29,7 @@ object TodoPagesViews {
     cp => {
       val list = cp.model
       val toList = cp.p.set(TodoProjectListPage(list.id))
-      val idString = s"${list.id.value}"
+      val idString = s"${list.id}"
       val contents = SortableListItem.twoLines(
         s"${list.name}",
         s"${list.items.size} item${if (list.items.size == 1) "" else "s"}"
@@ -41,7 +41,7 @@ object TodoPagesViews {
   val TodoListsView = ListView[TodoList, TodoPage, TodoPage, FindTodoListById](
     "TodoListView",
     l => FindTodoListById(l.id),
-    l => l.id.value,
+    l => l.id.toString(),
     TodoListSummaryView,
     "Todo lists"
   )
@@ -66,7 +66,7 @@ object TodoPagesViews {
   val TodoItemsView = ListView[Todo, PageWithTodoProjectList, TodoPage, FindTodoById](
     "TodoItemsView",
     todo => FindTodoById(todo.id),
-    todo => todo.id.value,
+    todo => todo.id.toString(),
     TodoItemSummaryView,
     "Todo items"
   )

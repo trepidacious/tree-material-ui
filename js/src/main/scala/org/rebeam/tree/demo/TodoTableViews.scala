@@ -27,7 +27,7 @@ object TodoTableViews {
         booleanViewUnlabelled(c.zoomN(Todo.completed))
       ),
       MuiTableRowColumn(style = js.Dynamic.literal("width" -> "40px"))(
-        "#" + t.id.value
+        t.id.toString()
       ),
       MuiTableRowColumn(style = js.Dynamic.literal("width" -> "100%"))(
         textViewPlainLabel(c.zoomN(Todo.name).label("Name"))
