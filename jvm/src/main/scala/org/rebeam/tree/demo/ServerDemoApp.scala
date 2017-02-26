@@ -41,7 +41,7 @@ object ServerDemoApp extends ServerApp {
     val time = System.currentTimeMillis()
     TodoList(
       id,
-      s"Todo list ${listIndex}",
+      s"Todo list $listIndex",
       Moment(time),
       Priority.Medium,
       MaterialColor.backgroundForIndex(id.id.toInt - 1),
@@ -71,7 +71,6 @@ object ServerDemoApp extends ServerApp {
       lists
     )
   }
-
 
   val todoProject = todoProjectIO.runWithId(DeltaId(ClientId(-1), ClientDeltaId(0)))
 
