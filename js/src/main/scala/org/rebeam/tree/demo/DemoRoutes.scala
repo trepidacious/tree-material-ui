@@ -51,7 +51,7 @@ object DemoRoutes {
       p => Renderer(r => g(Pages(p, r.narrow[P])))
 
     def guid[A] = new RouteB[Guid[A]](Guid.regex.regex, 1, g => Guid.fromString[A](g(0)), _.toString)
-    
+
     def caseObject[A](s: String, a: A) = RouteB.literal(s).xmap(_ => a)(_ => ())
 
     val todoProjectRoute = caseObject("#todo", TodoProjectPage)
