@@ -50,8 +50,8 @@ object DemoRoutes {
     def dynRenderP[P <: Page](g: Pages[P, P] => ReactElement): P => Renderer =
       p => Renderer(r => g(Pages(p, r.narrow[P])))
 
-    def guid[A] = (long ~ "-" ~ long ~ "-" ~ long).xmap(t => Guid[A](ClientId(t._1), ClientDeltaId(t._2), t._3))(g => (g.clientId.id, g.clientDeltaId.id, g.id))
-
+    def guid[A] = new RouteB[Guid[A]](Guid.regex.regex, 1, g => Guid.fromString[A](g(0)), _.toString)
+    
     def caseObject[A](s: String, a: A) = RouteB.literal(s).xmap(_ => a)(_ => ())
 
     val todoProjectRoute = caseObject("#todo", TodoProjectPage)

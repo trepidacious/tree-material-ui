@@ -73,14 +73,14 @@ object ServerDemoApp extends ServerApp {
     )
   }
 
-  val todoProject = todoProjectIO.runWithId(DeltaId(ClientId(-1), ClientDeltaId(0)))
+  val todoProject = todoProjectIO.runWithId(DeltaId(ClientId(0), ClientDeltaId(0)))
 
   val todoProjectStore = new ServerStore(todoProject)
 
   val todoListStore = new ServerStore(todoProject.lists.head)
 
-  // TODO better way of doing this
-  val nextClientId = new AtomicLong(0)
+  // TODO better way of doing this - start from 1 since we use 0 to generate example data
+  val nextClientId = new AtomicLong(1)
 
   val apiService = HttpService {
 
