@@ -34,35 +34,36 @@ object ServerDemoApp extends ServerApp {
   val listCount = 1000
   val itemCount = 10
 
+  def todoIO(i: Int): DeltaIO[Todo] = for {
+    id <- getId[Todo]
+  } yield {
+    Todo(
+      id,
+      "Todo " + i,
+      priority = i % 3 match {
+        case 0 => Priority.Low
+        case 1 => Priority.Medium
+        case _ => Priority.High
+      }
+    )
+  }
+
   def todoListIO(listIndex: Int): DeltaIO[TodoList] = for {
     id <- getId[TodoList]
-    todoIds <- (1 to itemCount).toList.map(_ => getId[Todo]).sequence
+    todos <- (1 to itemCount).toList.traverse(todoIO(_))
   } yield {
-    val time = System.currentTimeMillis()
     TodoList(
       id,
       s"Todo list $listIndex",
-      Moment(time),
       Priority.Medium,
       MaterialColor.backgroundForIndex(id.id.toInt - 1),
-      (1 to itemCount).map(i => {
-        Todo(
-          todoIds(i-1),
-          "Todo " + i,
-          Moment(time - 60000 * (10 - i)),
-          priority = i % 3 match {
-            case 0 => Priority.Low
-            case 1 => Priority.Medium
-            case _ => Priority.High
-          }
-        )
-      }).toList
+      todos
     )
   }
 
   val todoProjectIO: DeltaIO[TodoProject] = for{
     id <- getId[TodoProject]
-    lists <- (1 to listCount).toList.map(i => todoListIO(i)).sequence
+    lists <- (1 to listCount).toList.traverse(todoListIO(_))
   } yield {
     TodoProject(
       id,

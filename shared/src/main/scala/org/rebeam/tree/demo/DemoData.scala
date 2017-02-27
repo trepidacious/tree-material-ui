@@ -77,7 +77,6 @@ object DemoData {
   case class Todo (
                             id: Guid[Todo],
                             name: String,
-                            created: Moment,
                             completed: Boolean = false,
                             priority: Priority = Priority.Medium
                           )
@@ -85,9 +84,6 @@ object DemoData {
   @JsonCodec
   sealed trait TodoAction extends Delta[Todo]
   object TodoAction {
-//    case class Complete(completed: Moment) extends TodoAction {
-//      def apply(t: Todo): Todo = t.copy(completed = Some(completed))
-//    }
     case object CyclePriority extends TodoAction {
       def apply(t: Todo): DeltaIO[Todo] = pure {
         t.copy(priority =
@@ -108,7 +104,6 @@ object DemoData {
   case class TodoList (
     id: Guid[TodoList],
     name: String,
-    created: Moment,
     priority: Priority = Priority.Medium,
     color: Color = MaterialColor.Grey(500),
     items: List[Todo] = Nil
@@ -124,11 +119,11 @@ object DemoData {
   sealed trait TodoListAction extends Delta[TodoList]
   object TodoListAction {
 
-    case class CreateTodo(created: Moment, name: String = "New todo", priority: Priority = Priority.Medium) extends TodoListAction {
+    case class CreateTodo(name: String = "New todo", priority: Priority = Priority.Medium) extends TodoListAction {
       def apply(l: TodoList): DeltaIO[TodoList] = for {
         id <- getId[Todo]
       } yield {
-        val t = Todo(id, name, created, completed = false, priority)
+        val t = Todo(id, name, completed = false, priority)
         l.copy(items = t :: l.items)
       }
     }
@@ -178,11 +173,11 @@ object DemoData {
   sealed trait TodoProjectAction extends Delta[TodoProject]
   object TodoProjectAction {
 
-    case class CreateTodoList(created: Moment, name: String = "New todo list", priority: Priority = Priority.Medium) extends TodoProjectAction {
+    case class CreateTodoList(name: String = "New todo list", priority: Priority = Priority.Medium) extends TodoProjectAction {
       def apply(p: TodoProject): DeltaIO[TodoProject] = for {
         id <- getId[TodoList]
       } yield {
-        val t = TodoList(id, name, created, priority)
+        val t = TodoList(id, name, priority)
         p.copy(lists = t :: p.lists)
       }
     }

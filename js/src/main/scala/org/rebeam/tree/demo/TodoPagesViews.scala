@@ -76,7 +76,7 @@ object TodoPagesViews {
   val TodoProjectView = cursorPView[TodoProject, Pages[TodoPage, TodoPage]]("TodoProjectView") {
     cp => {
       //FIXME use actual creation time
-      val fab = PageLayout.addFAB(cp.act(TodoProjectAction.CreateTodoList(Moment(0)): TodoProjectAction))
+      val fab = PageLayout.addFAB(cp.act(TodoProjectAction.CreateTodoList(): TodoProjectAction))
 
       val title = Breadcrumbs.container(
         textViewHero(cp.zoomN(TodoProject.name).label("Project name"))
@@ -94,7 +94,7 @@ object TodoPagesViews {
   val TodoListView = cursorPView[TodoList, Pages[PageWithTodoProjectList, TodoPage]]("TodoListView") {
     cp => {
       //FIXME use actual creation time
-      val fab = PageLayout.addFAB(cp.act(TodoListAction.CreateTodo(Moment(0)): TodoListAction))
+      val fab = PageLayout.addFAB(cp.act(TodoListAction.CreateTodo(): TodoListAction))
 
       val title =
         Breadcrumbs.container(
