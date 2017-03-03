@@ -9,7 +9,17 @@ import scala.scalajs.js
 
 object PageLayout {
 
-  case class Props(color: Color, height: Int, toolbarText: String, listFAB: Option[ReactElement], title: Option[ReactElement], contents: Option[ReactElement], footer: Option[ReactElement], iconButtons: List[ReactElement])
+  case class Props(
+    color: Color,
+    height: Int,
+    toolbarText: String,
+    listFAB: Option[ReactElement],
+    title: Option[ReactElement],
+    contents: Option[ReactElement],
+    footer: Option[ReactElement],
+    iconButtons: List[ReactElement],
+    backgroundColor: Color
+  )
 
   private val component = ReactComponentB[Props]("PageLayout")
     .render_P(p => {
@@ -80,7 +90,8 @@ object PageLayout {
             ^.top := s"${p.height}px",
             ^.bottom := "0px",
             ^.left := "0px",
-            ^.width := "100%"
+            ^.width := "100%",
+            ^.backgroundColor := p.backgroundColor
           )(p.contents),
 
           // Optional footer
@@ -107,8 +118,9 @@ object PageLayout {
        title: Option[ReactElement] = None,
        contents: Option[ReactElement] = None,
        footer: Option[ReactElement] = None,
-       iconButtons: List[ReactElement] = Nil): RCP[Props] =
-    component(Props(color, height, toolbarText, listFAB, title, contents, footer, iconButtons))
+       iconButtons: List[ReactElement] = Nil,
+       backgroundColor: Color = MaterialColor.White()): RCP[Props] =
+    component(Props(color, height, toolbarText, listFAB, title, contents, footer, iconButtons, backgroundColor))
 
   def addFAB(callback: Callback): ReactComponentU_ = {
     MuiFloatingActionButton(

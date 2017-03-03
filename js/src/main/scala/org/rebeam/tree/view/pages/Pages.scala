@@ -34,6 +34,9 @@ object Pages {
     def zoomPagePF[D <: C](cToD: PartialFunction[C, D]): Option[CursorP[M, Pages[D, P]]] =
       zoomPage(cToD.lift)
 
+    def zoomPageEqual[D <: C](d: D): Option[CursorP[M, Pages[D, P]]] =
+      zoomPage(c => if (c == d) Some(d) else None)
+
     def zoomPage[D <: C](cToD: C => Option[D]): Option[CursorP[M, Pages[D, P]]] = {
       val c = cursor.p.current
       cToD(c).map(d => cursor.withP(cursor.p.withCurrent(d)))
