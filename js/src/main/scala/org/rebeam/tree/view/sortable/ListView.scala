@@ -50,7 +50,9 @@ object ListView {
           // expects the top level component to be the one containing the sortable elements. Using a div
           // breaks this and so breaks the nice feature where dragging to container edge starts scrolling.
           Infinite(elementHeight = 60, containerHeight = h, className = "tree-infinite--height-100-percent")(
-            MuiSubheader(inset = true, style = js.Dynamic.literal("height" -> "60px"))(subheader)
+            //Extra 8px of padding since we are makind subheader larger, and we want to line up with subheader used
+            //with normal 8px top and bottom padding on material content elements
+            MuiSubheader(inset = true, style = js.Dynamic.literal("height" -> "60px", "padding-top" -> "8px"))(subheader)
               :: cp.zoomAllMatchesP(toItem).zipWithIndex.map {
               case (itemCP, index) => sortableElement(SortableElement.Props(key = itemToKey(itemCP.model), index = index))(itemCP)
             }

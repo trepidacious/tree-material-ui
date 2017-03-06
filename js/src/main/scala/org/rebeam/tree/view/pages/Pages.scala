@@ -15,6 +15,7 @@ import scala.reflect.ClassTag
   */
 case class Pages[+C, P](current: C, ctl: RouterCtl[P]) {
   def set(target: P): Callback = ctl.set(target)
+  def modify(f: C => P): Callback = set(f(current))
   def withCurrent[D](d: D): Pages[D, P] = copy(current = d)
 }
 
@@ -42,17 +43,17 @@ object Pages {
       cToD(c).map(d => cursor.withP(cursor.p.withCurrent(d)))
     }
 
-    def zoom[N, D](cToD: C => Option[(D, Cursor[N])]): Option[CursorP[N, Pages[D, P]]] = {
+    def zoomModelAndPage[N, D](cToD: C => Option[(Cursor[N], D)]): Option[CursorP[N, Pages[D, P]]] = {
       val c = cursor.p.current
-      cToD(c).map{case (d, cn) => cn.withP(cursor.p.withCurrent(d))}
+      cToD(c).map{case (cn, d) => cn.withP(cursor.p.withCurrent(d))}
     }
 
-    class Zoomer[N, D <: C] {
+    class ModelAndPageZoomer[N, D <: C] {
       def apply(zoomWithD: D => Option[Cursor[N]])(implicit ct: ClassTag[D]): Option[CursorP[N, Pages[D, P]]]
-      = zoom[N, D](c => for (d <- ct.unapply(c); cn <- zoomWithD(d)) yield (d, cn))
+      = zoomModelAndPage[N, D](c => for (d <- ct.unapply(c); cn <- zoomWithD(d)) yield (cn, d))
     }
 
-    def zoomCT[N, D <: C] = new Zoomer[N, D]
+    def zoomModelAndPageCT[N, D <: C] = new ModelAndPageZoomer[N, D]
 
   }
 }

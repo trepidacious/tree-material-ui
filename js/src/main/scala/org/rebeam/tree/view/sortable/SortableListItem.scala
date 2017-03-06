@@ -7,7 +7,7 @@ object SortableListItem {
 
   case class Props(leftIcon: ReactElement, content: ReactElement, onClick: Callback, onClickContents: Callback)
 
-  val component = ReactComponentB[Props]("TitleBar")
+  val component = ReactComponentB[Props]("SortableListItem")
     .render_P(p => {
 
       <.div(

@@ -79,8 +79,10 @@ object View {
     )()
   }
 
+  //FIXME work out a better way to aline with textViewHero
   def labelHero(s: String): ReactTagOf[Span] = <.span(
-    ^.fontSize := "24px",
+    ^.fontSize := "23px",
+    ^.paddingTop := "16px",
     ^.color := "rgba(255, 255, 255, 1.00)",
     s
   )

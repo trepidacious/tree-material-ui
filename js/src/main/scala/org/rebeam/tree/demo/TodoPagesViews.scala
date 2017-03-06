@@ -160,11 +160,11 @@ object TodoPagesViews {
       // Zoom from project to list. If Page is a PageWithTodoProjectList, we
       // will produce a cursor whose model is the specified list, and where
       // Pages have current page type PageWithTodoProjectList
-      val list = cp.zoomCT[TodoList, PageWithTodoProjectList](p =>
+      val list = cp.zoomModelAndPageCT[TodoList, PageWithTodoProjectList](p =>
         cp.zoomN(TodoProject.lists).zoomMatch(FindTodoListById(p.listId))
       )
 
-      val item = cp.zoomCT[Todo, TodoProjectListItemPage](p =>
+      val item = cp.zoomModelAndPageCT[Todo, TodoProjectListItemPage](p =>
         cp.zoomN(TodoProject.lists).zoomMatch(FindTodoListById(p.listId)).flatMap(_.zoomN(TodoList.items).zoomMatch(FindTodoById(p.todoId)))
       )
 
