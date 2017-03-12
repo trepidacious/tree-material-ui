@@ -4,9 +4,10 @@ import chandu0101.scalajs.react.components.materialui._
 import io.circe.Encoder
 import japgolly.scalajs.react.ReactComponentC.ReqProps
 import japgolly.scalajs.react.{Callback, ReactComponentU_, TopNode}
+import org.rebeam.tree.sync.Sync._
 import org.rebeam.tree.view.{Cursor, CursorP}
 import org.rebeam.tree.view.infinite.Infinite
-import org.rebeam.tree.view.measure.{CursorHeightView, CursorPHeightView}
+import org.rebeam.tree.view.measure.CursorPHeightView
 import org.rebeam.tree.view.pages.Pages
 
 import scala.scalajs.js
@@ -34,7 +35,7 @@ object ListView {
                                          itemToKey: A => js.Any,
                                          itemView: ReqProps[CursorP[A, Pages[C, P]], Unit, Unit, TopNode],
                                          subheader: String)(implicit fEncoder: Encoder[F]): ((IndexChange) => Callback) => (CursorP[List[A], Pages[C, P]]) => ReactComponentU_ = {
-    ListView[List[A], CursorP[A, Pages[C, P]], Pages[C, P]](
+    ListView[List[A], Pages[C, P], CursorP[A, Pages[C, P]]](
       name,
       _.zoomAllMatchesP(toItem),
       c => itemToKey(c.model),
@@ -42,14 +43,14 @@ object ListView {
       subheader)
   }
 
-  def withAction[R, A, P, Q](
+  def withAction[R, P, A, Q](
     name: String,
     listCursorToItems: CursorP[R, P] => List[CursorP[A, Q]],
     itemToKey: A => js.Any,
     itemView: ReqProps[CursorP[A, Q], Unit, Unit, TopNode],
     subheader: String
    ): ((IndexChange) => Callback) => (CursorP[R, P]) => ReactComponentU_ = {
-    ListView[R, CursorP[A, Q], P](
+    ListView[R, P, CursorP[A, Q]](
       name,
       listCursorToItems,
       c => itemToKey(c.model),
@@ -58,7 +59,7 @@ object ListView {
     )
   }
 
-  def withAction[R, A, P, Q, F <: A => Boolean](
+  def usingMatches[R, P, A, Q, F <: A => Boolean](
     name: String,
     rootToItems: CursorP[R, P] => Cursor[List[A]],
     itemToFinder: A => F,
@@ -67,7 +68,7 @@ object ListView {
     itemView: ReqProps[CursorP[A, Q], Unit, Unit, TopNode],
     subheader: String
   )(implicit fEncoder: Encoder[F]): ((IndexChange) => Callback) => (CursorP[R, P]) => ReactComponentU_ = {
-    ListView.withAction[R, A, P, Q](
+    ListView.withAction[R, P, A, Q](
       name,
       (cp: CursorP[R, P]) => rootToItems(cp).zoomAllMatches(itemToFinder).map(ca => ca.withP(itemAndCursorToAction(ca.model, cp))),
       c => itemToKey(c),
@@ -75,6 +76,26 @@ object ListView {
       subheader
     )
   }
+
+  def usingId[R, P, A <: HasId[A], Q](
+    name: String,
+    rootToItems: CursorP[R, P] => Cursor[List[A]],
+    itemAndCursorToAction: (A, CursorP[R, P]) => Q,
+    itemView: ReqProps[CursorP[A, Q], Unit, Unit, TopNode],
+    subheader: String
+  )(implicit fEncoder: Encoder[FindById[A]]): ((IndexChange) => Callback) => (CursorP[R, P]) => ReactComponentU_ = {
+    ListView.usingMatches[R, P, A, Q, FindById[A]](
+      name,
+      rootToItems,
+      a => FindById[A](a.id),
+      itemAndCursorToAction,
+      a => a.id.toString(),
+      itemView,
+      subheader
+    )
+  }
+
+
 
   /**
     * Create a component viewing a list
@@ -84,11 +105,11 @@ object ListView {
     * @param itemView     A view for an element
     * @param subheader    The subheader text to display in list
     * @tparam L           The type of the list-like model
-    * @tparam A           The type of list element
     * @tparam P           The type P for CursorP
+    * @tparam A           The type of list element
     * @return             A view of the list, with infinite scrolling, suitable for use in a SortableContainer
     */
-  def apply[L, A, P](
+  def apply[L, P, A](
                                       name: String,
                                       listCursorToItems: CursorP[L, P] => List[A],
                                       itemToKey: A => js.Any,
