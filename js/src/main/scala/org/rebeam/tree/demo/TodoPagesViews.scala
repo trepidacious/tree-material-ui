@@ -38,7 +38,7 @@ object TodoPagesViews {
     }
   }
 
-  val TodoListsView = ListView[TodoList, TodoPage, TodoPage, FindTodoListById](
+  val TodoListsView = ListView.legacy[TodoList, TodoPage, TodoPage, FindTodoListById](
     "TodoListView",
     l => FindTodoListById(l.id),
     l => l.id.toString(),
@@ -63,7 +63,7 @@ object TodoPagesViews {
     }
   }
 
-  val TodoItemsView = ListView[Todo, PageWithTodoProjectList, TodoPage, FindTodoById](
+  val TodoItemsView = ListView.legacy[Todo, PageWithTodoProjectList, TodoPage, FindTodoById](
     "TodoItemsView",
     todo => FindTodoById(todo.id),
     todo => todo.id.toString(),
