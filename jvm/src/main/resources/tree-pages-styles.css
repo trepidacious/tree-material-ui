@@ -161,3 +161,584 @@
   animation-fill-mode: both;
   animation-timing-function: cubic-bezier(0.4, 0.0, 0.2, 1);
 }
+
+
+/* Sliding panel list item */
+
+.tree-list-item__transition-container {
+  position: relative;
+  width: 100%;
+  height: 60px;
+  box-sizing: border-box;
+  opacity: 1.0;
+  overflow: hidden;
+}
+
+/* Animating enter/leave of list items */
+/* Start of entering */
+.tree-list-view--transition-enter.tree-list-item__transition-container {
+  will-change: height opacity;
+  height: 0px;
+  opacity: 0.0;
+}
+
+/* End of entering */
+.tree-list-view--transition-enter.tree-list-view--transition-enter-active.tree-list-item__transition-container {
+  height: 60px;
+  transition: all 225ms cubic-bezier(0.4, 0.0, 0.2, 1);
+  opacity: 1.0;
+}
+
+/* Start of leaving */
+.tree-list-view--transition-leave.tree-list-item__transition-container {
+  will-change: height opacity;
+  height: 60px;
+  opacity: 1.0;
+}
+
+/* End of leaving */
+.tree-list-view--transition-leave.tree-list-view--transition-leave-active.tree-list-item__transition-container {
+  will-change: height opacity;
+  height: 0px;
+  transition: all 195ms cubic-bezier(0.4, 0.0, 0.2, 1);
+  opacity: 0.0;
+}
+
+
+/* Plain contents */
+.tree-list-item__plain-outer {
+  display: flex;
+
+  position: absolute;
+  top: 0px;
+  left: 0px;
+
+  cursor: pointer;
+  width: 100%;
+  height: 60px;
+  box-sizing: border-box;
+  user-select: none;
+  align-items: center;
+  background-color: #FFF;
+  font-size: 13px;
+  justify-content: space-between;
+  /*padding-left: 16px;*/
+
+  z-index: 100;
+}
+.tree-list-item__plain-segment {
+    flex: 0 0 56px;
+}
+.tree-list-item__plain-avatar {
+  flex: 0 0 72px;
+  box-sizing: border-box;
+  padding-left: 16px;
+  padding-right: 16px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  height: 60px;
+}
+.tree-list-item__plain-contents {
+  flex: 1 1 auto;
+  box-sizing: border-box;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  height: 60px;
+  min-width: 0px;
+}
+.tree-list-item__plain-ellipsis {
+  display: block;
+  flex: 0 0 56px;
+  box-sizing: border-box;
+  height: 60px;
+  padding: 18px 16px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.tree-list-item__plain-handle {
+  display: block;
+  flex: 0 0 56px;
+  box-sizing: border-box;
+  height: 60px;
+  padding: 18px 16px;
+  cursor: -webkit-grab;
+  cursor:-moz-grab;
+  user-select: none;
+}
+
+/*.tree-list-item__two-lines-div {
+  overflow
+}*/
+
+.tree-list-item__two-lines-top {
+  width: 100%;
+  white-space: nowrap;
+  overflow:hidden;
+  text-overflow:ellipsis;
+  display: block;
+  color: rgb(0, 0, 0);
+}
+
+.tree-list-item__two-lines-bottom {
+  width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+  color: rgba(0, 0, 0, 0.541176);
+}
+
+.react-sortable-handler > .tree-list-item__plain-handle {
+    cursor: -webkit-grabbing;
+    cursor:-moz-grabbing;
+}
+
+
+/* Container for all parts */
+.tree-list-item__container {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+
+  cursor: pointer;
+  width: 100%;
+  height: 60px;
+  box-sizing: border-box;
+  user-select: none;
+  align-items: center;
+  background-color: #FFF;
+  font-size: 13px;
+  justify-content: space-between;
+
+  z-index: 150;
+}
+
+/* Divider to show where material splits when sliding */
+.tree-list-item__divider {
+  position: absolute;
+  width: 100%;
+  height: 1px;
+  opacity: 0.1;
+  background-color: #000;
+  z-index: 160;
+}
+.tree-list-item__divider-top {
+  top: 0px;
+}
+.tree-list-item__divider-bottom {
+  bottom: 0px;
+}
+
+.tree-list-item__open-contents {
+  height: 60px;
+  background: #FFF;
+  flex: 1 1 auto;
+  display: flex;
+  align-items: center;
+}
+
+/* Start of opening divider - transparent */
+.tree-list-item--transition-enter .tree-list-item__divider {
+  will-change: opacity;
+  opacity: 0.0;
+}
+
+/* End of opening divider - visible */
+.tree-list-item--transition-enter.tree-list-item--transition-enter-active .tree-list-item__divider {
+  opacity: 0.1;
+  transition: opacity 150ms cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+
+/* Start of closing divider - visible */
+.tree-list-item--transition-leave .tree-list-item__divider {
+  will-change: opacity;
+  opacity: 0.1;
+}
+
+/* End of closing divider - transparent */
+.tree-list-item--transition-leave.tree-list-item--transition-leave-active .tree-list-item__divider {
+  opacity: 0.0;
+  transition: opacity 150ms cubic-bezier(0.4, 0.0, 0.2, 1) 300ms;
+}
+
+
+/* Left section of sliding panel - avatar and contents */
+.tree-list-item__sliding-panel-left {
+  display: flex;
+  align-items: top;
+  width: 100%;
+  height: 0px;
+  position: absolute;
+  left: 0px;
+  top: 0px;
+  transition: transform 200ms cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+
+/* Left section opens by sliding left by (number of buttons - 1) * 56px*/
+.tree-list-item__sliding-panel-left.tree-list-item--open-1 {
+  transform: translateX(0px);
+}
+.tree-list-item__sliding-panel-left.tree-list-item--open-2 {
+  transform: translateX(-56px);
+}
+.tree-list-item__sliding-panel-left.tree-list-item--open-3 {
+  transform: translateX(-112px);
+}
+.tree-list-item__sliding-panel-left.tree-list-item--open-4 {
+  transform: translateX(-168px);
+}
+.tree-list-item__sliding-panel-left.tree-list-item--open-5 {
+  transform: translateX(-224px);
+}
+
+/* Opening left panel for 1 button */
+/* Start of opening left panel*/
+.tree-list-item--transition-enter .tree-list-item__sliding-panel-left.tree-list-item--open-1 {
+  will-change: transform;
+  transform: translateX(0px);
+}
+
+/* End of opening left panel*/
+.tree-list-item--transition-enter.tree-list-item--transition-enter-active .tree-list-item__sliding-panel-left.tree-list-item--open-1 {
+  transform: translateX(0px);
+  transition: transform 200ms cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+
+/* Start of closing left panel*/
+.tree-list-item--transition-leave .tree-list-item__sliding-panel-left.tree-list-item--open-1 {
+  will-change: transform;
+  transform: translateX(0px);
+}
+
+/* End of closing left panel*/
+.tree-list-item--transition-leave.tree-list-item--transition-leave-active .tree-list-item__sliding-panel-left.tree-list-item--open-1 {
+  transform: translateX(0px);
+  transition: transform 200ms cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+
+
+/* Opening left panel for 2 buttons */
+/* Start of opening left panel*/
+.tree-list-item--transition-enter .tree-list-item__sliding-panel-left.tree-list-item--open-2 {
+  will-change: transform;
+  transform: translateX(0px);
+}
+
+/* End of opening left panel*/
+.tree-list-item--transition-enter.tree-list-item--transition-enter-active .tree-list-item__sliding-panel-left.tree-list-item--open-2 {
+  transform: translateX(-56px);
+  transition: transform 200ms cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+
+/* Start of closing left panel*/
+.tree-list-item--transition-leave .tree-list-item__sliding-panel-left.tree-list-item--open-2 {
+  will-change: transform;
+  transform: translateX(-56px);
+}
+
+/* End of closing left panel*/
+.tree-list-item--transition-leave.tree-list-item--transition-leave-active .tree-list-item__sliding-panel-left.tree-list-item--open-2 {
+  transform: translateX(0px);
+  transition: transform 200ms cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+
+
+/* Opening left panel for 3 buttons */
+/* Start of opening left panel*/
+.tree-list-item--transition-enter .tree-list-item__sliding-panel-left.tree-list-item--open-3 {
+  will-change: transform;
+  transform: translateX(0px);
+}
+
+/* End of opening left panel*/
+.tree-list-item--transition-enter.tree-list-item--transition-enter-active .tree-list-item__sliding-panel-left.tree-list-item--open-3 {
+  transform: translateX(-112px);
+  transition: transform 200ms cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+
+/* Start of closing left panel*/
+.tree-list-item--transition-leave .tree-list-item__sliding-panel-left.tree-list-item--open-3 {
+  will-change: transform;
+  transform: translateX(-112px);
+}
+
+/* End of closing left panel*/
+.tree-list-item--transition-leave.tree-list-item--transition-leave-active .tree-list-item__sliding-panel-left.tree-list-item--open-3 {
+  transform: translateX(0px);
+  transition: transform 200ms cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+
+/* Opening left panel for 4 buttons */
+/* Start of opening left panel*/
+.tree-list-item--transition-enter .tree-list-item__sliding-panel-left.tree-list-item--open-4 {
+  will-change: transform;
+  transform: translateX(0px);
+}
+
+/* End of opening left panel*/
+.tree-list-item--transition-enter.tree-list-item--transition-enter-active .tree-list-item__sliding-panel-left.tree-list-item--open-4 {
+  transform: translateX(-168px);
+  transition: transform 200ms cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+
+/* Start of closing left panel*/
+.tree-list-item--transition-leave .tree-list-item__sliding-panel-left.tree-list-item--open-4 {
+  will-change: transform;
+  transform: translateX(-168px);
+}
+
+/* End of closing left panel*/
+.tree-list-item--transition-leave.tree-list-item--transition-leave-active .tree-list-item__sliding-panel-left.tree-list-item--open-4 {
+  transform: translateX(0px);
+  transition: transform 200ms cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+
+
+/* Opening left panel for 5 buttons */
+/* Start of opening left panel*/
+.tree-list-item--transition-enter .tree-list-item__sliding-panel-left.tree-list-item--open-5 {
+  will-change: transform;
+  transform: translateX(0px);
+}
+
+/* End of opening left panel*/
+.tree-list-item--transition-enter.tree-list-item--transition-enter-active .tree-list-item__sliding-panel-left.tree-list-item--open-5 {
+  transform: translateX(-224px);
+  transition: transform 200ms cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+
+/* Start of closing left panel*/
+.tree-list-item--transition-leave .tree-list-item__sliding-panel-left.tree-list-item--open-5 {
+  will-change: transform;
+  transform: translateX(-224px);
+}
+
+/* End of closing left panel*/
+.tree-list-item--transition-leave.tree-list-item--transition-leave-active .tree-list-item__sliding-panel-left.tree-list-item--open-5 {
+  transform: translateX(0px);
+  transition: transform 200ms cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+
+
+
+
+/* Right section of sliding panel - expand button and drag handle */
+.tree-list-item__sliding-panel-right {
+  display: flex;
+  align-items: center;
+  width: 112px;
+  height: 100%;
+  position: absolute;
+  right: -56px;
+  top: 0px;
+  background: #FFF;
+}
+
+/* Start of opening right panel - one button left of default*/
+.tree-list-item--transition-enter .tree-list-item__sliding-panel-right {
+  will-change: transform;
+  transform: translateX(-56px);
+}
+
+/* End of opening right panel - default position */
+.tree-list-item--transition-enter.tree-list-item--transition-enter-active .tree-list-item__sliding-panel-right {
+  transform: translateX(0px);
+  transition: transform 200ms cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+
+/* Start of closing right panel - default position */
+.tree-list-item--transition-leave .tree-list-item__sliding-panel-right {
+  will-change: transform;
+  transform: translateX(0px);
+}
+
+/* End of closing right panel - slide left by one button */
+.tree-list-item--transition-leave.tree-list-item--transition-leave-active .tree-list-item__sliding-panel-right {
+  transform: translateX(-56px);
+  transition: transform 200ms cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+
+
+/* Button panel */
+.tree-list-item__button-panel {
+  position: absolute;
+  top: 1px;
+  right: 55px;
+  height: 58px;
+  box-shadow: inset 0px 1px 6px rgba(0, 0, 0, 0.15), inset 0px 1px 4px rgba(0, 0, 0, 0.15);
+
+  display: flex;
+  align-items: center;
+}
+
+/* Ellipsis button, used to open/close */
+.tree-list-item__ellipsis_button {
+  display: block;
+  flex: 0 0 56px;
+  box-sizing: border-box;
+  height: 60px;
+  padding: 18px 16px;
+  cursor: pointer;
+  user-select: none;
+}
+
+/* Ellipsis icon itself */
+.tree-list-item__ellipsis {
+  position: absolute;
+  top: 18px;
+  left: 16px;
+  width: 24px;
+  height: 24px;
+  transform: rotate(45deg); /* scale(0, 0) */
+  opacity: 0.0;
+}
+
+/* Cross icon itself */
+.tree-list-item__cross {
+  position: absolute;
+  top: 18px;
+  left: 16px;
+  width: 24px;
+  height: 24px;
+  transform: rotate(0deg); /* scale(1, 1) */
+  opacity: 1.0;
+}
+
+/* Start of opening ellipsis button */
+.tree-list-item--transition-enter .tree-list-item__ellipsis {
+  will-change: transform opacity;
+  transform: rotate(0deg);
+  opacity: 1.0;
+}
+
+/* End of opening ellipsis button */
+.tree-list-item--transition-enter.tree-list-item--transition-enter-active .tree-list-item__ellipsis {
+  transform: rotate(45deg);
+  opacity: 0.0;
+  transition: all 200ms cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+
+/* Start of closing ellipsis button */
+.tree-list-item--transition-leave .tree-list-item__ellipsis {
+  will-change: transform opacity;
+  transform: rotate(45deg);
+  opacity: 0.0;
+}
+
+/* End of closing ellipsis button */
+.tree-list-item--transition-leave.tree-list-item--transition-leave-active .tree-list-item__ellipsis {
+  transform: rotate(0deg);
+  opacity: 1.0;
+  transition: all 200ms cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+
+
+/* Start of opening cross button */
+.tree-list-item--transition-enter .tree-list-item__cross {
+  will-change: transform opacity;
+  transform: rotate(-45deg);
+  opacity: 0.0;
+}
+
+/* End of opening cross button */
+.tree-list-item--transition-enter.tree-list-item--transition-enter-active .tree-list-item__cross {
+  transform: rotate(0deg);
+  opacity: 1.0;
+  transition: all 200ms cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+
+/* Start of closing cross button */
+.tree-list-item--transition-leave .tree-list-item__cross {
+  will-change: transform opacity;
+  transform: rotate(0deg);
+  opacity: 1.0;
+}
+
+/* End of closing cross button */
+.tree-list-item--transition-leave.tree-list-item--transition-leave-active .tree-list-item__cross {
+  transform: rotate(-45deg);
+  opacity: 0.0;
+  transition: all 200ms cubic-bezier(0.4, 0.0, 0.2, 1);
+}
+
+.tree-button-icon__div {
+    display: block;
+    padding: 12px;
+    width: 24px;
+    height: 24px;
+    cursor: pointer;
+    user-select: none;
+}
+
+
+/* list item in a dialog */
+
+.tree-list-item-dialog__plain-outer {
+  display: flex;
+
+  cursor: pointer;
+  width: 100%;
+  height: 60px;
+  box-sizing: border-box;
+  user-select: none;
+  align-items: center;
+  font-size: 13px;
+  justify-content: space-between;
+
+}
+
+.tree-list-item-dialog__plain-avatar {
+  flex: 0 0 56px;
+  box-sizing: border-box;
+  padding-right: 16px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  height: 60px;
+}
+.tree-list-item-dialog__plain-contents {
+  flex: 1 1 auto;
+  box-sizing: border-box;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  height: 60px;
+  min-width: 0px;
+}
+
+.tree-colored-card__buttons {
+  padding: 8px;
+}
+
+.tree-colored-card__buttons button div span {
+  padding-left: 8px !important;
+  padding-right: 8px !important;
+}
+
+.tree-colored-card__buttons button {
+  min-width: 0px !important;
+}
+
+.tree-colored-card__title {
+  font-size: 24px;
+  padding: 24px 16px 0px 16px;
+  display: block;
+  color: #FFF;
+}
+
+.tree-colored-card__content {
+  padding: 16px;
+  font-size: 14px;
+  /*font-weight: 300;*/
+  line-height: 24px;
+  display: block;
+  color: #FFF !important;
+}
+
+.tree-list-text-view__plain {
+  font-size: 16px;
+  padding-top: 15px;
+  padding-bottom: 13px;
+}
+
+.tree-list-text-view__editing {
+}
