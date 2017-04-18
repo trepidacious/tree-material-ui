@@ -1,4 +1,4 @@
-package org.rebeam.tree.view.sortable
+package org.rebeam.tree.view.list
 
 import japgolly.scalajs.react._
 
@@ -34,7 +34,7 @@ object SortableContainer {
     //onSortStart <- undef or function({node, index, collection}, event)
     //onSortMove <- undef or function(event)
   ) {
-    private[sortable] def toJS = {
+    private[list] def toJS = {
       val p = js.Dynamic.literal()
       axis.foreach(p.updateDynamic("axis")(_))
       lockAxis.foreach(p.updateDynamic("lockAxis")(_))

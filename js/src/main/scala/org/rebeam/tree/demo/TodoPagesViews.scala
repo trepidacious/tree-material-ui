@@ -15,10 +15,11 @@ import org.rebeam.tree.view.Cursor._
 import org.rebeam.tree.view.View._
 import org.rebeam.tree.view._
 import org.rebeam.tree.view.infinite.Infinite
+import org.rebeam.tree.view.list.ListItem.EditAndDeleteActions
 import org.rebeam.tree.view.measure.{CursorPHeightView, MeasureDemo}
 import org.rebeam.tree.view.pages.Pages._
 import org.rebeam.tree.view.pages._
-import org.rebeam.tree.view.sortable._
+import org.rebeam.tree.view.list._
 
 import scala.scalajs.js
 import scala.scalajs.js.UndefOr
@@ -46,29 +47,23 @@ object TodoPagesViews {
     "Todo lists"
   )
 
-  val TodoItemSummaryView = cursorPView[Todo, Pages[PageWithTodoProjectList, TodoPage]]("TodoItemSummaryView"){
-    cp => {
-      val item = cp.model
-      val toItem = cp.p.set(cp.p.current.toItem(item.id))
-      val contents = SortableListItem.twoLines(
-        s"${item.name}",
-        s"Priority ${item.priority}"
-      )
-      val avatar = <.div(
-        ^.paddingLeft := "8px",
-        booleanViewUnlabelled(cp.zoomN(Todo.completed))
-      )
+  val TodoSummary = ListItem.completeEditAndDeleteListItem[Todo](
+    "TodoSummary",
+    todo => todo.name,
+    todo => s"Priority ${todo.priority}",
+    Todo.completed
+  )
 
-      SortableListItem(avatar, contents, onClickContents = toItem)
-    }
-  }
-
-  val TodoItemsView = ListView.legacy[Todo, PageWithTodoProjectList, TodoPage, FindTodoById](
-    "TodoItemsView",
-    todo => FindTodoById(todo.id),
-    todo => todo.id.toString(),
-    TodoItemSummaryView,
-    "Todo items"
+  val TodoListView = ListView.usingId[TodoList, Pages[PageWithTodoProjectList, TodoPage], Todo, EditAndDeleteActions](
+    "TodoListView",
+    _.zoomN(TodoList.items),
+    (todo, todoListCursor) => EditAndDeleteActions(
+      todoListCursor.p.modify(_.toItem(todo.id)),
+      todoListCursor.act(TodoListAction.DeleteTodoById(todo.id): TodoListAction)
+    ),
+    TodoSummary,
+    "Todo items",
+    mode = ListView.ListMode.Finite
   )
 
   val TodoProjectEmptyView = PageLayout(MaterialColor.BlueGrey(500), 128, "Loading project...", None, Some(MuiCircularProgress(mode = DeterminateIndeterminate.indeterminate, color = Mui.Styles.colors.white)()), None)
@@ -91,7 +86,7 @@ object TodoPagesViews {
     }
   }
 
-  val TodoListView = cursorPView[TodoList, Pages[PageWithTodoProjectList, TodoPage]]("TodoListView") {
+  val TodoListPageView = cursorPView[TodoList, Pages[PageWithTodoProjectList, TodoPage]]("TodoListView") {
     cp => {
       //FIXME use actual creation time
       val fab = PageLayout.addFAB(cp.act(TodoListAction.CreateTodo(): TodoListAction))
@@ -104,10 +99,13 @@ object TodoPagesViews {
           textViewHero(cp.zoomN(TodoList.name).label("List name"))
         )
 
-      val contents =
-        TodoItemsView(
+      val contents = TodoListView(
           p => cp.act(TodoListAction.TodoIndexChange(p.oldIndex, p.newIndex): TodoListAction)
-        )(cp.zoomNP(TodoList.items))
+      )(cp)
+
+//        TodoItemsView(
+//          p => cp.act(TodoListAction.TodoIndexChange(p.oldIndex, p.newIndex): TodoListAction)
+//        )(cp.zoomNP(TodoList.items))
 
       val buttons = List(
         ToolbarIconButton(
@@ -170,7 +168,7 @@ object TodoPagesViews {
 
       List[Option[ReactElement]](
         Some(TodoProjectView.withKey(0)(cp)),
-        list.map(TodoListView.withKey(1)(_)),
+        list.map(TodoListPageView.withKey(1)(_)),
         item.map(TodoView.withKey(2)(_))
       ).flatten
   }

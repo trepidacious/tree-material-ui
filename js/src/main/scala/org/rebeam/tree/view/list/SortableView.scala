@@ -1,4 +1,4 @@
-package org.rebeam.tree.view.sortable
+package org.rebeam.tree.view.list
 
 import japgolly.scalajs.react.vdom.prefix_<^._
 import org.rebeam.tree.view.View

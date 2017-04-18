@@ -5,8 +5,9 @@ import japgolly.scalajs.react.ReactComponentC.ReqProps
 import japgolly.scalajs.react.vdom.ReactTagOf
 import japgolly.scalajs.react.vdom.prefix_<^._
 import japgolly.scalajs.react.{BackendScope, Callback, ReactComponentB, ReactComponentU, ReactComponentU_, ReactElement, TopNode}
+import org.rebeam.lenses.LensN
 import org.rebeam.tree.view.View._
-import org.rebeam.tree.view.sortable.SortableHandle
+import org.rebeam.tree.view.icon.Icons
 import org.rebeam.tree.view.transition.CSSTransitionGroup
 import org.rebeam.tree.view.{Color, CursorP, MaterialColor, View}
 import org.scalajs.dom.html.Div
@@ -189,5 +190,32 @@ object ListItem {
       ListItem(avatar(m), ListItem.twoLines(firstLine(m), secondLine(m)), buttons, onClick = cp.p.edit)
     }
   }
+
+  def completeEditAndDeleteListItem[A](name: String, firstLine: A => String, secondLine: A => String, completionLens: LensN[A, Boolean]): ReqProps[CursorP[A, EditAndDeleteActions], Unit, Unit, TopNode] = cursorPView(name){
+    cp => {
+      val m = cp.model
+
+      val avatar = <.div(
+        ^.position := "relative",
+        ^.top := "8px",
+        ^.left := "8px",
+        booleanViewUnlabelled(cp.zoomN(completionLens))
+      )
+
+      val buttons = List(
+        ListItem.Action(
+          Mui.SvgIcons.ActionDelete()(),
+          cp.p.delete
+        ),
+        ListItem.Action(
+          Mui.SvgIcons.ContentCreate()(),
+          cp.p.edit
+        )
+      )
+
+      ListItem(avatar, ListItem.twoLines(firstLine(m), secondLine(m)), buttons, onClickContents = cp.p.edit)
+    }
+  }
+
 
 }

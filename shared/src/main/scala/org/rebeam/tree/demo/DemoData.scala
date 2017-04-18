@@ -79,7 +79,7 @@ object DemoData {
                             name: String,
                             completed: Boolean = false,
                             priority: Priority = Priority.Medium
-                          )
+                          ) extends HasId[Todo]
 
   @JsonCodec
   sealed trait TodoAction extends Delta[Todo]

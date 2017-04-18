@@ -278,4 +278,42 @@ object View {
       )(text: ReactNode)
     }).build
 
+  def coloredCardButton(label: String, primary: Boolean = false, secondary: Boolean = false)(callback: Callback) = {
+    MuiFlatButton(
+      style = js.Dynamic.literal("color" -> MaterialColor.White()),
+      hoverColor = MaterialColor.White().copy(a = 50),
+      rippleColor = MaterialColor.White(),
+      label = label,
+      primary = primary,
+      secondary = secondary,
+      onTouchTap = touch(callback)
+    )()
+  }
+
+  def coloredCard(color: Color, title: ReactNode, content: ReactNode, actions: List[(String, Callback)]) = {
+    MuiCard(
+      style = js.Dynamic.literal(
+        "background-color" -> color,
+        "margin" -> "8px"
+      )
+    )(
+      <.div(
+        ^.className := "tree-colored-card__title",
+        title
+      ),
+
+      <.div(
+        ^.className := "tree-colored-card__content",
+        content
+      ),
+
+      <.div(
+        ^.className := "tree-colored-card__buttons",
+        actions.zipWithIndex.map{
+          case((text, action), index) => coloredCardButton("Details", primary = index==0)(action)
+        }
+      )
+    )
+  }
+
 }

@@ -12,7 +12,7 @@ import org.rebeam.tree.demo.DemoData.Priority._
 import org.rebeam.tree.demo.DemoRoutes._
 import org.rebeam.tree.view.infinite.Infinite
 import org.rebeam.tree.view.pages.{Breadcrumbs, Pages}
-import org.rebeam.tree.view.sortable.{SortableContainer, SortableElement, SortableListItem}
+import org.rebeam.tree.view.list.{SortableContainer, SortableElement, SortableListItem}
 import Pages._
 
 import scala.scalajs.js

@@ -1,4 +1,4 @@
-package org.rebeam.tree.view.sortable
+package org.rebeam.tree.view.list
 
 import japgolly.scalajs.react._
 

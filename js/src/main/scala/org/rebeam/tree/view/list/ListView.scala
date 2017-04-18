@@ -1,4 +1,4 @@
-package org.rebeam.tree.view.sortable
+package org.rebeam.tree.view.list
 
 import chandu0101.scalajs.react.components.materialui._
 import io.circe.Encoder

@@ -3,7 +3,7 @@ package org.rebeam.tree.demo
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.prefix_<^._
 import org.rebeam.tree.view._
-import org.rebeam.tree.view.sortable._
+import org.rebeam.tree.view.list._
 
 object WidthProviderDemo {
 
