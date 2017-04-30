@@ -8,7 +8,7 @@ import japgolly.scalajs.react.Addons.ReactCssTransitionGroup
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.extra.Reusability
 import japgolly.scalajs.react.vdom.prefix_<^._
-import org.rebeam.tree.Moment
+import org.rebeam.tree.{DeltaIOContextSource, Moment}
 import org.rebeam.tree.demo.DemoData._
 import org.rebeam.tree.demo.DemoRoutes._
 import org.rebeam.tree.view.Cursor._
@@ -172,6 +172,8 @@ object TodoPagesViews {
         item.map(TodoView.withKey(2)(_))
       ).flatten
   }
+
+  implicit val contextSource = DeltaIOContextSource.default
 
   // This combines and stores the url and renderer, and will then produce a new element per page. This avoids
   // changing state when changing pages, so we keep the same websocket etc.

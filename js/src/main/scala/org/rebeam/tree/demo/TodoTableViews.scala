@@ -3,6 +3,7 @@ package org.rebeam.tree.demo
 import chandu0101.scalajs.react.components.materialui._
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.prefix_<^._
+import org.rebeam.tree.DeltaIOContextSource
 import org.rebeam.tree.demo.DemoData.Priority._
 import org.rebeam.tree.demo.DemoData._
 import org.rebeam.tree.view.Cursor._
@@ -79,6 +80,9 @@ object TodoTableViews {
     <.h3("Todo List"),
     spinner()
   )
+
+  implicit val contextSource = DeltaIOContextSource.default
+
   val todoListView = ServerRootComponent[TodoList](noTodoList, "api/todolist") {
     c => {
       <.div(

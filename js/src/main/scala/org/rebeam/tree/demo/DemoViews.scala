@@ -1,7 +1,7 @@
 package org.rebeam.tree.demo
 
 import japgolly.scalajs.react.vdom.prefix_<^._
-import org.rebeam.tree.Moment
+import org.rebeam.tree.{DeltaIOContextSource, Moment}
 import org.rebeam.tree.view.View._
 import org.rebeam.tree.view._
 import org.rebeam.tree.view.Cursor._
@@ -38,6 +38,8 @@ object DemoViews {
     <.h3("Address"),
     spinner()
   )
+
+  implicit val contextSource = DeltaIOContextSource.default
 
   val addressView = ServerRootComponent[Address](noAddress, "api/address") {
     addressCursor => {

@@ -10,7 +10,7 @@ import org.http4s.server.blaze.BlazeBuilder
 import org.http4s.server.staticcontent._
 import org.http4s.server.websocket._
 import org.http4s.websocket.WebsocketBits._
-import org.rebeam.tree.Moment
+import org.rebeam.tree.{DeltaIOContext, DeltaIOContextSource, Moment}
 import org.rebeam.tree.server.{ServerStore, ServerStoreValueExchange}
 import org.rebeam.tree.view.MaterialColor
 
@@ -23,7 +23,6 @@ import DemoData._
 import org.rebeam.tree.Delta._
 import org.rebeam.tree.sync.Sync._
 import org.rebeam.tree.sync.DeltaIORun._
-
 import cats.instances.list._
 import cats.syntax.traverse._
 
@@ -73,14 +72,19 @@ object ServerDemoApp extends ServerApp {
     )
   }
 
-  val todoProject = todoProjectIO.runWithId(DeltaId(ClientId(0), ClientDeltaId(0)))
+  private val todoProject = todoProjectIO.runWith(
+    DeltaIOContext(Moment(0)),
+    DeltaId(ClientId(0), ClientDeltaId(0))
+  )
 
-  val todoProjectStore = new ServerStore(todoProject)
+  private val todoProjectStore = new ServerStore(todoProject)
 
-  val todoListStore = new ServerStore(todoProject.lists.head)
+  private val todoListStore = new ServerStore(todoProject.lists.head)
 
   // TODO better way of doing this - start from 1 since we use 0 to generate example data
-  val nextClientId = new AtomicLong(1)
+  private val nextClientId = new AtomicLong(1)
+
+  private val contextSource = DeltaIOContextSource.default
 
   val apiService = HttpService {
 
@@ -91,13 +95,31 @@ object ServerDemoApp extends ServerApp {
       Ok(System.getProperty("user.dir"))
 
     case GET -> Root / "todolist" =>
-      WS(ServerStoreValueExchange(todoListStore, ClientId(nextClientId.getAndIncrement())))
+      WS(
+        ServerStoreValueExchange(
+          todoListStore,
+          ClientId(nextClientId.getAndIncrement()),
+          contextSource
+        )
+      )
 
     case GET -> Root / "todoproject" =>
-      WS(ServerStoreValueExchange(todoProjectStore, ClientId(nextClientId.getAndIncrement())))
+      WS(
+        ServerStoreValueExchange(
+          todoProjectStore,
+          ClientId(nextClientId.getAndIncrement()),
+          contextSource
+        )
+      )
 
     case GET -> Root / "address" =>
-      WS(ServerStoreValueExchange(address, ClientId(nextClientId.getAndIncrement())))
+      WS(
+        ServerStoreValueExchange(
+          address,
+          ClientId(nextClientId.getAndIncrement()),
+          contextSource
+        )
+      )
 
     case req@ GET -> Root / "ws" =>
       val src = awakeEvery(1.seconds)(Strategy.DefaultStrategy, DefaultScheduler).map{ d => Text(s"Ping! $d") }

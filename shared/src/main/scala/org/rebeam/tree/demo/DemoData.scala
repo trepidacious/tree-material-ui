@@ -74,6 +74,76 @@ object DemoData {
 
   @JsonCodec
   @Lenses
+  case class TaskTag(name: String) extends AnyVal
+
+  @JsonCodec
+  @Lenses
+  case class Email(email: String) extends AnyVal
+
+  @JsonCodec
+  @Lenses
+  case class Markdown(contents: String) extends AnyVal
+
+  @JsonCodec
+  @Lenses
+  case class User(id: Guid[User], firstName: String, lastName: String, userName: String, email: Email) extends HasId[User]
+
+  @JsonCodec
+  sealed trait TaskState
+  object TaskState {
+    case object Active extends TaskState
+    case object Inactive extends TaskState
+    case object Complete extends TaskState
+  }
+
+  @JsonCodec
+  sealed trait TaskEvent extends Delta[Task]
+  object TaskEvent {
+
+
+    case class Watch(userId: Guid[User]) extends TaskEvent {
+      def apply(t: Task): DeltaIO[Task] = t.copy(watching = t.watching + userId).withEvent(this)
+    }
+    case class Unwatch(userId: Guid[User]) extends TaskEvent {
+      def apply(t: Task): DeltaIO[Task] = t.copy(watching = t.watching - userId).withEvent(this)
+    }
+    case class Lead(userId: Option[Guid[User]]) extends TaskEvent {
+      def apply(t: Task): DeltaIO[Task] = t.copy(leading = userId).withEvent(this)
+    }
+    case class Tag(tag: TaskTag) extends TaskEvent {
+      def apply(t: Task): DeltaIO[Task] = t.copy(tags = t.tags + tag).withEvent(this)
+    }
+    case class Untag(tag: TaskTag) extends TaskEvent {
+      def apply(t: Task): DeltaIO[Task] = t.copy(tags = t.tags - tag).withEvent(this)
+    }
+    case class SetState(state: TaskState) extends TaskEvent {
+      def apply(t: Task): DeltaIO[Task] = t.copy(state = state).withEvent(this)
+    }
+    case class Comment(userId: Guid[User], markdown: Markdown)
+  }
+
+  @JsonCodec
+  @Lenses
+  case class Task(
+    id: Guid[Task],
+    name: String,
+    description: Markdown,
+    state: TaskState,
+    tags: Set[TaskTag],
+    watching: Set[Guid[User]],
+    leading: Option[Guid[User]],
+    history: List[(Moment, TaskEvent)]
+  ) {
+    def withEvent(e: TaskEvent): DeltaIO[Task] = for {
+      c <- getContext
+    } yield {
+      val entry = (c.moment, e)
+      copy(history = history :+ entry)
+    }
+  }
+
+  @JsonCodec
+  @Lenses
   case class Todo (
                             id: Guid[Todo],
                             name: String,
