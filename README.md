@@ -24,4 +24,4 @@ A quick tour of the important parts:
 - [ ] Focus in pages. When going back from a detail page, the master page could remember the displayed detail "index" as a "focus". This could be used to e.g. scroll to that element in a list, so that when navigating backwards, we see the detail we just left in the master list. This is a lighter alternative to just keeping the master view around while displaying detail, and would work well with undo/redo. Focus might or might not update with scrolling.
 - [ ] Websocket re-open on close with exponential backoff.
 - [ ] Connect server model up to database.
-- [ ] Graphing with paths.scala.js.
+- [X] Graphing with paths.scala.js.

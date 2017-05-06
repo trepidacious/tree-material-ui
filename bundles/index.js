@@ -53,3 +53,7 @@ window.Infinite = Infinite;
 // rebeam: react-measure
 window.Measure = require('react-measure');
 
+// rebeam: react-markdown
+window.ReactMarkdown = require('react-markdown');
+
+

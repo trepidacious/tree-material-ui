@@ -9,17 +9,12 @@ import org.http4s.server.ServerApp
 import org.http4s.server.blaze.BlazeBuilder
 import org.http4s.server.staticcontent._
 import org.http4s.server.websocket._
-import org.http4s.websocket.WebsocketBits._
 import org.rebeam.tree.{DeltaIOContext, DeltaIOContextSource, Moment}
 import org.rebeam.tree.server.{ServerStore, ServerStoreValueExchange}
 import org.rebeam.tree.view.MaterialColor
 
-import scala.concurrent.duration._
-import scalaz.concurrent.{Strategy, Task}
-import scalaz.stream.async.unboundedQueue
-import scalaz.stream.time.awakeEvery
-import scalaz.stream.{DefaultScheduler, Exchange, Process, Sink}
 import DemoData._
+import TaskData._
 import org.rebeam.tree.Delta._
 import org.rebeam.tree.sync.Sync._
 import org.rebeam.tree.sync.DeltaIORun._
@@ -81,6 +76,18 @@ object ServerDemoApp extends ServerApp {
 
   private val todoListStore = new ServerStore(todoProject.lists.head)
 
+  val taskIO: DeltaIO[Task] = for {
+    user <- User.create("A", "User", "user", Email("a@user.com"))
+    task <- Task.example(user.id)
+  } yield task
+
+  private val task = taskIO.runWith(
+    DeltaIOContext(Moment(0)),
+    DeltaId(ClientId(0), ClientDeltaId(0))
+  )
+
+  private val taskStore = new ServerStore(task)
+
   // TODO better way of doing this - start from 1 since we use 0 to generate example data
   private val nextClientId = new AtomicLong(1)
 
@@ -112,6 +119,15 @@ object ServerDemoApp extends ServerApp {
         )
       )
 
+    case GET -> Root / "task" =>
+      WS(
+        ServerStoreValueExchange(
+          taskStore,
+          ClientId(nextClientId.getAndIncrement()),
+          contextSource
+        )
+      )
+
     case GET -> Root / "address" =>
       WS(
         ServerStoreValueExchange(
@@ -120,21 +136,6 @@ object ServerDemoApp extends ServerApp {
           contextSource
         )
       )
-
-    case req@ GET -> Root / "ws" =>
-      val src = awakeEvery(1.seconds)(Strategy.DefaultStrategy, DefaultScheduler).map{ d => Text(s"Ping! $d") }
-      val sink: Sink[Task, WebSocketFrame] = Process.constant {
-        case Text(t, _) => Task.delay(println(t))
-        case f          => Task.delay(println(s"Unknown type: $f"))
-      }
-      WS(Exchange(src, sink))
-
-    case req@ GET -> Root / "wsecho" =>
-      val q = unboundedQueue[WebSocketFrame]
-      val src = q.dequeue.collect {
-        case Text(msg, _) => Text("Echoing: " + msg)
-      }
-      WS(Exchange(src, q.enqueue))
 
   }
 

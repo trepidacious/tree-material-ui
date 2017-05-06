@@ -30,6 +30,7 @@
     "webpack-dev-server": "^1.9.0"
   },
   "dependencies": {
+    "json-loader": "^0.5.4",
     "material-ui": "0.15.2",
     "paths-js": "0.4.5",
     "react": "15.4.1",
@@ -42,6 +43,7 @@
     "react-geomicons": "^2.0.4",
     "react-grid-layout": "^0.13.9",
     "react-infinite": "^0.7.1",
+    "react-markdown": "^2.5.0",
     "react-measure": "^1.4.5",
     "react-select": "^1.0.0-beta",
     "react-sortable-hoc": "0.4.5",

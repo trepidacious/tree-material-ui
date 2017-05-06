@@ -118,7 +118,9 @@ object TodoPagesViews {
         listFAB = Some(fab),
         title = Some(title),
         contents = Some(contents),
-        iconButtons = buttons)
+        iconButtons = buttons,
+        scrollContents = true
+      )
     }
   }
 

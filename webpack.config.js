@@ -32,12 +32,18 @@ module.exports = {
                 loader: 'style-loader!css-loader'
             },
 
+            // inline base64 URLs for <=8k images, direct URLs for the rest
             {
                 test: /\.(png|jpg|svg)$/,
                 loaders: [
                     'url-loader?limit=8192',
                     'image-webpack?optimizationLevel=7&progressive=true']
-            } // inline base64 URLs for <=8k images, direct URLs for the rest
+            },
+
+            {
+                test: /\.json$/,
+                loader: 'json-loader'
+            }
         ]
     }
 
