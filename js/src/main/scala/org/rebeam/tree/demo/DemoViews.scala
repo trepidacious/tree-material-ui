@@ -75,18 +75,8 @@ object DemoViews {
         |# Formatting
         |**Bold**
         |*Italic*
-        |# Formatting
-        |**Bold**
-        |*Italic*
-        |# Formatting
-        |**Bold**
-        |*Italic*
-        |# Formatting
-        |**Bold**
-        |*Italic*
-        |# Formatting
-        |**Bold**
-        |*Italic*
+        |# HTML
+        |<span>This should appear with escaped HTML span tags</span>
       """.stripMargin)
     )
 
