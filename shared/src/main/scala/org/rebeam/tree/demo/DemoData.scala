@@ -11,6 +11,7 @@ import BasicDeltaDecoders._
 import DeltaCodecs._
 import io.circe.generic.JsonCodec
 import org.rebeam.tree.Delta._
+import org.rebeam.tree.ref.Cache
 import org.rebeam.tree.sync.Sync._
 
 import scala.collection.mutable.ListBuffer
@@ -251,6 +252,12 @@ object DemoData {
   implicit val todoProjectIdGen = new ModelIdGen[TodoProject] {
     def genId(a: TodoProject) = None
   }
+
+  implicit val todoProjectCacheIdGen = new ModelIdGen[Cache[TodoProject]] {
+    def genId(a: Cache[TodoProject]) = None
+  }
+
+  implicit val projectCacheCodec = DeltaCodecs.cache[TodoProject]
 
 }
 

@@ -20,13 +20,14 @@ import org.rebeam.tree.sync.Sync._
 import org.rebeam.tree.sync.DeltaIORun._
 import cats.instances.list._
 import cats.syntax.traverse._
+import org.rebeam.tree.ref.Cache
 
 object ServerDemoApp extends ServerApp {
 
   val address = new ServerStore(Address(Street("OLD STREET", 1, 22.3)))
 
-  val listCount = 1000
-  val itemCount = 10
+  val listCount = 2
+  val itemCount = 5
 
   def todoIO(i: Int): DeltaIO[Todo] = for {
     id <- getId[Todo]
@@ -72,7 +73,11 @@ object ServerDemoApp extends ServerApp {
     DeltaId(ClientId(0), ClientDeltaId(0))
   )
 
+  private val todoProjectCache = Cache.empty[TodoProject].updated(todoProject.id, todoProject)
+
   private val todoProjectStore = new ServerStore(todoProject)
+
+  private val todoProjectCacheStore = new ServerStore(todoProjectCache)
 
   private val todoListStore = new ServerStore(todoProject.lists.head)
 
@@ -114,6 +119,15 @@ object ServerDemoApp extends ServerApp {
       WS(
         ServerStoreValueExchange(
           todoProjectStore,
+          ClientId(nextClientId.getAndIncrement()),
+          contextSource
+        )
+      )
+
+    case GET -> Root / "todoprojectcache" =>
+      WS(
+        ServerStoreValueExchange(
+          todoProjectCacheStore,
           ClientId(nextClientId.getAndIncrement()),
           contextSource
         )

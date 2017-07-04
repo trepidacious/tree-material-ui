@@ -141,7 +141,7 @@ object TaskData {
   }
 
   //Delta decoders
-  implicit val taskDeltaDecoder: Decoder[Delta[Task]] = action[Task, TaskEvent]
+  implicit val taskDeltaDecoder: DeltaCodec[Task] = action[Task, TaskEvent]
 
   implicit val taskIdGen: ModelIdGen[Task] = new ModelIdGen[Task] {
     def genId(a: Task) = None

@@ -32,6 +32,11 @@ object DemoRoutes {
   case object TodoProjectPage extends TodoPage {
     override def back: TodoPage = TodoProjectPage
   }
+
+  case object TodoProjectCachePage extends TodoPage {
+    override def back: TodoPage = TodoProjectCachePage
+  }
+
   case class TodoProjectListPage(listId: Guid[TodoList]) extends PageWithTodoProjectList
   case class TodoProjectListItemPage(listId: Guid[TodoList], todoId: Guid[Todo]) extends PageWithTodoProjectListItem
 
@@ -58,12 +63,16 @@ object DemoRoutes {
     val todoProjectListRoute = ("#todo/list" / guid[TodoList]).caseClass[TodoProjectListPage]
     val todoProjectListItemRoute = ("#todo/list" / guid[TodoList] / "item" / guid[Todo]).caseClass[TodoProjectListItemPage]
 
+    val todoProjectCacheRoute = caseObject("#todocache", TodoProjectCachePage)
+
+
     (trimSlashes
       | staticRoute(root,   HomePage) ~> render(DemoViews.homeView())
       | staticRoute("#address", AddressPage) ~> render(DemoViews.addressView)
       | dynamicRouteCT(todoProjectRoute) ~> dynRenderP[TodoPage](TodoPagesViews.todoProjectViewFactory)
       | dynamicRouteCT(todoProjectListRoute) ~> dynRenderP[TodoPage](TodoPagesViews.todoProjectViewFactory)
       | dynamicRouteCT(todoProjectListItemRoute) ~> dynRenderP[TodoPage](TodoPagesViews.todoProjectViewFactory)
+      | dynamicRouteCT(todoProjectCacheRoute) ~> dynRenderP[TodoPage](TodoPagesViews.todoProjectCacheViewFactory)
       )
 
       .notFound(redirectToPage(HomePage)(Redirect.Replace))

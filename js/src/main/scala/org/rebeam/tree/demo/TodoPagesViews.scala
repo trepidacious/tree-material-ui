@@ -1,6 +1,5 @@
 package org.rebeam.tree.demo
 
-import cats.syntax.either._
 import chandu0101.scalajs.react.components.materialui._
 import demo.components.BarDemo
 import io.circe.Encoder
@@ -8,9 +7,11 @@ import japgolly.scalajs.react.Addons.ReactCssTransitionGroup
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.extra.Reusability
 import japgolly.scalajs.react.vdom.prefix_<^._
-import org.rebeam.tree.{DeltaIOContextSource, Moment}
+import org.rebeam.tree.{DeltaCodecs, DeltaIOContextSource, Moment}
 import org.rebeam.tree.demo.DemoData._
 import org.rebeam.tree.demo.DemoRoutes._
+import org.rebeam.tree.ref.Cache
+import org.rebeam.tree.ref.Ref
 import org.rebeam.tree.view.Cursor._
 import org.rebeam.tree.view.View._
 import org.rebeam.tree.view._
@@ -20,6 +21,9 @@ import org.rebeam.tree.view.measure.{CursorPHeightView, MeasureDemo}
 import org.rebeam.tree.view.pages.Pages._
 import org.rebeam.tree.view.pages._
 import org.rebeam.tree.view.list._
+import Cache._
+import org.rebeam.tree.sync.Sync
+import org.rebeam.tree.sync.Sync.{ClientDeltaId, ClientId, Guid}
 
 import scala.scalajs.js
 import scala.scalajs.js.UndefOr
@@ -66,7 +70,18 @@ object TodoPagesViews {
     mode = ListView.ListMode.Finite
   )
 
-  val TodoProjectEmptyView = PageLayout(MaterialColor.BlueGrey(500), 128, "Loading project...", None, Some(MuiCircularProgress(mode = DeterminateIndeterminate.indeterminate, color = Mui.Styles.colors.white)()), None)
+  val TodoProjectEmptyView = PageLayout(
+    MaterialColor.BlueGrey(500), 128,
+    "Loading project...",
+    None,
+    Some(
+      MuiCircularProgress(
+        mode = DeterminateIndeterminate.indeterminate,
+        color = Mui.Styles.colors.white
+      )()
+    ),
+    None
+  )
 
   val TodoProjectView = cursorPView[TodoProject, Pages[TodoPage, TodoPage]]("TodoProjectView") {
     cp => {
@@ -175,12 +190,24 @@ object TodoPagesViews {
       ).flatten
   }
 
+  val TodoProjectCachePagesView = cursorPView[Cache[TodoProject], Pages[TodoPage, TodoPage]]("TodoProjectCachePagesView"){
+    _.zoomRefP(Ref(Guid(ClientId(0), ClientDeltaId(0), 0)))
+      .map(TodoProjectPagesView(_))
+      .getOrElse(TodoProjectEmptyView)
+  }
+
   implicit val contextSource = DeltaIOContextSource.default
 
   // This combines and stores the url and renderer, and will then produce a new element per page. This avoids
   // changing state when changing pages, so we keep the same websocket etc.
   val todoProjectViewFactory = ServerRootComponent.factory[TodoProject, Pages[TodoPage, TodoPage]](TodoProjectEmptyView, "api/todoproject") {
     TodoProjectPagesView(_)
+  }
+
+  // This combines and stores the url and renderer, and will then produce a new element per page. This avoids
+  // changing state when changing pages, so we keep the same websocket etc.
+  val todoProjectCacheViewFactory = ServerRootComponent.factory[Cache[TodoProject], Pages[TodoPage, TodoPage]](TodoProjectEmptyView, "api/todoprojectcache") {
+    TodoProjectCachePagesView(_)
   }
 
 }
