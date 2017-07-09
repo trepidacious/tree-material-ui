@@ -17,7 +17,7 @@ import org.rebeam.tree.view.View._
 import org.rebeam.tree.view._
 import org.rebeam.tree.view.infinite.Infinite
 import org.rebeam.tree.view.list.ListItem.EditAndDeleteActions
-import org.rebeam.tree.view.measure.{CursorPHeightView, MeasureDemo}
+import org.rebeam.tree.view.measure.{CursorHeightView, MeasureDemo}
 import org.rebeam.tree.view.pages.Pages._
 import org.rebeam.tree.view.pages._
 import org.rebeam.tree.view.list._
@@ -30,10 +30,10 @@ import scala.scalajs.js.UndefOr
 
 object TodoPagesViews {
 
-  val TodoListSummaryView = cursorPView[TodoList, Pages[TodoPage, TodoPage]]("TodoListSummaryView"){
+  val TodoListSummaryView = cursorView[TodoList, Pages[TodoPage, TodoPage]]("TodoListSummaryView"){
     cp => {
       val list = cp.model
-      val toList = cp.p.set(TodoProjectListPage(list.id))
+      val toList = cp.location.set(TodoProjectListPage(list.id))
       val idString = s"${list.id}"
       val contents = SortableListItem.twoLines(
         s"${list.name}",
@@ -60,9 +60,9 @@ object TodoPagesViews {
 
   val TodoListView = ListView.usingId[TodoList, Pages[PageWithTodoProjectList, TodoPage], Todo, EditAndDeleteActions](
     "TodoListView",
-    _.zoomN(TodoList.items),
+    _.zoom(TodoList.items),
     (todo, todoListCursor) => EditAndDeleteActions(
-      todoListCursor.p.modify(_.toItem(todo.id)),
+      todoListCursor.location.modify(_.toItem(todo.id)),
       todoListCursor.act(TodoListAction.DeleteTodoById(todo.id): TodoListAction)
     ),
     TodoSummary,
@@ -83,25 +83,25 @@ object TodoPagesViews {
     None
   )
 
-  val TodoProjectView = cursorPView[TodoProject, Pages[TodoPage, TodoPage]]("TodoProjectView") {
+  val TodoProjectView = cursorView[TodoProject, Pages[TodoPage, TodoPage]]("TodoProjectView") {
     cp => {
       //FIXME use actual creation time
       val fab = PageLayout.addFAB(cp.act(TodoProjectAction.CreateTodoList(): TodoProjectAction))
 
       val title = Breadcrumbs.container(
-        textViewHero(cp.zoomN(TodoProject.name).label("Project name"))
+        textViewHero(cp.zoom(TodoProject.name).label("Project name"))
       )
 
       val contents =
         TodoListsView(
           p => cp.act(TodoProjectAction.ListIndexChange(p.oldIndex, p.newIndex): TodoProjectAction)
-        )(cp.zoomNP(TodoProject.lists))
+        )(cp.zoom(TodoProject.lists))
 
       PageLayout(MaterialColor.BlueGrey(500), 128, "", Some(fab), Some(title), Some(contents))
     }
   }
 
-  val TodoListPageView = cursorPView[TodoList, Pages[PageWithTodoProjectList, TodoPage]]("TodoListView") {
+  val TodoListPageView = cursorView[TodoList, Pages[PageWithTodoProjectList, TodoPage]]("TodoListView") {
     cp => {
       //FIXME use actual creation time
       val fab = PageLayout.addFAB(cp.act(TodoListAction.CreateTodo(): TodoListAction))
@@ -110,8 +110,8 @@ object TodoPagesViews {
         Breadcrumbs.container(
 //                  Breadcrumbs.element(s"${projectCP.model.name}", projectCP.p.set(TodoProjectPage)),
 //                  Breadcrumbs.chevron,
-          Breadcrumbs.back(cp.p.set(TodoProjectPage)),
-          textViewHero(cp.zoomN(TodoList.name).label("List name"))
+          Breadcrumbs.back(cp.location.set(TodoProjectPage)),
+          textViewHero(cp.zoom(TodoList.name).label("List name"))
         )
 
       val contents = TodoListView(
@@ -140,14 +140,15 @@ object TodoPagesViews {
   }
 
 
-  val TodoView = cursorPView[Todo, Pages[TodoProjectListItemPage, TodoPage]]("TodoView") {
+  val TodoView = cursorView[Todo, Pages[TodoProjectListItemPage, TodoPage]]("TodoView") {
     cp => {
       val title =
         Breadcrumbs.container(
           //                  Breadcrumbs.element(s"${projectCP.model.name}", projectCP.p.set(TodoProjectPage)),
           //                  Breadcrumbs.chevron,
-          Breadcrumbs.back(cp.p.set(cp.p.current.back)),
-          textViewHero(cp.zoomN(Todo.name).label("Todo name"))
+          // TODO use a modify method on pages
+          Breadcrumbs.back(cp.location.set(cp.location.current.back)),
+          textViewHero(cp.zoom(Todo.name).label("Todo name"))
         )
 
       val contents = BarDemo.BarChart(
@@ -176,11 +177,11 @@ object TodoPagesViews {
       // will produce a cursor whose model is the specified list, and where
       // Pages have current page type PageWithTodoProjectList
       val list = cp.zoomModelAndPageCT[TodoList, PageWithTodoProjectList](p =>
-        cp.zoomN(TodoProject.lists).zoomMatch(FindTodoListById(p.listId))
+        cp.zoom(TodoProject.lists).zoomMatch(FindTodoListById(p.listId))
       )
 
       val item = cp.zoomModelAndPageCT[Todo, TodoProjectListItemPage](p =>
-        cp.zoomN(TodoProject.lists).zoomMatch(FindTodoListById(p.listId)).flatMap(_.zoomN(TodoList.items).zoomMatch(FindTodoById(p.todoId)))
+        cp.zoom(TodoProject.lists).zoomMatch(FindTodoListById(p.listId)).flatMap(_.zoom(TodoList.items).zoomMatch(FindTodoById(p.todoId)))
       )
 
       List[Option[ReactElement]](
@@ -190,8 +191,8 @@ object TodoPagesViews {
       ).flatten
   }
 
-  val TodoProjectCachePagesView = cursorPView[Cache[TodoProject], Pages[TodoPage, TodoPage]]("TodoProjectCachePagesView"){
-    _.zoomRefP(Ref(Guid(ClientId(0), ClientDeltaId(0), 0)))
+  val TodoProjectCachePagesView = cursorView[Cache[TodoProject], Pages[TodoPage, TodoPage]]("TodoProjectCachePagesView"){
+    _.zoomRef(Ref(Guid(ClientId(0), ClientDeltaId(0), 0)))
       .map(TodoProjectPagesView(_))
       .getOrElse(TodoProjectEmptyView)
   }

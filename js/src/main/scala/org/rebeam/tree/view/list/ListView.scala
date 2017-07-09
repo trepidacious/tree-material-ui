@@ -8,7 +8,7 @@ import org.rebeam.tree.sync.Sync._
 import org.rebeam.tree.view._
 import org.rebeam.tree.view.View._
 import org.rebeam.tree.view.infinite.Infinite
-import org.rebeam.tree.view.measure.CursorPHeightView
+import org.rebeam.tree.view.measure.CursorHeightView
 import org.rebeam.tree.view.pages.Pages
 import org.rebeam.tree.view.transition._
 
@@ -35,12 +35,12 @@ object ListView {
                                          name: String,
                                          toItem: A => F,
                                          itemToKey: A => js.Any,
-                                         itemView: ReqProps[CursorP[A, Pages[C, P]], Unit, Unit, TopNode],
+                                         itemView: ReqProps[Cursor[A, Pages[C, P]], Unit, Unit, TopNode],
                                          subheader: String,
-                                         mode: ListMode = ListMode.Infinite)(implicit fEncoder: Encoder[F]): ((IndexChange) => Callback) => (CursorP[List[A], Pages[C, P]]) => ReactComponentU_ = {
-    ListView[List[A], Pages[C, P], CursorP[A, Pages[C, P]]](
+                                         mode: ListMode = ListMode.Infinite)(implicit fEncoder: Encoder[F]): ((IndexChange) => Callback) => (Cursor[List[A], Pages[C, P]]) => ReactComponentU_ = {
+    ListView[List[A], Pages[C, P], Cursor[A, Pages[C, P]]](
       name,
-      _.zoomAllMatchesP(toItem),
+      _.zoomAllMatches(toItem),
       c => itemToKey(c.model),
       itemView,
       subheader,
@@ -50,13 +50,13 @@ object ListView {
 
   def withAction[R, P, A, Q](
     name: String,
-    listCursorToItems: CursorP[R, P] => List[CursorP[A, Q]],
+    listCursorToItems: Cursor[R, P] => List[Cursor[A, Q]],
     itemToKey: A => js.Any,
-    itemView: ReqProps[CursorP[A, Q], Unit, Unit, TopNode],
+    itemView: ReqProps[Cursor[A, Q], Unit, Unit, TopNode],
     subheader: String,
     mode: ListMode = ListMode.Infinite
-   ): ((IndexChange) => Callback) => (CursorP[R, P]) => ReactComponentU_ = {
-    ListView[R, P, CursorP[A, Q]](
+   ): ((IndexChange) => Callback) => (Cursor[R, P]) => ReactComponentU_ = {
+    ListView[R, P, Cursor[A, Q]](
       name,
       listCursorToItems,
       c => itemToKey(c.model),
@@ -68,17 +68,17 @@ object ListView {
 
   def usingMatches[R, P, A, Q, F <: A => Boolean](
     name: String,
-    rootToItems: CursorP[R, P] => Cursor[List[A]],
+    rootToItems: Cursor[R, P] => Cursor[List[A], P],
     itemToFinder: A => F,
-    itemAndCursorToAction: (A, CursorP[R, P]) => Q,
+    itemAndCursorToAction: (A, Cursor[R, P]) => Q,
     itemToKey: A => js.Any,
-    itemView: ReqProps[CursorP[A, Q], Unit, Unit, TopNode],
+    itemView: ReqProps[Cursor[A, Q], Unit, Unit, TopNode],
     subheader: String,
     mode: ListMode = ListMode.Infinite
-  )(implicit fEncoder: Encoder[F]): ((IndexChange) => Callback) => (CursorP[R, P]) => ReactComponentU_ = {
+  )(implicit fEncoder: Encoder[F]): ((IndexChange) => Callback) => (Cursor[R, P]) => ReactComponentU_ = {
     ListView.withAction[R, P, A, Q](
       name,
-      (cp: CursorP[R, P]) => rootToItems(cp).zoomAllMatches(itemToFinder).map(ca => ca.withP(itemAndCursorToAction(ca.model, cp))),
+      (cp: Cursor[R, P]) => rootToItems(cp).zoomAllMatches(itemToFinder).map(ca => ca.move(itemAndCursorToAction(ca.model, cp))),
       c => itemToKey(c),
       itemView,
       subheader,
@@ -88,12 +88,12 @@ object ListView {
 
   def usingId[R, P, A <: HasId[A], Q](
     name: String,
-    rootToItems: CursorP[R, P] => Cursor[List[A]],
-    itemAndCursorToAction: (A, CursorP[R, P]) => Q,
-    itemView: ReqProps[CursorP[A, Q], Unit, Unit, TopNode],
+    rootToItems: Cursor[R, P] => Cursor[List[A], P],
+    itemAndCursorToAction: (A, Cursor[R, P]) => Q,
+    itemView: ReqProps[Cursor[A, Q], Unit, Unit, TopNode],
     subheader: String,
     mode: ListMode = ListMode.Infinite
-  )(implicit fEncoder: Encoder[FindById[A]]): ((IndexChange) => Callback) => (CursorP[R, P]) => ReactComponentU_ = {
+  )(implicit fEncoder: Encoder[FindById[A]]): ((IndexChange) => Callback) => (Cursor[R, P]) => ReactComponentU_ = {
     ListView.usingMatches[R, P, A, Q, FindById[A]](
       name,
       rootToItems,
@@ -126,11 +126,11 @@ object ListView {
     */
   def apply[L, P, A](
                                       name: String,
-                                      listCursorToItems: CursorP[L, P] => List[A],
+                                      listCursorToItems: Cursor[L, P] => List[A],
                                       itemToKey: A => js.Any,
                                       itemView: ReqProps[A, Unit, Unit, TopNode],
                                       subheader: String,
-                                      mode: ListMode = ListMode.Infinite): ((IndexChange) => Callback) => (CursorP[L, P]) => ReactComponentU_ =
+                                      mode: ListMode = ListMode.Infinite): ((IndexChange) => Callback) => (Cursor[L, P]) => ReactComponentU_ =
   {
     val sortableElement = SortableElement.wrap(itemView)
 
@@ -139,7 +139,7 @@ object ListView {
       case ListMode.Infinite =>
         // Use a height view to get us the height of the rendered element as an extra part of prop.
         // This lets us scale the Infinite list appropriately to fill space.
-        val view = CursorPHeightView[L, P](name) {
+        val view = CursorHeightView[L, P](name) {
           (cp, height) =>
             val h: Int = height.map(_.toInt).getOrElse(60)
 
@@ -162,7 +162,7 @@ object ListView {
       // Don't wrap with infinite, therefore doesn't need a height view.
       // For this case we can also provide enter/leave transitions.
       case ListMode.Finite =>
-        val view = cursorPView[L, P](name) {
+        val view = cursorView[L, P](name) {
           cp =>
             CSSTransitionGroup(
               "tree-list-view--transition",

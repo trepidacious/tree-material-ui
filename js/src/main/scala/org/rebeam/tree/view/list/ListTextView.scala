@@ -17,12 +17,12 @@ object ListTextView {
 
   case class State(editing: Boolean)
 
-  class Backend(scope: BackendScope[CursorL[String], State]) {
+  class Backend(scope: BackendScope[Cursor[String, String], State]) {
 
     private val edit = scope.modState(s => s.copy(editing = true))
     private val unedit = scope.modState(s => s.copy(editing = false))
 
-    private def renderPlain(c: CursorL[String]): ReactTagOf[Div] = {
+    private def renderPlain(c: Cursor[String, String]): ReactTagOf[Div] = {
       <.div(
         ^.key := "plain",
         ^.className := "tree-list-text-view__plain",
@@ -35,7 +35,7 @@ object ListTextView {
       )
     }
 
-    private def renderEditing(c: CursorL[String]) = {
+    private def renderEditing(c: Cursor[String, String]) = {
       <.div(
         ^.key := "editing",
         ^.className := "tree-list-text-view__editing",
@@ -49,7 +49,7 @@ object ListTextView {
           onFocus =  (e: ReactFocusEventI) => Callback{e.target.select},
           // Normal bound editing
           onChange = (e: ReactEventI) => e.preventDefaultCB >> c.set(e.target.value),
-          hintText = c.label: ReactNode//,
+          hintText = c.location: ReactNode//,
 //          onEnterKeyDown = (e: ReactEventI) => e.preventDefaultCB >> Callback{println("ENTER!")},
 //          onKeyDown = (e: ReactKeyboardEvent) => if (e.keyCode == 9) {
 //            e.preventDefaultCB >> Callback{println("TAB!")}
@@ -60,7 +60,7 @@ object ListTextView {
       )
     }
 
-    def render(p: CursorL[String], state: State): ReactTagOf[Div] = {
+    def render(p: Cursor[String, String], state: State): ReactTagOf[Div] = {
       if (state.editing) {
         renderEditing(p)
       } else {
@@ -69,14 +69,14 @@ object ListTextView {
     }
   }
 
-  val component: ReqProps[CursorL[String], State, Backend, TopNode] =
-    ReactComponentB[CursorL[String]]("ListTextView")
+  val component: ReqProps[Cursor[String, String], State, Backend, TopNode] =
+    ReactComponentB[Cursor[String, String]]("ListTextView")
     .initialState(State(false))
     .backend(new Backend(_))
     .render(s => s.backend.render(s.props, s.state))
     .build
 
-  def apply(c: CursorL[String]): ReactComponentU[CursorL[String], State, Backend, TopNode] =
+  def apply(c: Cursor[String, String]): ReactComponentU[Cursor[String, String], State, Backend, TopNode] =
     component(c)
 
 }

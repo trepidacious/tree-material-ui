@@ -20,12 +20,12 @@ import scala.scalajs.js
 
 object DemoViews {
 
-  val streetView = cursorView[Street]("StreetView") { c =>
+  val streetView = cursorView[Street, Unit]("StreetView") { c =>
     <.div(
       <.p("Blah"),
-      intView(c.zoomN(Street.number).label("Number")),
-      textView(c.zoomN(Street.name).label("Name")),
-      doubleView(c.zoomN(Street.temperature).label("Temperature")),
+      intView(c.zoom(Street.number).label("Number")),
+      textView(c.zoom(Street.name).label("Name")),
+      doubleView(c.zoom(Street.temperature).label("Temperature")),
       raisedButton("Number multiple", primary = true){
         c.act(StreetAction.NumberMultiple(10): StreetAction)
       },
@@ -44,7 +44,7 @@ object DemoViews {
 
   val addressView = ServerRootComponent[Address](noAddress, "api/address") {
     addressCursor => {
-      val streetCursor = addressCursor.zoomN(Address.street)
+      val streetCursor = addressCursor.zoom(Address.street)
       <.div(
         <.h3("Address"),
         streetView(streetCursor)

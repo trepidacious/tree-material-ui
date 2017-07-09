@@ -27,18 +27,10 @@ object View {
     ReactComponentB[A](name).render_P(render).build
 
   //We are careful to ensure that cursors remain equal if they are reusable
-  implicit def cursorReuse[A]: Reusability[Cursor[A]] = Reusability.byRefOr_==
-  implicit def cursorLReuse[A]: Reusability[CursorL[A]] = Reusability.byRefOr_==
-  implicit def cursorPReuse[A, P]: Reusability[CursorP[A, P]] = Reusability.byRefOr_==
+  implicit def cursorReuse[A, P]: Reusability[Cursor[A, P]] = Reusability.byRefOr_==
 
-  def cursorView[A](name: String)(render: Cursor[A] => ReactElement) =
-    ReactComponentB[Cursor[A]](name).render_P(render).configure(Reusability.shouldComponentUpdate).build
-
-  def cursorLView[A](name: String)(render: CursorL[A] => ReactElement) =
-    ReactComponentB[CursorL[A]](name).render_P(render).configure(Reusability.shouldComponentUpdate).build
-
-  def cursorPView[A, P](name: String)(render: CursorP[A, P] => ReactElement): ReqProps[CursorP[A, P], Unit, Unit, TopNode] =
-    ReactComponentB[CursorP[A, P]](name).render_P(render).configure(Reusability.shouldComponentUpdate).build
+  def cursorView[A, P](name: String)(render: Cursor[A, P] => ReactElement): ReqProps[Cursor[A, P], Unit, Unit, TopNode] =
+    ReactComponentB[Cursor[A, P]](name).render_P(render).configure(Reusability.shouldComponentUpdate).build
 
   def staticView(name: String)(e: ReactElement) = ReactComponentB[Unit](name)
     .render(_ => e)
@@ -48,21 +40,21 @@ object View {
     MuiCircularProgress(mode = DeterminateIndeterminate.indeterminate)()
   )
 
-  val textView = cursorLView[String]("textView") { p =>
+  val textView = cursorView[String, String]("textView") { p =>
     MuiTextField(
       value = p.model,
       onChange = (e: ReactEventI) => e.preventDefaultCB >>  p.set(e.target.value),
-      floatingLabelText = p.label: ReactNode
+      floatingLabelText = p.location: ReactNode
     )()
   }
 
-  val textViewHero = cursorLView[String]("textViewHero") { p =>
+  val textViewHero = cursorView[String, String]("textViewHero") { p =>
     MuiTextField(
       value = p.model,
       onChange = (e: ReactEventI) => e.preventDefaultCB >>  p.set(e.target.value),
 //      floatingLabelText = p.label: ReactNode,
 //      floatingLabelStyle = js.Dynamic.literal("font-size" -> "16px", "color" -> "rgba(255, 255, 255, 0.87"),
-      hintText = p.label: ReactNode,
+      hintText = p.location: ReactNode,
       hintStyle = js.Dynamic.literal("color" -> "rgba(255, 255, 255, 0.87)"),
       style = js.Dynamic.literal("font-size" -> "24px"),
       inputStyle = js.Dynamic.literal("color" -> "rgba(255, 255, 255, 1.00)"),
@@ -79,7 +71,7 @@ object View {
     )()
   }
 
-  //FIXME work out a better way to aline with textViewHero
+  //FIXME work out a better way to align with textViewHero
   def labelHero(s: String): ReactTagOf[Span] = <.span(
     ^.fontSize := "23px",
     ^.paddingTop := "16px",
@@ -87,11 +79,11 @@ object View {
     s
   )
 
-  val textViewPlainLabel = cursorLView[String]("textViewPlainLabel") { p =>
+  val textViewPlainLabel = cursorView[String, String]("textViewPlainLabel") { p =>
     MuiTextField(
       value = p.model,
       onChange = (e: ReactEventI) => e.preventDefaultCB >>  p.set(e.target.value),
-      hintText = p.label: ReactNode
+      hintText = p.location: ReactNode
     )()
   }
 
@@ -134,9 +126,9 @@ object View {
     */
   object AsStringView {
 
-    class Backend[A](scope: BackendScope[CursorL[A], (String, Boolean)])(implicit codec: StringCodec[A], encoder: Encoder[A]) {
+    class Backend[A](scope: BackendScope[Cursor[A, String], (String, Boolean)])(implicit codec: StringCodec[A], encoder: Encoder[A]) {
 
-      def render(props: CursorL[A], state: (String, Boolean)) = {
+      def render(props: Cursor[A, String], state: (String, Boolean)) = {
         val model = props.model
 
         // If we have had a prop change since the last time we set state,
@@ -182,12 +174,12 @@ object View {
           },
 //          errorText = error,
 //          hintText = props.label: ReactNode
-            floatingLabelText = props.label: ReactNode
+            floatingLabelText = props.location: ReactNode
         )()
       }
     }
 
-    def component[A](name: String, codec: StringCodec[A])(implicit encoder: Encoder[A]) = ReactComponentB[CursorL[A]](name)
+    def component[A](name: String, codec: StringCodec[A])(implicit encoder: Encoder[A]) = ReactComponentB[Cursor[A, String]](name)
       .getInitialState[(String, Boolean)](scope => (scope.props.model.toString, false))
       .backend(new Backend[A](_)(codec, encoder))
       .render(s => s.backend.render(s.props, s.state))
@@ -228,16 +220,16 @@ object View {
 
   val intView = AsStringView.component[Int]("intView", intStringCodec)
 
-  val booleanView = cursorLView[Boolean]("booleanView") { p =>
+  val booleanView = cursorView[Boolean, String]("booleanView") { p =>
     MuiCheckbox(
-      label = p.label,
+      label = p.location,
       checked = p.model,
       onCheck = (e: ReactEventH, b: Boolean) => e.preventDefaultCB >> p.set(!p.model)
     )()
   }
 
 
-  val booleanViewUnlabelled = cursorView[Boolean]("booleanView") { p =>
+  val booleanViewUnlabelled = cursorView[Boolean, String]("booleanView") { p =>
     MuiCheckbox(
       checked = p.model,
       onCheck = (e: ReactEventH, b: Boolean) => e.preventDefaultCB >> p.set(!p.model)

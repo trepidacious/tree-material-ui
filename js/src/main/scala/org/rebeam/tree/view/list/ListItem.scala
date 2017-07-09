@@ -9,7 +9,7 @@ import org.rebeam.lenses.LensN
 import org.rebeam.tree.view.View._
 import org.rebeam.tree.view.icon.Icons
 import org.rebeam.tree.view.transition.CSSTransitionGroup
-import org.rebeam.tree.view.{Color, CursorP, MaterialColor, View}
+import org.rebeam.tree.view.{Color, Cursor, MaterialColor, View}
 import org.scalajs.dom.html.Div
 
 object ListItem {
@@ -172,26 +172,26 @@ object ListItem {
 
   case class EditAndDeleteActions(edit: Callback, delete: Callback)
 
-  def editAndDeleteListItem[A](name: String, firstLine: A => String, secondLine: A => String, avatar: A => ReactElement): ReqProps[CursorP[A, EditAndDeleteActions], Unit, Unit, TopNode] = cursorPView[A, EditAndDeleteActions](name){
+  def editAndDeleteListItem[A](name: String, firstLine: A => String, secondLine: A => String, avatar: A => ReactElement): ReqProps[Cursor[A, EditAndDeleteActions], Unit, Unit, TopNode] = cursorView[A, EditAndDeleteActions](name){
     cp => {
       val m = cp.model
 
       val buttons = List(
         ListItem.Action(
           Mui.SvgIcons.ActionDelete()(),
-          cp.p.delete
+          cp.location.delete
         ),
         ListItem.Action(
           Mui.SvgIcons.ContentCreate()(),
-          cp.p.edit
+          cp.location.edit
         )
       )
 
-      ListItem(avatar(m), ListItem.twoLines(firstLine(m), secondLine(m)), buttons, onClick = cp.p.edit)
+      ListItem(avatar(m), ListItem.twoLines(firstLine(m), secondLine(m)), buttons, onClick = cp.location.edit)
     }
   }
 
-  def completeEditAndDeleteListItem[A](name: String, firstLine: A => String, secondLine: A => String, completionLens: LensN[A, Boolean]): ReqProps[CursorP[A, EditAndDeleteActions], Unit, Unit, TopNode] = cursorPView(name){
+  def completeEditAndDeleteListItem[A](name: String, firstLine: A => String, secondLine: A => String, completionLens: LensN[A, Boolean]): ReqProps[Cursor[A, EditAndDeleteActions], Unit, Unit, TopNode] = cursorView(name){
     cp => {
       val m = cp.model
 
@@ -199,21 +199,21 @@ object ListItem {
         ^.position := "relative",
         ^.top := "8px",
         ^.left := "8px",
-        booleanViewUnlabelled(cp.zoomN(completionLens))
+        booleanViewUnlabelled(cp.zoom(completionLens).label(""))
       )
 
       val buttons = List(
         ListItem.Action(
           Mui.SvgIcons.ActionDelete()(),
-          cp.p.delete
+          cp.location.delete
         ),
         ListItem.Action(
           Mui.SvgIcons.ContentCreate()(),
-          cp.p.edit
+          cp.location.edit
         )
       )
 
-      ListItem(avatar, ListItem.twoLines(firstLine(m), secondLine(m)), buttons, onClickContents = cp.p.edit)
+      ListItem(avatar, ListItem.twoLines(firstLine(m), secondLine(m)), buttons, onClickContents = cp.location.edit)
     }
   }
 
