@@ -6,6 +6,8 @@ import org.rebeam.lenses.macros.Lenses
 import org.rebeam.tree.Delta._
 import org.rebeam.tree.DeltaCodecs._
 import org.rebeam.tree._
+import org.rebeam.tree.ref.Ref
+import org.rebeam.tree.sync.RefAdder
 import org.rebeam.tree.sync.Sync._
 import org.rebeam.tree.view.{Color, MaterialColor}
 
@@ -68,7 +70,7 @@ object TaskData {
     def important: Boolean
   }
   object TaskEvent {
-    case class Create(userId: Guid[User]) extends TaskEvent {
+    case class Create(userRef: Ref[User]) extends TaskEvent {
       def apply(t: Task): DeltaIO[Task] = t.withEvent(this)
       val important = true
     }
@@ -93,26 +95,26 @@ object TaskData {
       val important = true
     }
     case class Tag(tag: TaskTag) extends TaskEvent {
-      def apply(t: Task): DeltaIO[Task] = t.copy(tags = t.tags + tag).withEvent(this)
+      def apply(t: Task): DeltaIO[Task] = t.copy(tags = tag :: t.tags.filterNot(_ == tag)).withEvent(this)
       val important = true
     }
     case class Untag(tag: TaskTag) extends TaskEvent {
-      def apply(t: Task): DeltaIO[Task] = t.copy(tags = t.tags - tag).withEvent(this)
+      def apply(t: Task): DeltaIO[Task] = t.copy(tags = t.tags.filterNot(_ == tag)).withEvent(this)
       val important = true
     }
-    case class Watch(userId: Guid[User]) extends TaskEvent {
-      def apply(t: Task): DeltaIO[Task] = t.copy(watching = t.watching + userId).withEvent(this)
+    case class Watch(userRef: Ref[User]) extends TaskEvent {
+      def apply(t: Task): DeltaIO[Task] = t.copy(watching = userRef :: t.watching.filterNot(_.guid == userRef.guid)).withEvent(this)
       val important = true
     }
-    case class Unwatch(userId: Guid[User]) extends TaskEvent {
-      def apply(t: Task): DeltaIO[Task] = t.copy(watching = t.watching - userId).withEvent(this)
+    case class Unwatch(userRef: Ref[User]) extends TaskEvent {
+      def apply(t: Task): DeltaIO[Task] = t.copy(watching = t.watching.filterNot(_.guid == userRef.guid)).withEvent(this)
       val important = true
     }
-    case class Lead(userId: Option[Guid[User]]) extends TaskEvent {
-      def apply(t: Task): DeltaIO[Task] = t.copy(leading = userId).withEvent(this)
+    case class Lead(userRef: Option[Ref[User]]) extends TaskEvent {
+      def apply(t: Task): DeltaIO[Task] = t.copy(leading = userRef).withEvent(this)
       val important = true
     }
-    case class Comment(userId: Guid[User], markdown: Markdown) extends TaskEvent {
+    case class Comment(userRef: Ref[User], markdown: Markdown) extends TaskEvent {
       def apply(t: Task): DeltaIO[Task] = t.withEvent(this)
       val important = true
     }
@@ -127,9 +129,9 @@ object TaskData {
                    description: Markdown,
                    priority: TaskPriority,
                    state: TaskState,
-                   tags: Set[TaskTag],
-                   watching: Set[Guid[User]],
-                   leading: Option[Guid[User]],
+                   tags: List[TaskTag],
+                   watching: List[Ref[User]],
+                   leading: Option[Ref[User]],
                    history: List[(Moment, TaskEvent)]
   ) {
     def withEvent(e: TaskEvent): DeltaIO[Task] = for {
@@ -140,8 +142,13 @@ object TaskData {
     }
   }
 
-  //Delta decoders
-  implicit val taskDeltaDecoder: DeltaCodec[Task] = action[Task, TaskEvent]
+  //Delta decoders. Note we provide lenses to watching and leading to reach the refs in them
+  implicit val taskDeltaDecoder: DeltaCodec[Task] = action[Task, TaskEvent] or lensN(Task.watching) or lensN(Task.leading)
+
+  //TODO provide a means of making a DeltaCodec fail when used to actually decode a delta, but still perform ref updating
+  //Get to the refs in watching and leading, so Mirror can update them.
+  implicit val optionRefUserDeltaDecoder: DeltaCodec[Option[Ref[User]]] = option[Ref[User]]
+  implicit val listRefUserDeltaDecoder: DeltaCodec[List[Ref[User]]] = optionalI[Ref[User]]
 
   implicit val taskIdGen: ModelIdGen[Task] = new ModelIdGen[Task] {
     def genId(a: Task) = None
@@ -151,10 +158,10 @@ object TaskData {
 
     /**
       * Create a default task using given user id
-      * @param userId User to create the task. Will also be set to watch the task.
+      * @param userRef User to create the task. Will also be set to watch the task.
       * @return A new task with default fields, having a single TaskEvent.created in history
       */
-    def create(userId: Guid[User]): DeltaIO[Task] = for {
+    def create(userRef: Ref[User]): DeltaIO[Task] = for {
       id <- getId[Task]
       t = Task(
         id = id,
@@ -163,30 +170,30 @@ object TaskData {
         description = Markdown(""),
         priority = TaskPriority.Medium,
         state = TaskState.Active,
-        tags = Set.empty,
-        watching = Set(userId),
+        tags = Nil,
+        watching = Nil,
         leading = None,
         history = List.empty
       )
-      tCreated <- TaskEvent.Create(userId).apply(t)
+      tCreated <- TaskEvent.Create(userRef).apply(t)
     } yield tCreated
 
     /**
       * Create an example task using given user id, with some interesting
       * data set showing different events
-      * @param userId User to create the task. Will also be used to demonstrate leading/watching.
+      * @param userRef User to create the task. Will also be used to demonstrate leading/watching.
       * @return A new task with interesting data
       */
-    def example(userId: Guid[User]): DeltaIO[Task] = {
+    def example(userRef: Ref[User]): DeltaIO[Task] = {
       val events = List(
         TaskEvent.SetName("Example task"),
         TaskEvent.SetColor(MaterialColor.backgroundForIndex(0)),
         TaskEvent.SetDescription(Markdown(
           """
             | A task with some history to act as an example of features:
-            | * SetName
-            | * SetColor
-            | * SetDescription
+            | * Set name
+            | * Set color
+            | * Set description
             | * Set priority low
             | * Set task inactive
             | * Add and remove some tags
@@ -196,25 +203,27 @@ object TaskData {
           """.stripMargin)),
         TaskEvent.SetPriority(TaskPriority.Low),
         TaskEvent.SetState(TaskState.Inactive),
-        TaskEvent.Tag(TaskTag("example")),
+        TaskEvent.Tag(TaskTag("example tag")),
         TaskEvent.Tag(TaskTag("unwanted tag")),
         TaskEvent.Untag(TaskTag("unwanted tag")),
-        TaskEvent.Unwatch(userId),
-        TaskEvent.Lead(Some(userId)),
+        TaskEvent.Unwatch(userRef),
+        TaskEvent.Lead(Some(userRef)),
         TaskEvent.Lead(None),
-        TaskEvent.Comment(userId, Markdown("Cool example!")),
-        TaskEvent.Comment(userId, Markdown("YMMV!"))
+        TaskEvent.Comment(userRef, Markdown("Cool example!")),
+        TaskEvent.Comment(userRef, Markdown("YMMV!"))
       )
 
       // Start with a DeltaIO creating a default task, then within a DeltaIO,
       // apply each event to the task in sequence to produce the example task.
       events.foldLeft(
-        Task.create(userId)
+        Task.create(userRef)
       ){
         case (taskIO, event) => taskIO.flatMap(task => event(task))
       }
     }
   }
+
+  implicit val taskRefAdder: RefAdder[Task] = RefAdder.noOpRefAdder[Task]
 
 }
 

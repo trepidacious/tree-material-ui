@@ -11,7 +11,8 @@ import BasicDeltaDecoders._
 import DeltaCodecs._
 import io.circe.generic.JsonCodec
 import org.rebeam.tree.Delta._
-import org.rebeam.tree.ref.Cache
+import org.rebeam.tree.ref.{Mirror, MirrorCodec}
+import org.rebeam.tree.sync.RefAdder
 import org.rebeam.tree.sync.Sync._
 
 import scala.collection.mutable.ListBuffer
@@ -253,11 +254,21 @@ object DemoData {
     def genId(a: TodoProject) = None
   }
 
-  implicit val todoProjectCacheIdGen = new ModelIdGen[Cache[TodoProject]] {
-    def genId(a: Cache[TodoProject]) = None
+  implicit val mirrorIdGen = new ModelIdGen[Mirror] {
+    def genId(a: Mirror) = None
   }
 
-  implicit val projectCacheCodec = DeltaCodecs.cache[TodoProject]
+  // Mirror codec to allow TodoProject to be handled by Mirror
+  implicit val todoProjectMirrorCodec: MirrorCodec[TodoProject] = MirrorCodec[TodoProject]("todoProject")
+
+  // Encoder, decoder and delta codec for entire Mirror
+  implicit val mirrorDecoder: Decoder[Mirror] = Mirror.decoder(todoProjectMirrorCodec)
+  implicit val mirrorEncoder: Encoder[Mirror] = Mirror.encoder
+  implicit val mirrorDeltaCodec: DeltaCodec[Mirror] = DeltaCodecs.mirror[TodoProject]
+
+  implicit val addressRefAdder: RefAdder[Address] = RefAdder.noOpRefAdder[Address]
+  implicit val todoListRefAdder: RefAdder[TodoList] = RefAdder.noOpRefAdder[TodoList]
+  implicit val todoProjectRefAdder: RefAdder[TodoProject] = RefAdder.noOpRefAdder[TodoProject]
 
 }
 

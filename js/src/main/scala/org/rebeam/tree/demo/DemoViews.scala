@@ -42,6 +42,8 @@ object DemoViews {
 
   implicit val contextSource = DeltaIOContextSource.default
 
+  implicit val rootSourceAddress = ServerRootComponent.noRootSource[Address]
+
   val addressView = ServerRootComponent[Address](noAddress, "api/address") {
     addressCursor => {
       val streetCursor = addressCursor.zoom(Address.street)

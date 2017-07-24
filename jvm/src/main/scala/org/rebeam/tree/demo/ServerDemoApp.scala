@@ -12,7 +12,6 @@ import org.http4s.server.websocket._
 import org.rebeam.tree.{DeltaIOContext, DeltaIOContextSource, Moment}
 import org.rebeam.tree.server.{ServerStore, ServerStoreValueExchange}
 import org.rebeam.tree.view.MaterialColor
-
 import DemoData._
 import TaskData._
 import org.rebeam.tree.Delta._
@@ -20,7 +19,7 @@ import org.rebeam.tree.sync.Sync._
 import org.rebeam.tree.sync.DeltaIORun._
 import cats.instances.list._
 import cats.syntax.traverse._
-import org.rebeam.tree.ref.Cache
+import org.rebeam.tree.ref.{Mirror, Ref}
 
 object ServerDemoApp extends ServerApp {
 
@@ -71,25 +70,34 @@ object ServerDemoApp extends ServerApp {
   private val todoProject = todoProjectIO.runWith(
     DeltaIOContext(Moment(0)),
     DeltaId(ClientId(0), ClientDeltaId(0))
-  )
+  ).data
 
-  private val todoProjectCache = Cache.empty[TodoProject].updated(todoProject.id, todoProject)
+  val todoProjectMirrorIO: DeltaIO[Mirror] = for {
+    revision <- getId[TodoProject]
+  } yield {
+    Mirror.empty.updated(todoProject.id, todoProject, revision)
+  }
+
+  private val todoProjectMirror = todoProjectMirrorIO.runWith(
+    DeltaIOContext(Moment(0)),
+    DeltaId(ClientId(0), ClientDeltaId(1))
+  ).data
 
   private val todoProjectStore = new ServerStore(todoProject)
 
-  private val todoProjectCacheStore = new ServerStore(todoProjectCache)
+  private val todoProjectMirrorStore = new ServerStore(todoProjectMirror)
 
   private val todoListStore = new ServerStore(todoProject.lists.head)
 
   val taskIO: DeltaIO[Task] = for {
     user <- User.create("A", "User", "user", Email("a@user.com"))
-    task <- Task.example(user.id)
+    task <- Task.example(Ref(user.id))
   } yield task
 
   private val task = taskIO.runWith(
     DeltaIOContext(Moment(0)),
     DeltaId(ClientId(0), ClientDeltaId(0))
-  )
+  ).data
 
   private val taskStore = new ServerStore(task)
 
@@ -124,10 +132,10 @@ object ServerDemoApp extends ServerApp {
         )
       )
 
-    case GET -> Root / "todoprojectcache" =>
+    case GET -> Root / "todoprojectmirror" =>
       WS(
         ServerStoreValueExchange(
-          todoProjectCacheStore,
+          todoProjectMirrorStore,
           ClientId(nextClientId.getAndIncrement()),
           contextSource
         )

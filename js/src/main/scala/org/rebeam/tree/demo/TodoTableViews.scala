@@ -83,6 +83,8 @@ object TodoTableViews {
 
   implicit val contextSource = DeltaIOContextSource.default
 
+  implicit val rootSourceTodoList = ServerRootComponent.noRootSource[TodoList]
+
   val todoListView = ServerRootComponent[TodoList](noTodoList, "api/todolist") {
     c => {
       <.div(

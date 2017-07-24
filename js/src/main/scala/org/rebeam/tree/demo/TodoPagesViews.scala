@@ -10,7 +10,7 @@ import japgolly.scalajs.react.vdom.prefix_<^._
 import org.rebeam.tree.{DeltaCodecs, DeltaIOContextSource, Moment}
 import org.rebeam.tree.demo.DemoData._
 import org.rebeam.tree.demo.DemoRoutes._
-import org.rebeam.tree.ref.Cache
+import org.rebeam.tree.ref.Mirror
 import org.rebeam.tree.ref.Ref
 import org.rebeam.tree.view.Cursor._
 import org.rebeam.tree.view.View._
@@ -21,7 +21,7 @@ import org.rebeam.tree.view.measure.{CursorHeightView, MeasureDemo}
 import org.rebeam.tree.view.pages.Pages._
 import org.rebeam.tree.view.pages._
 import org.rebeam.tree.view.list._
-import Cache._
+import Mirror._
 import org.rebeam.tree.sync.Sync
 import org.rebeam.tree.sync.Sync.{ClientDeltaId, ClientId, Guid}
 
@@ -73,6 +73,19 @@ object TodoPagesViews {
   val TodoProjectEmptyView = PageLayout(
     MaterialColor.BlueGrey(500), 128,
     "Loading project...",
+    None,
+    Some(
+      MuiCircularProgress(
+        mode = DeterminateIndeterminate.indeterminate,
+        color = Mui.Styles.colors.white
+      )()
+    ),
+    None
+  )
+
+  val TodoProjectEmptyView2 = PageLayout(
+    MaterialColor.BlueGrey(500), 128,
+    "Can't find ref...",
     None,
     Some(
       MuiCircularProgress(
@@ -191,13 +204,15 @@ object TodoPagesViews {
       ).flatten
   }
 
-  val TodoProjectCachePagesView = cursorView[Cache[TodoProject], Pages[TodoPage, TodoPage]]("TodoProjectCachePagesView"){
-    _.zoomRef(Ref(Guid(ClientId(0), ClientDeltaId(0), 0)))
-      .map(TodoProjectPagesView(_))
-      .getOrElse(TodoProjectEmptyView)
+  val TodoProjectCachePagesView = cursorView[Mirror, Pages[TodoPage, TodoPage]]("TodoProjectCachePagesView"){
+    c => c.followRef(Ref(Guid[TodoProject](ClientId(0), ClientDeltaId(0), 0)))
+          .map(TodoProjectPagesView(_))
+          .getOrElse(TodoProjectEmptyView2)
   }
 
   implicit val contextSource = DeltaIOContextSource.default
+
+  implicit val rootSourceTodoProject = ServerRootComponent.noRootSource[TodoProject]
 
   // This combines and stores the url and renderer, and will then produce a new element per page. This avoids
   // changing state when changing pages, so we keep the same websocket etc.
@@ -207,7 +222,7 @@ object TodoPagesViews {
 
   // This combines and stores the url and renderer, and will then produce a new element per page. This avoids
   // changing state when changing pages, so we keep the same websocket etc.
-  val todoProjectCacheViewFactory = ServerRootComponent.factory[Cache[TodoProject], Pages[TodoPage, TodoPage]](TodoProjectEmptyView, "api/todoprojectcache") {
+  val todoProjectCacheViewFactory = ServerRootComponent.factory[Mirror, Pages[TodoPage, TodoPage]](TodoProjectEmptyView, "api/todoprojectmirror") {
     TodoProjectCachePagesView(_)
   }
 
