@@ -12,94 +12,70 @@ import org.http4s.server.websocket._
 import org.rebeam.tree.{DeltaIOContext, DeltaIOContextSource, Moment}
 import org.rebeam.tree.server.{ServerStore, ServerStoreValueExchange}
 import org.rebeam.tree.view.MaterialColor
-import DemoData._
-import TaskData._
 import org.rebeam.tree.Delta._
 import org.rebeam.tree.sync.Sync._
 import org.rebeam.tree.sync.DeltaIORun._
-import cats.instances.list._
-import cats.syntax.traverse._
+import org.rebeam.tree.demo.DemoData.Address
 import org.rebeam.tree.ref.{Mirror, Ref}
 
 object ServerDemoApp extends ServerApp {
 
-  val address = new ServerStore(Address(Street("OLD STREET", 1, 22.3)))
-
-  val listCount = 2
-  val itemCount = 5
-
-  def todoIO(i: Int): DeltaIO[Todo] = for {
-    id <- getId[Todo]
-  } yield {
-    Todo(
-      id,
-      "Todo " + i,
-      priority = i % 3 match {
-        case 0 => Priority.Low
-        case 1 => Priority.Medium
-        case _ => Priority.High
-      }
-    )
+  val address: ServerStore[Address] = {
+    import DemoData._
+    new ServerStore(Address(Street("OLD STREET", 1, 22.3)))
   }
 
-  def todoListIO(listIndex: Int): DeltaIO[TodoList] = for {
-    id <- getId[TodoList]
-    todos <- (1 to itemCount).toList.traverse(todoIO(_))
-  } yield {
-    TodoList(
-      id,
-      s"Todo list $listIndex",
-      Priority.Medium,
-      MaterialColor.backgroundForIndex(id.id.toInt - 1),
-      todos
-    )
+  private val todoProjectMirrorStore = {
+    import DemoData._
+
+    //FIXME update
+    val todoProjectMirrorIO: DeltaIO[Mirror] = for {
+      todoProject <- TodoExample.todoProjectIO
+      revision <- getId[TodoProject]
+    } yield {
+      Mirror.empty.updated(todoProject.id, todoProject, revision)
+    }
+
+    val todoProjectMirror = todoProjectMirrorIO.runWith(
+      DeltaIOContext(Moment(0)),
+      DeltaId(ClientId(0), ClientDeltaId(0))
+    ).data
+
+    new ServerStore(todoProjectMirror)
   }
 
-  val todoProjectIO: DeltaIO[TodoProject] = for{
-    id <- getId[TodoProject]
-    lists <- (1 to listCount).toList.traverse(todoListIO(_))
-  } yield {
-    TodoProject(
-      id,
-      "Todo project",
-      MaterialColor.Indigo(),
-      lists
-    )
+  private val todoListStore = {
+    import DemoData._
+    val todoProject = TodoExample.todoProjectIO.runWith(
+      DeltaIOContext(Moment(0)),
+      DeltaId(ClientId(0), ClientDeltaId(0))
+    ).data
+    new ServerStore(todoProject.lists.head)
   }
 
-  private val todoProject = todoProjectIO.runWith(
-    DeltaIOContext(Moment(0)),
-    DeltaId(ClientId(0), ClientDeltaId(0))
-  ).data
 
-  val todoProjectMirrorIO: DeltaIO[Mirror] = for {
-    revision <- getId[TodoProject]
-  } yield {
-    Mirror.empty.updated(todoProject.id, todoProject, revision)
+  private val todoProjectStore = {
+    import DemoData._
+    val todoProject = TodoExample.todoProjectIO.runWith(
+      DeltaIOContext(Moment(0)),
+      DeltaId(ClientId(0), ClientDeltaId(0))
+    ).data
+    new ServerStore(todoProject)
   }
 
-  private val todoProjectMirror = todoProjectMirrorIO.runWith(
-    DeltaIOContext(Moment(0)),
-    DeltaId(ClientId(0), ClientDeltaId(1))
-  ).data
+  private val taskStore = {
+    import TaskData._
+    val taskIO: DeltaIO[Task] = for {
+      user <- User.create("A", "User", "user", Email("a@user.com"))
+      task <- Task.example(Ref(user.id))
+    } yield task
 
-  private val todoProjectStore = new ServerStore(todoProject)
-
-  private val todoProjectMirrorStore = new ServerStore(todoProjectMirror)
-
-  private val todoListStore = new ServerStore(todoProject.lists.head)
-
-  val taskIO: DeltaIO[Task] = for {
-    user <- User.create("A", "User", "user", Email("a@user.com"))
-    task <- Task.example(Ref(user.id))
-  } yield task
-
-  private val task = taskIO.runWith(
-    DeltaIOContext(Moment(0)),
-    DeltaId(ClientId(0), ClientDeltaId(0))
-  ).data
-
-  private val taskStore = new ServerStore(task)
+    val task = taskIO.runWith(
+      DeltaIOContext(Moment(0)),
+      DeltaId(ClientId(0), ClientDeltaId(0))
+    ).data
+    new ServerStore(task)
+  }
 
   // TODO better way of doing this - start from 1 since we use 0 to generate example data
   private val nextClientId = new AtomicLong(1)
@@ -133,6 +109,7 @@ object ServerDemoApp extends ServerApp {
       )
 
     case GET -> Root / "todoprojectmirror" =>
+      import DemoData._
       WS(
         ServerStoreValueExchange(
           todoProjectMirrorStore,

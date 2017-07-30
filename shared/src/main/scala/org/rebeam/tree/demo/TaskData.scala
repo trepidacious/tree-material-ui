@@ -46,9 +46,11 @@ object TaskData {
   case class User(id: Guid[User], firstName: String, lastName: String, userName: String, email: Email) extends HasId[User]
 
   object User {
-    def create(firstName: String, lastName: String, userName: String, email: Email): DeltaIO[User] = for {
-      id <- getId[User]
-    } yield User(id, firstName, lastName, userName, email)
+    def create(firstName: String, lastName: String, userName: String, email: Email): DeltaIO[User] =
+      //put(id => pure(User(id, firstName, lastName, userName, email)))
+      for (
+        id <- getId[User]
+      ) yield User(id, firstName, lastName, userName, email)
   }
 
   @JsonCodec

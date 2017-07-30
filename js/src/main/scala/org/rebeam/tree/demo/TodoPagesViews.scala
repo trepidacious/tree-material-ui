@@ -205,7 +205,7 @@ object TodoPagesViews {
   }
 
   val TodoProjectCachePagesView = cursorView[Mirror, Pages[TodoPage, TodoPage]]("TodoProjectCachePagesView"){
-    c => c.followRef(Ref(Guid[TodoProject](ClientId(0), ClientDeltaId(0), 0)))
+    c =>c.followRef(Ref(Guid[TodoProject](ClientId(0), ClientDeltaId(0), 0)))
           .map(TodoProjectPagesView(_))
           .getOrElse(TodoProjectEmptyView2)
   }

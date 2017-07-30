@@ -14,6 +14,8 @@ import org.rebeam.tree.Delta._
 import org.rebeam.tree.ref.{Mirror, MirrorCodec}
 import org.rebeam.tree.sync.RefAdder
 import org.rebeam.tree.sync.Sync._
+import cats.instances.list._
+import cats.syntax.traverse._
 
 import scala.collection.mutable.ListBuffer
 
@@ -269,6 +271,52 @@ object DemoData {
   implicit val addressRefAdder: RefAdder[Address] = RefAdder.noOpRefAdder[Address]
   implicit val todoListRefAdder: RefAdder[TodoList] = RefAdder.noOpRefAdder[TodoList]
   implicit val todoProjectRefAdder: RefAdder[TodoProject] = RefAdder.noOpRefAdder[TodoProject]
+
+  object TodoExample {
+
+    val listCount = 2
+    val itemCount = 5
+
+    def todoIO(i: Int): DeltaIO[Todo] = for {
+      id <- getId[Todo]
+    } yield {
+      Todo(
+        id,
+        "Todo " + i,
+        priority = i % 3 match {
+          case 0 => Priority.Low
+          case 1 => Priority.Medium
+          case _ => Priority.High
+        }
+      )
+    }
+
+    def todoListIO(listIndex: Int): DeltaIO[TodoList] = for {
+      id <- getId[TodoList]
+      todos <- (1 to itemCount).toList.traverse(todoIO(_))
+    } yield {
+      TodoList(
+        id,
+        s"Todo list $listIndex",
+        Priority.Medium,
+        MaterialColor.backgroundForIndex(id.id.toInt - 1),
+        todos
+      )
+    }
+
+    val todoProjectIO: DeltaIO[TodoProject] = for{
+      id <- getId[TodoProject]
+      lists <- (1 to listCount).toList.traverse(todoListIO(_))
+    } yield {
+      TodoProject(
+        id,
+        "Todo project",
+        MaterialColor.Indigo(),
+        lists
+      )
+    }
+
+  }
 
 }
 
