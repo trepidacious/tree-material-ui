@@ -24,12 +24,12 @@ object MarkdownView {
   case object Text extends Element
 
   /**
-    * Paragraph nodes (<p>)
+    * Paragraph nodes (p)
     */
   case object Paragraph extends Element
 
   /**
-    * Headers (<h1>, <h2> etc)
+    * Headers (h1, h2 etc)
     */
   case object Heading extends Element
 
@@ -39,57 +39,57 @@ object MarkdownView {
   case object Softbreak extends Element
 
   /**
-    * Hard line breaks (<br>)
+    * Hard line breaks (br)
     */
   case object Hardbreak extends Element
 
   /**
-    * Link nodes (<a>)
+    * Link nodes (a)
     */
   case object Link extends Element
 
   /**
-    * Image nodes (<img>)
+    * Image nodes (img)
     */
   case object Image extends Element
 
   /**
-    * Emphasis nodes (<em>)
+    * Emphasis nodes (em)
     */
   case object Emph extends Element
 
   /**
-    * Inline code nodes (<code>)
+    * Inline code nodes (code)
     */
   case object Code extends Element
 
   /**
-    * Blocks of code (<code>)
+    * Blocks of code (code)
     */
   case object CodeBlock extends Element
 
   /**
-    * Block quotes (<blockquote>)
+    * Block quotes (blockquote)
     */
   case object BlockQuote extends Element
 
   /**
-    * List nodes (<ol>, <ul>)
+    * List nodes (ol, ul)
     */
   case object List extends Element
 
   /**
-    * List item nodes (<li>)
+    * List item nodes (li)
     */
   case object Item extends Element
 
   /**
-    * Strong/bold nodes (<strong>)
+    * Strong/bold nodes (strong)
     */
   case object Strong extends Element
 
   /**
-    * Horizontal rule nodes (<hr>)
+    * Horizontal rule nodes (hr)
     */
   case object ThematicBreak extends Element
 
@@ -105,7 +105,7 @@ object MarkdownView {
     * @param skipHtml Setting to true will skip inlined and blocks of HTML (default if None: false).
     * @param sourcePos Setting to true will add data-sourcepos attributes to all elements, indicating where
     *                  in the markdown source they were rendered from (default if None: false).
-    * @param softBreak Setting to br will create <br> tags instead of newlines (default if None: \n).
+    * @param softBreak Setting to br will create br tags instead of newlines (default if None: \n).
     * @param allowedTypes Defines which types of nodes should be allowed (rendered). (default if None: all types).
     * @param disallowedTypes Defines which types of nodes should be disallowed (not rendered). (default if None: none).
     * @param unwrapDisallowed Setting to true will try to extract/unwrap the children of disallowed nodes.
