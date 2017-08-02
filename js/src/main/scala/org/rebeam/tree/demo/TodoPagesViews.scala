@@ -51,7 +51,7 @@ object TodoPagesViews {
     "Todo lists"
   )
 
-  val TodoSummary = ListItem.completeEditAndDeleteListItem[Todo](
+  val TodoSummary = ListItem.listItemWithCompleteEditAndDelete[Todo](
     "TodoSummary",
     todo => todo.name,
     todo => s"Priority ${todo.priority}",
@@ -116,7 +116,6 @@ object TodoPagesViews {
 
   val TodoListPageView = cursorView[TodoList, Pages[PageWithTodoProjectList, TodoPage]]("TodoListView") {
     cp => {
-      //FIXME use actual creation time
       val fab = PageLayout.addFAB(cp.act(TodoListAction.CreateTodo(): TodoListAction))
 
       val title =

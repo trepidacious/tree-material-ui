@@ -26,9 +26,6 @@ object View {
   def view[A](name: String, overlay: Boolean = true)(render: A => ReactElement) =
     ReactComponentB[A](name).render_P(render).build
 
-  //We are careful to ensure that cursors remain equal if they are reusable
-  implicit def cursorReuse[A, P]: Reusability[Cursor[A, P]] = Reusability.byRefOr_==
-
   def cursorView[A, P](name: String)(render: Cursor[A, P] => ReactElement): ReqProps[Cursor[A, P], Unit, Unit, TopNode] =
     ReactComponentB[Cursor[A, P]](name).render_P(render).configure(Reusability.shouldComponentUpdate).build
 

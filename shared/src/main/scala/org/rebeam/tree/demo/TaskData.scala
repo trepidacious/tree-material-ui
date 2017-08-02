@@ -105,11 +105,11 @@ object TaskData {
       val important = true
     }
     case class Watch(userRef: Ref[User]) extends TaskEvent {
-      def apply(t: Task): DeltaIO[Task] = t.copy(watching = userRef :: t.watching.filterNot(_.guid == userRef.guid)).withEvent(this)
+      def apply(t: Task): DeltaIO[Task] = t.copy(watching = userRef :: t.watching.filterNot(_.id == userRef.id)).withEvent(this)
       val important = true
     }
     case class Unwatch(userRef: Ref[User]) extends TaskEvent {
-      def apply(t: Task): DeltaIO[Task] = t.copy(watching = t.watching.filterNot(_.guid == userRef.guid)).withEvent(this)
+      def apply(t: Task): DeltaIO[Task] = t.copy(watching = t.watching.filterNot(_.id == userRef.id)).withEvent(this)
       val important = true
     }
     case class Lead(userRef: Option[Ref[User]]) extends TaskEvent {

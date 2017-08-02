@@ -5,7 +5,6 @@ import japgolly.scalajs.react.{BackendScope, ReactComponentB, ReactElement}
 import japgolly.scalajs.react.extra.Reusability
 import japgolly.scalajs.react.vdom.prefix_<^._
 import org.rebeam.tree.view.Cursor
-import org.rebeam.tree.view.View.cursorReuse
 
 object PagesView {
 
@@ -47,6 +46,6 @@ object PagesView {
     .componentWillReceiveProps(
       scope => scope.$.setState(State(transitions(scope.currentProps.location.current, scope.nextProps.location.current)))
     )
-    .configure(Reusability.shouldComponentUpdate(cursorReuse, stateReuse))
+    .configure(Reusability.shouldComponentUpdate(Cursor.cursorReusability, stateReuse))
     .build
 }

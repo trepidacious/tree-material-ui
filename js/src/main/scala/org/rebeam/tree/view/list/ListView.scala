@@ -4,6 +4,7 @@ import chandu0101.scalajs.react.components.materialui._
 import io.circe.Encoder
 import japgolly.scalajs.react.ReactComponentC.ReqProps
 import japgolly.scalajs.react.{Callback, ReactComponentU_, TopNode}
+import org.rebeam.tree.ref.{MirrorCodec, Ref}
 import org.rebeam.tree.sync.Sync._
 import org.rebeam.tree.view._
 import org.rebeam.tree.view.View._
@@ -48,6 +49,25 @@ object ListView {
     )
   }
 
+  /**
+    * Create a list view
+    * @param name               Name of view
+    * @param listCursorToItems  Take a cursor with root model (type R) and location as a page (type P) and yield a list
+    *                           of cursors to the list items (type A) and locations as actions on them (type Q). Note we
+    *                           are using the location parameter as an action to perform on list items.
+    * @param itemToKey          Get a key for given list item
+    * @param itemView           Get a view for Cursor[A, Q], which displays list items of type A, allowing actions to
+    *                           be performed using location of type Q.
+    * @param subheader          Subheader text for the list
+    * @param mode               Mode for list display
+    * @tparam R                 The type of root model - some data type from which we can get to a list of items - doesn't
+    *                           need to actually be a list
+    * @tparam P                 The type of location for the root cursor - normally some kind of "page" location
+    * @tparam A                 The type of list items
+    * @tparam Q                 The type of location for list items - often some kind of action that can be performed
+    *                           on list items, but can be an actual location.
+    * @return                   A List view
+    */
   def withAction[R, P, A, Q](
     name: String,
     listCursorToItems: Cursor[R, P] => List[Cursor[A, Q]],
@@ -66,6 +86,29 @@ object ListView {
     )
   }
 
+  def usingRef[R, P, A, Q](
+                            name: String,
+                            rootToItemRefs: Cursor[R, P] => Cursor[List[Ref[A]], P],
+                            itemAndCursorToAction: (A, Cursor[R, P]) => Q,
+                            itemView: ReqProps[Cursor[A, Q], Unit, Unit, TopNode],
+                            subheader: String,
+                            mode: ListMode = ListMode.Infinite
+                          )(implicit fEncoder: Encoder[FindRefById[A]], mCodec: MirrorCodec[A], toId: ToId[A]): ((IndexChange) => Callback) => (Cursor[R, P]) => ReactComponentU_ = {
+
+    ListView.withAction[R, P, A, Q](
+      name,
+      (cp: Cursor[R, P]) =>
+        rootToItemRefs(cp)
+          .zoomAllMatches(a => FindRefById(a.id))
+          .flatMap(cursorToRef => cursorToRef.followRef(cursorToRef.model))
+          .map(ca => ca.move(itemAndCursorToAction(ca.model, cp))),
+      a => toId.id(a).toString(),
+      itemView,
+      subheader,
+      mode
+    )
+  }
+
   def usingMatches[R, P, A, Q, F <: A => Boolean](
     name: String,
     rootToItems: Cursor[R, P] => Cursor[List[A], P],
@@ -77,12 +120,12 @@ object ListView {
     mode: ListMode = ListMode.Infinite
   )(implicit fEncoder: Encoder[F]): ((IndexChange) => Callback) => (Cursor[R, P]) => ReactComponentU_ = {
     ListView.withAction[R, P, A, Q](
-      name,
-      (cp: Cursor[R, P]) => rootToItems(cp).zoomAllMatches(itemToFinder).map(ca => ca.move(itemAndCursorToAction(ca.model, cp))),
-      c => itemToKey(c),
-      itemView,
-      subheader,
-      mode
+      name              = name,
+      listCursorToItems = (cp: Cursor[R, P]) => rootToItems(cp).zoomAllMatches(itemToFinder).map(ca => ca.move(itemAndCursorToAction(ca.model, cp))),
+      itemToKey         = c => itemToKey(c),
+      itemView          = itemView,
+      subheader         = subheader,
+      mode              = mode
     )
   }
 
@@ -95,14 +138,14 @@ object ListView {
     mode: ListMode = ListMode.Infinite
   )(implicit fEncoder: Encoder[FindById[A]]): ((IndexChange) => Callback) => (Cursor[R, P]) => ReactComponentU_ = {
     ListView.usingMatches[R, P, A, Q, FindById[A]](
-      name,
-      rootToItems,
-      a => FindById[A](a.id),
-      itemAndCursorToAction,
-      a => a.id.toString(),
-      itemView,
-      subheader,
-      mode
+      name                  = name,
+      rootToItems           = rootToItems,
+      itemToFinder          = a => FindById[A](a.id),
+      itemAndCursorToAction = itemAndCursorToAction,
+      itemToKey             = a => a.id.toString(),
+      itemView              = itemView,
+      subheader             = subheader,
+      mode                  = mode
     )
   }
 

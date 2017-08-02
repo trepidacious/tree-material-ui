@@ -17,6 +17,7 @@ import org.rebeam.tree.sync.Sync._
 import org.rebeam.tree.sync.DeltaIORun._
 import org.rebeam.tree.demo.DemoData.Address
 import org.rebeam.tree.ref.{Mirror, Ref}
+import org.rebeam.tree.sync.RefAdder
 
 object ServerDemoApp extends ServerApp {
 
@@ -28,7 +29,7 @@ object ServerDemoApp extends ServerApp {
   private val todoProjectMirrorStore = {
     import DemoData._
 
-    //FIXME update
+    //FIXME update to use put
     val todoProjectMirrorIO: DeltaIO[Mirror] = for {
       todoProject <- TodoExample.todoProjectIO
       revision <- getId[TodoProject]
@@ -77,6 +78,18 @@ object ServerDemoApp extends ServerApp {
     new ServerStore(task)
   }
 
+  private val refDemoStore = {
+    import RefData._
+
+    val result = RefData.exampleDataMirrorIO.runWith(
+      DeltaIOContext(Moment(0)),
+      DeltaId(ClientId(0), ClientDeltaId(0))
+    )
+
+    val mirror = RefAdder.mirrorRefAdder.addRefs(result)
+    new ServerStore(mirror)
+  }
+
   // TODO better way of doing this - start from 1 since we use 0 to generate example data
   private val nextClientId = new AtomicLong(1)
 
@@ -113,6 +126,16 @@ object ServerDemoApp extends ServerApp {
       WS(
         ServerStoreValueExchange(
           todoProjectMirrorStore,
+          ClientId(nextClientId.getAndIncrement()),
+          contextSource
+        )
+      )
+
+    case GET -> Root / "refs" =>
+      import RefData._
+      WS(
+        ServerStoreValueExchange(
+          refDemoStore,
           ClientId(nextClientId.getAndIncrement()),
           contextSource
         )

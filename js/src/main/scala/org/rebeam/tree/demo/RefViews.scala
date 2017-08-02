@@ -1,0 +1,88 @@
+package org.rebeam.tree.demo
+
+import chandu0101.scalajs.react.components.materialui.{DeterminateIndeterminate, Mui, MuiCircularProgress}
+import japgolly.scalajs.react._
+import japgolly.scalajs.react.vdom.prefix_<^._
+import org.rebeam.tree.DeltaIOContextSource
+import org.rebeam.tree.demo.DemoRoutes.RefPage
+import org.rebeam.tree.demo.RefData._
+import org.rebeam.tree.ref.{Mirror, Ref}
+import org.rebeam.tree.sync.Sync.{ClientDeltaId, ClientId, Guid}
+import org.rebeam.tree.view.View._
+import org.rebeam.tree.view._
+import RefData._
+import org.rebeam.tree.view.list.ListItem.{DeleteAction, EditAndDeleteActions}
+import org.rebeam.tree.view.list.{ListItem, ListView}
+import org.rebeam.tree.view.pages.Pages
+
+object RefViews {
+
+  implicit val contextSource = DeltaIOContextSource.default
+
+  val RefEmptyView = PageLayout(
+    MaterialColor.BlueGrey(500), 128,
+    "Loading Ref Demo...",
+    None,
+    Some(
+      MuiCircularProgress(
+        mode = DeterminateIndeterminate.indeterminate,
+        color = Mui.Styles.colors.white
+      )()
+    ),
+    None
+  )
+
+  // This combines and stores the url and renderer, and will then produce a new element per page. This avoids
+  // changing state when changing pages, so we keep the same websocket etc.
+  val refViewFactory = ServerRootComponent.factory[Mirror, Pages[RefPage.type, RefPage.type]](RefEmptyView, "api/refs") {
+    RefMirrorView(_)
+  }
+
+  val RefMirrorView = cursorView[Mirror, Pages[RefPage.type, RefPage.type]]("RefMirrorView"){
+    c =>
+//      System.out.println(c.model)
+      c.followRef(Ref(Guid[DataItemList](ClientId(0), ClientDeltaId(0), 0x12)))
+      .map(RefView(_))
+      .getOrElse(RefEmptyView)
+  }
+
+  val DataItemSummary = ListItem.listItemWithContentsAndDelete[DataItem](
+    "DataItemSummary",
+    cp => View.textViewPlainLabel(cp.zoom(DataItem.name).label("Name")),
+    _ => avatarText(("!", MaterialColor.DeepPurple(500)))
+  )
+
+  val DataItemListView = ListView.usingRef[DataItemList, Pages[RefPage.type, RefPage.type], DataItem, DeleteAction](
+    "DataItemListView",
+    _.zoom(DataItemList.items),
+    (dataItem, dataItemListCursor) => DeleteAction(
+      dataItemListCursor.act(DataItemListAction.DeleteDataItemById(dataItem.id): DataItemListAction)
+    ),
+    DataItemSummary,
+    "Data items",
+    ListView.ListMode.Finite
+  )
+
+  val RefView = cursorView[DataItemList, Pages[RefPage.type, RefPage.type]]("RefView"){
+    c=> {
+
+      val fab = PageLayout.addFAB(c.act(DataItemListAction.CreateDataItem(): DataItemListAction))
+
+      val contents = DataItemListView(
+        p => c.act(DataItemListAction.DataItemIndexChange(p.oldIndex, p.newIndex): DataItemListAction)
+      )(c)
+
+      PageLayout(
+        color = MaterialColor.BlueGrey(500),
+        height = 128,
+        toolbarText = "Ref List",
+        listFAB = Some(fab),
+        title = None,
+        contents = Some(contents)//,
+//        scrollContents = true
+      )
+    }
+  }
+
+}
+

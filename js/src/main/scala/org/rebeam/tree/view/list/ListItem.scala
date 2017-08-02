@@ -170,9 +170,41 @@ object ListItem {
       )
     )
 
+  case class DeleteAction(delete: Callback)
+
+  def listItemWithDelete[A](name: String, firstLine: A => String, secondLine: A => String, avatar: A => ReactElement): ReqProps[Cursor[A, DeleteAction], Unit, Unit, TopNode] = cursorView[A, DeleteAction](name){
+    cp => {
+      val m = cp.model
+
+      val buttons = List(
+        ListItem.Action(
+          Mui.SvgIcons.ActionDelete()(),
+          cp.location.delete
+        )
+      )
+
+      ListItem(avatar(m), ListItem.twoLines(firstLine(m), secondLine(m)), buttons)
+    }
+  }
+
+  def listItemWithContentsAndDelete[A](name: String, contents: Cursor[A, DeleteAction] => ReactElement, avatar: A => ReactElement): ReqProps[Cursor[A, DeleteAction], Unit, Unit, TopNode] = cursorView[A, DeleteAction](name){
+    cp => {
+      val m = cp.model
+
+      val buttons = List(
+        ListItem.Action(
+          Mui.SvgIcons.ActionDelete()(),
+          cp.location.delete
+        )
+      )
+
+      ListItem(avatar(m), contents(cp), buttons)
+    }
+  }
+
   case class EditAndDeleteActions(edit: Callback, delete: Callback)
 
-  def editAndDeleteListItem[A](name: String, firstLine: A => String, secondLine: A => String, avatar: A => ReactElement): ReqProps[Cursor[A, EditAndDeleteActions], Unit, Unit, TopNode] = cursorView[A, EditAndDeleteActions](name){
+  def listItemWithEditAndDelete[A](name: String, firstLine: A => String, secondLine: A => String, avatar: A => ReactElement): ReqProps[Cursor[A, EditAndDeleteActions], Unit, Unit, TopNode] = cursorView[A, EditAndDeleteActions](name){
     cp => {
       val m = cp.model
 
@@ -191,7 +223,7 @@ object ListItem {
     }
   }
 
-  def completeEditAndDeleteListItem[A](name: String, firstLine: A => String, secondLine: A => String, completionLens: LensN[A, Boolean]): ReqProps[Cursor[A, EditAndDeleteActions], Unit, Unit, TopNode] = cursorView(name){
+  def listItemWithCompleteEditAndDelete[A](name: String, firstLine: A => String, secondLine: A => String, completionLens: LensN[A, Boolean]): ReqProps[Cursor[A, EditAndDeleteActions], Unit, Unit, TopNode] = cursorView(name){
     cp => {
       val m = cp.model
 

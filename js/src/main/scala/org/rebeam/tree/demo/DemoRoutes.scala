@@ -14,6 +14,8 @@ object DemoRoutes {
   case object HomePage          extends Page
   case object AddressPage       extends Page
 
+  case object RefPage           extends Page
+
   sealed trait TodoPage extends Page {
     def back: TodoPage
   }
@@ -59,6 +61,8 @@ object DemoRoutes {
 
     def caseObject[A](s: String, a: A) = RouteB.literal(s).xmap(_ => a)(_ => ())
 
+    val refRoute = caseObject("#ref", RefPage)
+
     val todoProjectRoute = caseObject("#todo", TodoProjectPage)
     val todoProjectListRoute = ("#todo/list" / guid[TodoList]).caseClass[TodoProjectListPage]
     val todoProjectListItemRoute = ("#todo/list" / guid[TodoList] / "item" / guid[Todo]).caseClass[TodoProjectListItemPage]
@@ -69,6 +73,7 @@ object DemoRoutes {
     (trimSlashes
       | staticRoute(root,   HomePage) ~> render(DemoViews.homeView())
       | staticRoute("#address", AddressPage) ~> render(DemoViews.addressView)
+      | dynamicRouteCT(refRoute) ~> dynRenderP[RefPage.type](RefViews.refViewFactory)
       | dynamicRouteCT(todoProjectRoute) ~> dynRenderP[TodoPage](TodoPagesViews.todoProjectViewFactory)
       | dynamicRouteCT(todoProjectListRoute) ~> dynRenderP[TodoPage](TodoPagesViews.todoProjectViewFactory)
       | dynamicRouteCT(todoProjectListItemRoute) ~> dynRenderP[TodoPage](TodoPagesViews.todoProjectViewFactory)
