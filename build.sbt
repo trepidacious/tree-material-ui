@@ -12,7 +12,8 @@ scalacOptions in ThisBuild ++= Seq(
   "-encoding", "UTF-8",
   "-unchecked",
   "-Xfatal-warnings",
-  "-Xlint"
+  "-Xlint",
+  "-Xcheckinit"
 )
 
 resolvers += Resolver.sonatypeRepo("snapshots")
