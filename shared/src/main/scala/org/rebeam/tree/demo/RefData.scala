@@ -6,7 +6,7 @@ import org.rebeam.lenses.macros.Lenses
 import org.rebeam.tree.Delta._
 import org.rebeam.tree.{Delta, DeltaCodecs}
 import org.rebeam.tree.DeltaCodecs._
-import org.rebeam.tree.ref.{Mirror, MirrorCodec, Ref}
+import org.rebeam.tree.ref.{Mirror, MirrorAndId, MirrorCodec, Ref}
 import org.rebeam.tree.sync.Sync._
 import org.rebeam.tree.BasicDeltaDecoders._
 import cats.instances.list._
@@ -83,7 +83,7 @@ object RefData {
     def create(name: String): DeltaIO[DataItem] = put(id => pure(DataItem(id, name)))
   }
 
-  val exampleDataMirrorIO: DeltaIO[Mirror] = {
+  val exampleDataMirrorIO: DeltaIO[MirrorAndId[DataItemList]] = {
     for {
       items <- Range(1, 10).toList.traverse[DeltaIO, DataItem](
         i => putPure[DataItem](
@@ -93,11 +93,11 @@ object RefData {
       list <- putPure[DataItemList](
         id => DataItemList(id, items.map(i => Ref(i.id)))
       )
-    } yield Mirror.empty  // Start with an empty mirror, the delta will add the data
+    } yield MirrorAndId(Mirror.empty, list.id)  // Start with an empty mirror, the delta will add the data. Id is for the list.
   }
 
-  implicit val mirrorIdGen = new ModelIdGen[Mirror] {
-    def genId(a: Mirror) = None
+  implicit val mirrorIdGen = new ModelIdGen[MirrorAndId[DataItemList]] {
+    def genId(a: MirrorAndId[DataItemList]) = None
   }
 
 }

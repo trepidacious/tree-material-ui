@@ -6,7 +6,7 @@ import japgolly.scalajs.react.vdom.prefix_<^._
 import org.rebeam.tree.DeltaIOContextSource
 import org.rebeam.tree.demo.DemoRoutes.RefPage
 import org.rebeam.tree.demo.RefData._
-import org.rebeam.tree.ref.{Mirror, Ref}
+import org.rebeam.tree.ref.{Mirror, MirrorAndId, Ref}
 import org.rebeam.tree.sync.Sync.{ClientDeltaId, ClientId, Guid}
 import org.rebeam.tree.view.View._
 import org.rebeam.tree.view._
@@ -34,14 +34,14 @@ object RefViews {
 
   // This combines and stores the url and renderer, and will then produce a new element per page. This avoids
   // changing state when changing pages, so we keep the same websocket etc.
-  val refViewFactory = ServerRootComponent.factory[Mirror, Pages[RefPage.type, RefPage.type]](RefEmptyView, "api/refs") {
+  val refViewFactory = ServerRootComponent.factory[MirrorAndId[DataItemList], Pages[RefPage.type, RefPage.type]](RefEmptyView, "api/refs") {
     RefMirrorView(_)
   }
 
-  val RefMirrorView = cursorView[Mirror, Pages[RefPage.type, RefPage.type]]("RefMirrorView"){
+  val RefMirrorView = cursorView[MirrorAndId[DataItemList], Pages[RefPage.type, RefPage.type]]("RefMirrorView"){
     c =>
 //      System.out.println(c.model)
-      c.followRef(Ref(Guid[DataItemList](ClientId(0), ClientDeltaId(0), 0x12)))
+      c.followRef(Ref(c.model.id))
       .map(RefView(_))
       .getOrElse(RefEmptyView)
   }

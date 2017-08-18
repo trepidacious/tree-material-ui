@@ -16,7 +16,8 @@ import org.rebeam.tree.Delta._
 import org.rebeam.tree.sync.Sync._
 import org.rebeam.tree.sync.DeltaIORun._
 import org.rebeam.tree.demo.DemoData.Address
-import org.rebeam.tree.ref.{Mirror, Ref}
+import org.rebeam.tree.demo.RefData.DataItemList
+import org.rebeam.tree.ref.{Mirror, MirrorAndId, Ref}
 import org.rebeam.tree.sync.RefAdder
 
 object ServerDemoApp extends ServerApp {
@@ -78,7 +79,7 @@ object ServerDemoApp extends ServerApp {
     new ServerStore(task)
   }
 
-  private val refDemoStore = {
+  private val refDemoStore: ServerStore[MirrorAndId[DataItemList]] = {
     import RefData._
 
     val result = RefData.exampleDataMirrorIO.runWith(
@@ -86,8 +87,8 @@ object ServerDemoApp extends ServerApp {
       DeltaId(ClientId(0), ClientDeltaId(0))
     )
 
-    val mirror = RefAdder.mirrorRefAdder.addRefs(result)
-    new ServerStore(mirror)
+    val mirrorAndId = RefAdder.mirrorAndIdRefAdder.addRefs(result)
+    new ServerStore(mirrorAndId)
   }
 
   // TODO better way of doing this - start from 1 since we use 0 to generate example data
