@@ -145,12 +145,12 @@ object TaskData {
   }
 
   //Delta decoders. Note we provide lenses to watching and leading to reach the refs in them
-  implicit val taskDeltaDecoder: DeltaCodec[Task] = action[Task, TaskEvent] or lensN(Task.watching) or lensN(Task.leading)
+  implicit lazy val taskDeltaDecoder: DeltaCodec[Task] = action[Task, TaskEvent] or lensN(Task.watching) or lensN(Task.leading)
 
   //TODO provide a means of making a DeltaCodec fail when used to actually decode a delta, but still perform ref updating
   //Get to the refs in watching and leading, so Mirror can update them.
-  implicit val optionRefUserDeltaDecoder: DeltaCodec[Option[Ref[User]]] = option[Ref[User]]
-  implicit val listRefUserDeltaDecoder: DeltaCodec[List[Ref[User]]] = optionalI[Ref[User]]
+  implicit lazy val optionRefUserDeltaDecoder: DeltaCodec[Option[Ref[User]]] = option[Ref[User]]
+  implicit lazy val listRefUserDeltaDecoder: DeltaCodec[List[Ref[User]]] = optionalI[Ref[User]]
 
   implicit val taskIdGen: ModelIdGen[Task] = new ModelIdGen[Task] {
     def genId(a: Task) = None
