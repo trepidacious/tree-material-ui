@@ -12,7 +12,7 @@ import org.rebeam.tree.view.View._
 import org.rebeam.tree.view._
 import RefData._
 import org.rebeam.tree.view.list.ListItem.{DeleteAction, EditAndDeleteActions}
-import org.rebeam.tree.view.list.{ListItem, ListView}
+import org.rebeam.tree.view.list.{ListItem, ListTextView, ListView}
 import org.rebeam.tree.view.pages.Pages
 
 object RefViews {
@@ -48,7 +48,7 @@ object RefViews {
 
   val DataItemSummary = ListItem.listItemWithContentsAndDelete[DataItem](
     "DataItemSummary",
-    cp => View.textViewPlainLabel(cp.zoom(DataItem.name).label("Name")),
+    cp => ListTextView(cp.zoom(DataItem.name).label("Name")),
     _ => avatarText(("!", MaterialColor.DeepPurple(500)))
   )
 
