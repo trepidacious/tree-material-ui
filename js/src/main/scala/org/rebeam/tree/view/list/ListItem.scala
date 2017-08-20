@@ -179,7 +179,7 @@ object ListItem {
       val buttons = List(
         ListItem.ButtonAction(
           Mui.SvgIcons.ActionDelete()(),
-          cp.location.delete.callback
+          cp.location.delete
         )
       )
 
@@ -203,7 +203,7 @@ object ListItem {
     }
   }
 
-  case class EditAndDeleteActions(edit: Callback, delete: Callback)
+  case class EditAndDeleteActions(edit: Action, delete: Action)
 
   def listItemWithEditAndDelete[A](name: String, firstLine: A => String, secondLine: A => String, avatar: A => ReactElement): ReqProps[Cursor[A, EditAndDeleteActions], Unit, Unit, TopNode] = cursorView[A, EditAndDeleteActions](name){
     cp => {

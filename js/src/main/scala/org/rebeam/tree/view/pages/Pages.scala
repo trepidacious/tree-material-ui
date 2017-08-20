@@ -2,9 +2,13 @@ package org.rebeam.tree.view.pages
 
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.extra.router.RouterCtl
-import org.rebeam.tree.view.Cursor
+import org.rebeam.tree.view.{Action, Cursor}
 
 import scala.reflect.ClassTag
+
+case class SetPageAction[P](ctl: RouterCtl[P], p: P) extends Action {
+  def callback: Callback = ctl.set(p)
+}
 
 /**
   * A current page, and a RouterCtl, e.g. to navigate to new pages
@@ -14,8 +18,8 @@ import scala.reflect.ClassTag
   * @tparam C       The type of current page
   */
 case class Pages[+C, P](current: C, ctl: RouterCtl[P]) {
-  def set(target: P): Callback = ctl.set(target)
-  def modify(f: C => P): Callback = set(f(current))
+  def set(target: P): Action = SetPageAction(ctl, target)
+  def modify(f: C => P): Action = set(f(current))
   def withCurrent[D](d: D): Pages[D, P] = copy(current = d)
 }
 
