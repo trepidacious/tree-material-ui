@@ -9,7 +9,7 @@ import org.rebeam.lenses.LensN
 import org.rebeam.tree.view.View._
 import org.rebeam.tree.view.icon.Icons
 import org.rebeam.tree.view.transition.CSSTransitionGroup
-import org.rebeam.tree.view.{Color, Cursor, MaterialColor, View}
+import org.rebeam.tree.view._
 import org.scalajs.dom.html.Div
 
 object ListItem {
@@ -23,9 +23,9 @@ object ListItem {
 
   private val handle = SortableHandle.wrap(handleGrip)(())
 
-  case class Action(icon: ReactElement, cb: Callback)
+  case class ButtonAction(icon: ReactElement, cb: Callback)
 
-  case class Props(avatar: ReactElement, content: ReactElement, iconButtons: List[Action], onClick: Callback, onClickAvatar: Callback, onClickContents: Callback, buttonBackgroundColor: Color)
+  case class Props(avatar: ReactElement, content: ReactElement, iconButtons: List[ButtonAction], onClick: Callback, onClickAvatar: Callback, onClickContents: Callback, buttonBackgroundColor: Color)
 
   case class State(open: Boolean)
 
@@ -154,7 +154,7 @@ object ListItem {
     .render(s => s.backend.render(s.props, s.state))
     .build
 
-  def apply(avatar: ReactElement, content: ReactElement, iconButtons: List[Action], onClick: Callback = Callback.empty, onClickAvatar: Callback = Callback.empty, onClickContents: Callback = Callback.empty, buttonBackgroundColor: Color = MaterialColor.Indigo(500)): ReactComponentU[Props, State, Backend, TopNode] =
+  def apply(avatar: ReactElement, content: ReactElement, iconButtons: List[ButtonAction], onClick: Callback = Callback.empty, onClickAvatar: Callback = Callback.empty, onClickContents: Callback = Callback.empty, buttonBackgroundColor: Color = MaterialColor.Indigo(500)): ReactComponentU[Props, State, Backend, TopNode] =
     component(Props(avatar, content, iconButtons, onClick, onClickAvatar, onClickContents, buttonBackgroundColor))
 
   def twoLines(line1: String, line2: String): ReactTagOf[Div] =
@@ -170,16 +170,16 @@ object ListItem {
       )
     )
 
-  case class DeleteAction(delete: Callback)
+  case class DeleteAction(delete: Action)
 
   def listItemWithDelete[A](name: String, firstLine: A => String, secondLine: A => String, avatar: A => ReactElement): ReqProps[Cursor[A, DeleteAction], Unit, Unit, TopNode] = cursorView[A, DeleteAction](name){
     cp => {
       val m = cp.model
 
       val buttons = List(
-        ListItem.Action(
+        ListItem.ButtonAction(
           Mui.SvgIcons.ActionDelete()(),
-          cp.location.delete
+          cp.location.delete.callback
         )
       )
 
@@ -192,9 +192,10 @@ object ListItem {
       val m = cp.model
 
       val buttons = List(
-        ListItem.Action(
+        //FIXME pass ActionCallback directly
+        ListItem.ButtonAction(
           Mui.SvgIcons.ActionDelete()(),
-          cp.location.delete
+          cp.location.delete.callback
         )
       )
 
@@ -209,11 +210,11 @@ object ListItem {
       val m = cp.model
 
       val buttons = List(
-        ListItem.Action(
+        ListItem.ButtonAction(
           Mui.SvgIcons.ActionDelete()(),
           cp.location.delete
         ),
-        ListItem.Action(
+        ListItem.ButtonAction(
           Mui.SvgIcons.ContentCreate()(),
           cp.location.edit
         )
@@ -235,11 +236,11 @@ object ListItem {
       )
 
       val buttons = List(
-        ListItem.Action(
+        ListItem.ButtonAction(
           Mui.SvgIcons.ActionDelete()(),
           cp.location.delete
         ),
-        ListItem.Action(
+        ListItem.ButtonAction(
           Mui.SvgIcons.ContentCreate()(),
           cp.location.edit
         )
