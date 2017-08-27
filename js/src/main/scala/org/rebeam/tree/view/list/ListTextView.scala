@@ -45,6 +45,7 @@ object ListTextView {
           key = "tv",
           // On creation, request focus (also triggering selection via onFocus)
           ref = focus,
+          fullWidth = true,
           // On focus, select all text for spreadsheet cell-style editing
           onFocus =  (e: ReactFocusEventI) => Callback{e.target.select},
           // Normal bound editing
