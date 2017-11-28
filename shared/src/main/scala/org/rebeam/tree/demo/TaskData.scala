@@ -6,8 +6,7 @@ import org.rebeam.lenses.macros.Lenses
 import org.rebeam.tree.Delta._
 import org.rebeam.tree.DeltaCodecs._
 import org.rebeam.tree._
-import org.rebeam.tree.ref.Ref
-import org.rebeam.tree.sync.RefAdder
+import org.rebeam.tree.sync._
 import org.rebeam.tree.sync.Sync._
 import org.rebeam.tree.view.{Color, MaterialColor}
 
@@ -43,7 +42,7 @@ object TaskData {
 
   @JsonCodec
   @Lenses
-  case class User(id: Guid[User], firstName: String, lastName: String, userName: String, email: Email) extends HasId[User]
+  case class User(id: Id[User], firstName: String, lastName: String, userName: String, email: Email) extends Identified[User]
 
   object User {
     def create(firstName: String, lastName: String, userName: String, email: Email): DeltaIO[User] =
@@ -125,7 +124,7 @@ object TaskData {
   @JsonCodec
   @Lenses
   case class Task(
-                   id: Guid[Task],
+                   id: Id[Task],
                    name: String,
                    color: Color,
                    description: Markdown,

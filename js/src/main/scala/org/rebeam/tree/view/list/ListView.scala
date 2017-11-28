@@ -4,7 +4,9 @@ import chandu0101.scalajs.react.components.materialui._
 import io.circe.Encoder
 import japgolly.scalajs.react.ReactComponentC.ReqProps
 import japgolly.scalajs.react.{Callback, ReactComponentU_, TopNode}
-import org.rebeam.tree.ref.{MirrorCodec, Ref}
+import org.rebeam.tree.Searchable
+import org.rebeam.tree.ref._
+import org.rebeam.tree.sync._
 import org.rebeam.tree.sync.Sync._
 import org.rebeam.tree.view._
 import org.rebeam.tree.view.View._
@@ -38,7 +40,7 @@ object ListView {
                                          itemToKey: A => js.Any,
                                          itemView: ReqProps[Cursor[A, Pages[C, P]], Unit, Unit, TopNode],
                                          subheader: String,
-                                         mode: ListMode = ListMode.Infinite)(implicit fEncoder: Encoder[F]): ((IndexChange) => Callback) => (Cursor[List[A], Pages[C, P]]) => ReactComponentU_ = {
+                                         mode: ListMode = ListMode.Infinite)(implicit fEncoder: Encoder[F], s: Searchable[A, Guid]): ((IndexChange) => Callback) => (Cursor[List[A], Pages[C, P]]) => ReactComponentU_ = {
     ListView[List[A], Pages[C, P], Cursor[A, Pages[C, P]]](
       name,
       _.zoomAllMatches(toItem),
@@ -93,7 +95,7 @@ object ListView {
                             itemView: ReqProps[Cursor[A, Q], Unit, Unit, TopNode],
                             subheader: String,
                             mode: ListMode = ListMode.Infinite
-                          )(implicit fEncoder: Encoder[FindRefById[A]], mCodec: MirrorCodec[A], toId: ToId[A]): ((IndexChange) => Callback) => (Cursor[R, P]) => ReactComponentU_ = {
+                          )(implicit fEncoder: Encoder[FindRefById[A]], mCodec: MirrorCodec[A], toId: Identifiable[A], s: Searchable[A, Guid]): ((IndexChange) => Callback) => (Cursor[R, P]) => ReactComponentU_ = {
 
     ListView.withAction[R, P, A, Q](
       name,
@@ -118,7 +120,7 @@ object ListView {
     itemView: ReqProps[Cursor[A, Q], Unit, Unit, TopNode],
     subheader: String,
     mode: ListMode = ListMode.Infinite
-  )(implicit fEncoder: Encoder[F]): ((IndexChange) => Callback) => (Cursor[R, P]) => ReactComponentU_ = {
+  )(implicit fEncoder: Encoder[F], s: Searchable[A, Guid]): ((IndexChange) => Callback) => (Cursor[R, P]) => ReactComponentU_ = {
     ListView.withAction[R, P, A, Q](
       name              = name,
       listCursorToItems = (cp: Cursor[R, P]) => rootToItems(cp).zoomAllMatches(itemToFinder).map(ca => ca.move(itemAndCursorToAction(ca.model, cp))),
@@ -129,14 +131,14 @@ object ListView {
     )
   }
 
-  def usingId[R, P, A <: HasId[A], Q](
+  def usingId[R, P, A <: Identified[A], Q](
     name: String,
     rootToItems: Cursor[R, P] => Cursor[List[A], P],
     itemAndCursorToAction: (A, Cursor[R, P]) => Q,
     itemView: ReqProps[Cursor[A, Q], Unit, Unit, TopNode],
     subheader: String,
     mode: ListMode = ListMode.Infinite
-  )(implicit fEncoder: Encoder[FindById[A]]): ((IndexChange) => Callback) => (Cursor[R, P]) => ReactComponentU_ = {
+  )(implicit fEncoder: Encoder[FindById[A]], s: Searchable[A, Guid]): ((IndexChange) => Callback) => (Cursor[R, P]) => ReactComponentU_ = {
     ListView.usingMatches[R, P, A, Q, FindById[A]](
       name                  = name,
       rootToItems           = rootToItems,

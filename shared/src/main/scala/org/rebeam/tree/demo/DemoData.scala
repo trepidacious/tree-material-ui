@@ -12,10 +12,12 @@ import DeltaCodecs._
 import io.circe.generic.JsonCodec
 import org.rebeam.tree.Delta._
 import org.rebeam.tree.ref.{Mirror, MirrorCodec}
-import org.rebeam.tree.sync.RefAdder
+import org.rebeam.tree.sync._
 import org.rebeam.tree.sync.Sync._
 import cats.instances.list._
 import cats.syntax.traverse._
+import org.rebeam.tree.Searchable.notSearchable
+import shapeless.{::,HNil}
 
 import scala.collection.mutable.ListBuffer
 
@@ -74,16 +76,18 @@ object DemoData {
     object High extends Priority {
       override def toString = "high"
     }
+    implicit val s: Searchable[Priority, Guid] = notSearchable
   }
+
 
   @JsonCodec
   @Lenses
   case class Todo (
-                            id: Guid[Todo],
+                            id: Id[Todo],
                             name: String,
                             completed: Boolean = false,
                             priority: Priority = Priority.Medium
-                          ) extends HasId[Todo]
+                          ) extends Identified[Todo]
 
   @JsonCodec
   sealed trait TodoAction extends Delta[Todo]
@@ -106,7 +110,7 @@ object DemoData {
   @JsonCodec
   @Lenses
   case class TodoList (
-    id: Guid[TodoList],
+    id: Id[TodoList],
     name: String,
     priority: Priority = Priority.Medium,
     color: Color = MaterialColor.Grey(500),
@@ -115,7 +119,7 @@ object DemoData {
 
   //Works with Cursor.zoomMatch to zoom to a particular Todo
   @JsonCodec
-  case class FindTodoById(id: Guid[Todo]) extends (Todo => Boolean) {
+  case class FindTodoById(id: Id[Todo]) extends (Todo => Boolean) {
     def apply(t: Todo): Boolean = t.id == id
   }
 
@@ -136,7 +140,7 @@ object DemoData {
       def apply(l: TodoList): DeltaIO[TodoList] = pure(l.copy(items = l.items.filterNot(_ == t)))
     }
 
-    case class DeleteTodoById(id: Guid[Todo]) extends TodoListAction {
+    case class DeleteTodoById(id: Id[Todo]) extends TodoListAction {
       def apply(l: TodoList): DeltaIO[TodoList] = pure(l.copy(items = l.items.filterNot(_.id == id)))
     }
 
@@ -167,7 +171,7 @@ object DemoData {
   @JsonCodec
   @Lenses
   case class TodoProject (
-                        id: Guid[TodoProject],
+                        id: Id[TodoProject],
                         name: String,
                         color: Color = MaterialColor.Grey(500),
                         lists: List[TodoList]
@@ -190,7 +194,7 @@ object DemoData {
       def apply(p: TodoProject): DeltaIO[TodoProject] = pure(p.copy(lists = p.lists.filterNot(_ == l)))
     }
 
-    case class DeleteListById(id: Guid[TodoList]) extends TodoProjectAction {
+    case class DeleteListById(id: Id[TodoList]) extends TodoProjectAction {
       def apply(p: TodoProject): DeltaIO[TodoProject] = pure(p.copy(lists = p.lists.filterNot(_.id == id)))
     }
 
@@ -214,7 +218,7 @@ object DemoData {
 
   //Works with Cursor.zoomMatch to zoom to a particular TodoList
   @JsonCodec
-  case class FindTodoListById(id: Guid[TodoList]) extends (TodoList => Boolean) {
+  case class FindTodoListById(id: Id[TodoList]) extends (TodoList => Boolean) {
     def apply(t: TodoList): Boolean = t.id == id
   }
 
@@ -299,7 +303,7 @@ object DemoData {
         id,
         s"Todo list $listIndex",
         Priority.Medium,
-        MaterialColor.backgroundForIndex(id.id.toInt - 1),
+        MaterialColor.backgroundForIndex(id.guid.withinDeltaId.id.toInt - 1),
         todos
       )
     }
@@ -317,6 +321,38 @@ object DemoData {
     }
 
   }
+
+//  def main(args: Array[String]): Unit = {
+//    import Searchable._
+//    val todo = Todo(Id[Todo](Guid(ClientId(0), ClientDeltaId(0), WithinDeltaId(0))), "name", true, Priority.Medium)
+//
+//    val todoList = TodoList(
+//      Id[TodoList](Guid(ClientId(0), ClientDeltaId(0), WithinDeltaId(1))),
+//      "list",
+//      Priority.Medium,
+//      MaterialColor.Grey(500),
+//      List(todo)
+//    )
+//
+//    val todoProject = TodoProject(
+//      Id[TodoProject](Guid(ClientId(0), ClientDeltaId(0), WithinDeltaId(2))),
+//      "project",
+//      MaterialColor.Grey(500),
+//      List(todoList)
+//    )
+//
+////    println(todoProject)
+////    println(todoProject.allRefGuids)
+//    println(MaterialColor.Grey(500).allRefGuids)
+//    println(Id[Todo](Guid(ClientId(0), ClientDeltaId(0), WithinDeltaId(0))).allRefGuids)
+//
+//    println(Id[TodoList](Guid(ClientId(0), ClientDeltaId(0), WithinDeltaId(0))).allRefGuids)
+//    println(todo.allRefGuids)
+//    println(List(todo).allRefGuids)
+//    println(todoList.allRefGuids)
+//    println(todoProject.allRefGuids)
+//
+//  }
 
 }
 

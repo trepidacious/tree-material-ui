@@ -6,8 +6,9 @@ import japgolly.scalajs.react.vdom.prefix_<^._
 import org.rebeam.tree.DeltaIOContextSource
 import org.rebeam.tree.demo.DemoRoutes.RefPage
 import org.rebeam.tree.demo.RefData._
-import org.rebeam.tree.ref.{Mirror, MirrorAndId, Ref}
-import org.rebeam.tree.sync.Sync.{ClientDeltaId, ClientId, Guid}
+import org.rebeam.tree.ref.{Mirror, MirrorAndId}
+import org.rebeam.tree.sync.Sync.{ClientDeltaId, ClientId}
+import org.rebeam.tree.sync._
 import org.rebeam.tree.view.View._
 import org.rebeam.tree.view._
 import RefData._
@@ -41,7 +42,7 @@ object RefViews {
   val RefMirrorView = cursorView[MirrorAndId[DataItemList], Pages[RefPage.type, RefPage.type]]("RefMirrorView"){
     c =>
 //      System.out.println(c.model)
-      c.followRef(Ref(c.model.id))
+      c.followRef(org.rebeam.tree.sync.Ref(c.model.id))
       .map(RefView(_))
       .getOrElse(RefEmptyView)
   }

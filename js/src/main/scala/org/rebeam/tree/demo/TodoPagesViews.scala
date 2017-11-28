@@ -11,7 +11,7 @@ import org.rebeam.tree.{DeltaCodecs, DeltaIOContextSource, Moment}
 import org.rebeam.tree.demo.DemoData._
 import org.rebeam.tree.demo.DemoRoutes._
 import org.rebeam.tree.ref.Mirror
-import org.rebeam.tree.ref.Ref
+import org.rebeam.tree.sync._
 import org.rebeam.tree.view.Cursor._
 import org.rebeam.tree.view.View._
 import org.rebeam.tree.view._
@@ -23,7 +23,7 @@ import org.rebeam.tree.view.pages._
 import org.rebeam.tree.view.list._
 import Mirror._
 import org.rebeam.tree.sync.Sync
-import org.rebeam.tree.sync.Sync.{ClientDeltaId, ClientId, Guid}
+import org.rebeam.tree.sync.Sync.{ClientDeltaId, ClientId}
 
 import scala.scalajs.js
 import scala.scalajs.js.UndefOr
@@ -204,7 +204,7 @@ object TodoPagesViews {
   }
 
   val TodoProjectCachePagesView = cursorView[Mirror, Pages[TodoPage, TodoPage]]("TodoProjectCachePagesView"){
-    c =>c.followRef(Ref(Guid[TodoProject](ClientId(0), ClientDeltaId(0), 0)))
+    c => c.followRef(org.rebeam.tree.sync.Ref(Id[TodoProject](Guid(ClientId(0), ClientDeltaId(0), WithinDeltaId(0)))))
           .map(TodoProjectPagesView(_))
           .getOrElse(TodoProjectEmptyView2)
   }

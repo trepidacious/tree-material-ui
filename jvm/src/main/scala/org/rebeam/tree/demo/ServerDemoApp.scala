@@ -17,8 +17,8 @@ import org.rebeam.tree.sync.Sync._
 import org.rebeam.tree.sync.DeltaIORun._
 import org.rebeam.tree.demo.DemoData.Address
 import org.rebeam.tree.demo.RefData.DataItemList
-import org.rebeam.tree.ref.{Mirror, MirrorAndId, Ref}
-import org.rebeam.tree.sync.RefAdder
+import org.rebeam.tree.ref.{Mirror, MirrorAndId}
+import org.rebeam.tree.sync.{RefAdder, Ref}
 
 object ServerDemoApp extends ServerApp {
 
@@ -33,7 +33,7 @@ object ServerDemoApp extends ServerApp {
     //FIXME update to use put
     val todoProjectMirrorIO: DeltaIO[Mirror] = for {
       todoProject <- TodoExample.todoProjectIO
-      revision <- getId[TodoProject]
+      revision <- getGuid
     } yield {
       Mirror.empty.updated(todoProject.id, todoProject, revision)
     }

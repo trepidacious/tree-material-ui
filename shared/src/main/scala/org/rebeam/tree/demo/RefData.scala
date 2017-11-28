@@ -6,8 +6,9 @@ import org.rebeam.lenses.macros.Lenses
 import org.rebeam.tree.Delta._
 import org.rebeam.tree.{Delta, DeltaCodecs}
 import org.rebeam.tree.DeltaCodecs._
-import org.rebeam.tree.ref.{Mirror, MirrorAndId, MirrorCodec, Ref}
+import org.rebeam.tree.ref.{Mirror, MirrorAndId, MirrorCodec}
 import org.rebeam.tree.sync.Sync._
+import org.rebeam.tree.sync._
 import org.rebeam.tree.BasicDeltaDecoders._
 import cats.instances.list._
 import cats.instances.option._
@@ -20,11 +21,11 @@ object RefData {
 
   @JsonCodec
   @Lenses
-  case class DataItem(id: Guid[DataItem], name: String) extends HasId[DataItem]
+  case class DataItem(id: Id[DataItem], name: String) extends Identified[DataItem]
 
   @JsonCodec
   @Lenses
-  case class DataItemList(id: Guid[DataItemList], items: List[Ref[DataItem]]) extends HasId[DataItemList]
+  case class DataItemList(id: Id[DataItemList], items: List[Ref[DataItem]]) extends Identified[DataItemList]
 
 
   @JsonCodec
@@ -39,7 +40,7 @@ object RefData {
       }
     }
 
-    case class DeleteDataItemById(id: Guid[DataItem]) extends DataItemListAction {
+    case class DeleteDataItemById(id: Id[DataItem]) extends DataItemListAction {
       def apply(l: DataItemList): DeltaIO[DataItemList] = pure(l.copy(items = l.items.filterNot(_.id == id)))
     }
 
