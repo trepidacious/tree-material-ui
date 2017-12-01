@@ -61,4 +61,50 @@ object Icons {
     )
   }
 
+  def makeArcHashIcon(): ReactTagOf[SVG] = {
+    import japgolly.scalajs.react.vdom.svg.prefix_<^._
+    <.svg(
+      ^.width := "24px",
+      ^.height := "24px",
+      ^.fill := "none",
+      ^.stroke := "#fff",
+      ^.strokeWidth := 2,
+      ^.strokeLinecap := "round",
+      ^.viewBox := "0 0 24 24",
+      <.path(^.transform := "translate(0, 0)", ^.d := arcHashIconPath(24))
+    )
+  }
+
+
+  val cos60: Double = 0.5
+  val sin60: Double = 0.866025403784439
+
+  def arcDir(i: Int): (Double, Double) = i % 6 match {
+    case 0 => (1, 0)
+    case 1 => (cos60, -sin60)
+    case 2 => (-cos60, -sin60)
+    case 3 => (-1, 0)
+    case 4 => (-cos60, sin60)
+    case 5 => (cos60, sin60)
+  }
+
+  def arc(xc: Double, yc: Double, start: Int, end: Int, radius: Double): String = {
+    val ds = arcDir(start)
+    val xs = xc + radius * ds._1
+    val ys = yc + radius * ds._2
+
+    val de = arcDir(end)
+    val xe = xc + radius * de._1
+    val ye = yc + radius * de._2
+
+    s"M $xs $ys A $radius $radius 0 0 0 $xe $ye"
+  }
+
+  def arcHashIconPath(size: Double): String = {
+    val c = size / 2
+    val r = size / 8
+    arc(c, c, 0, 1, r) + " " + arc(c, c, 1, 2, r*2) + " " + arc(c, c, 2, 3, r*3) +
+      arc(c, c, 3, 4, r) + " " + arc(c, c, 4, 5, r*2) + " " + arc(c, c, 5, 6, r*3)
+  }
+
 }

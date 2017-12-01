@@ -50,7 +50,7 @@ object RefViews {
   val DataItemSummary = ListItem.listItemWithContentsAndDelete[DataItem](
     "DataItemSummary",
     cp => ListTextView(cp.zoom(DataItem.name).label("Name")),
-    _ => avatarText(("!", MaterialColor.DeepPurple(500)))
+    item => avatarArcHash(item.id.guid.toString())
   )
 
   val DataItemListView = ListView.usingRef[DataItemList, Pages[RefPage.type, RefPage.type], DataItem, DeleteAction](
