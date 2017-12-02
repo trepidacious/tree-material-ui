@@ -51,7 +51,7 @@ object RefViews {
   val DataItemSummary = ListItem.listItemWithContentsAndDelete[DataItem](
     "DataItemSummary",
     cp => ListTextView(cp.zoom(DataItem.name).label("Name")),
-    item => avatarArcHash(CRC32.empty.updateLong(item.id.guid.clientId.id).updateLong(item.id.guid.clientDeltaId.id).updateLong(item.id.guid.withinDeltaId.id).value)
+    item => avatarArcHashId(item.id)
   )
 
   val DataItemListView = ListView.usingRef[DataItemList, Pages[RefPage.type, RefPage.type], DataItem, DeleteAction](

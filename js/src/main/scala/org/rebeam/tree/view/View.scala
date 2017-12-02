@@ -15,7 +15,8 @@ import japgolly.scalajs.react.ReactComponentC.ReqProps
 import scala.language.implicitConversions
 import scala.scalajs.js
 import japgolly.scalajs.react.vdom.prefix_<^._
-import org.rebeam.tree.view.icon.Icons
+import org.rebeam.tree.sync.{Guid, Id}
+import org.rebeam.tree.view.icon.{ArcHash, ArcHashable, Icons}
 import org.scalajs.dom.html.Span
 
 object View {
@@ -268,16 +269,20 @@ object View {
       )(text: ReactNode)
     }).build
 
-  val avatarArcHash: ReqProps[Int, Unit, Unit, TopNode] = ReactComponentB[Int]("avatarArcHash")
+  val avatarArcHashId: ReqProps[Id[_], Unit, Unit, TopNode] = avatarArcHash(ArcHashable.arcHashableId)
+
+  val avatarArcHashGuid: ReqProps[Guid, Unit, Unit, TopNode] = avatarArcHash(ArcHashable.arcHashableGuid)
+
+  def avatarArcHash[A](implicit ah: ArcHashable[A]): ReqProps[A, Unit, Unit, TopNode] = ReactComponentB[A]("avatarArcHash")
     .render(d => {
       val hash = d.props
 
-      val color = MaterialColor.backgroundForIndex((hash >> 24)&0xFF)
+      val color = ArcHash.color(hash)
       MuiAvatar(
         color = colors.white,
         backgroundColor = color
 
-      )(Icons.makeArcHashIcon(hash))
+      )(ArcHash.icon(hash))
     }).build
 
   def coloredCardButton(label: String, primary: Boolean = false, secondary: Boolean = false)(callback: Callback) = {
