@@ -12,6 +12,7 @@ import org.rebeam.tree.sync._
 import org.rebeam.tree.view.View._
 import org.rebeam.tree.view._
 import RefData._
+import org.rebeam.tree.util.CRC32
 import org.rebeam.tree.view.list.ListItem.{DeleteAction, EditAndDeleteActions}
 import org.rebeam.tree.view.list.{ListItem, ListTextView, ListView}
 import org.rebeam.tree.view.pages.Pages
@@ -50,7 +51,7 @@ object RefViews {
   val DataItemSummary = ListItem.listItemWithContentsAndDelete[DataItem](
     "DataItemSummary",
     cp => ListTextView(cp.zoom(DataItem.name).label("Name")),
-    item => avatarArcHash(item.id.guid.toString())
+    item => avatarArcHash(CRC32.empty.updateLong(item.id.guid.clientId.id).updateLong(item.id.guid.clientDeltaId.id).updateLong(item.id.guid.withinDeltaId.id).value)
   )
 
   val DataItemListView = ListView.usingRef[DataItemList, Pages[RefPage.type, RefPage.type], DataItem, DeleteAction](

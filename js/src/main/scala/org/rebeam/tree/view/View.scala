@@ -268,18 +268,16 @@ object View {
       )(text: ReactNode)
     }).build
 
-  val avatarArcHash: ReqProps[String, Unit, Unit, TopNode] = ReactComponentB[String]("avatarArcHash")
+  val avatarArcHash: ReqProps[Int, Unit, Unit, TopNode] = ReactComponentB[Int]("avatarArcHash")
     .render(d => {
       val hash = d.props
 
-      // TODO pick a color from hash
-      val color = MaterialColor.backgroundForIndex(0)
+      val color = MaterialColor.backgroundForIndex((hash >> 24)&0xFF)
       MuiAvatar(
         color = colors.white,
         backgroundColor = color
 
-        //TODO use hash to pick arc segments
-      )(Icons.makeArcHashIcon())
+      )(Icons.makeArcHashIcon(hash))
     }).build
 
   def coloredCardButton(label: String, primary: Boolean = false, secondary: Boolean = false)(callback: Callback) = {

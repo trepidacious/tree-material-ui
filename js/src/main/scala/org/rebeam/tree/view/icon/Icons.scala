@@ -61,7 +61,7 @@ object Icons {
     )
   }
 
-  def makeArcHashIcon(): ReactTagOf[SVG] = {
+  def makeArcHashIcon(hash: Int): ReactTagOf[SVG] = {
     import japgolly.scalajs.react.vdom.svg.prefix_<^._
     <.svg(
       ^.width := "24px",
@@ -71,7 +71,7 @@ object Icons {
       ^.strokeWidth := 2,
       ^.strokeLinecap := "round",
       ^.viewBox := "0 0 24 24",
-      <.path(^.transform := "translate(0, 0)", ^.d := arcHashIconPath(24))
+      <.path(^.transform := "translate(0, 0)", ^.d := arcHashIconPath(24, hash))
     )
   }
 
@@ -100,11 +100,18 @@ object Icons {
     s"M $xs $ys A $radius $radius 0 0 0 $xe $ye"
   }
 
-  def arcHashIconPath(size: Double): String = {
+  def arcHashRingPath(c: Double, r: Double, hash: Int): String = {
+    (0 until 6).map(
+      i => if (((hash >> i) & 1) == 1) arc(c, c, i, i + 1, r) else ""
+    ).mkString(" ")
+  }
+
+  def arcHashIconPath(size: Double, hash: Int): String = {
     val c = size / 2
     val r = size / 8
-    arc(c, c, 0, 1, r) + " " + arc(c, c, 1, 2, r*2) + " " + arc(c, c, 2, 3, r*3) +
-      arc(c, c, 3, 4, r) + " " + arc(c, c, 4, 5, r*2) + " " + arc(c, c, 5, 6, r*3)
+    (0 until 3).map(
+      i => arcHashRingPath(c, r * (i + 1), hash >> (i * 3))
+    ).mkString(" ")
   }
 
 }
