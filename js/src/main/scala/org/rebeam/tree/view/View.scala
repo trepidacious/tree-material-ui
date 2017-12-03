@@ -279,10 +279,10 @@ object View {
     .render(d => {
       val hash = d.props
 
-      val color = ArcHash.color(hash)
       MuiAvatar(
-        color = colors.white,
-        backgroundColor = color
+//        backgroundColor = ArcHash.background(hash)
+        backgroundColor = MaterialColor.BlueGrey(700)
+//        style = js.Dynamic.literal("stroke" -> ArcHash.accent(hash))
 
       )(ArcHash.icon(hash))
     }).build

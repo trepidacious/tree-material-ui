@@ -51,25 +51,58 @@ object ArcHash {
 
   def backgroundForIndex(i: Int) = backgrounds(i % backgrounds.size)
 
-  def color[A](a: A)(implicit ah: ArcHashable[A]): Color = color(ah.arcHash(a))
+  val accents: Seq[Color] = Seq(
+    MaterialColor.Red.a100,
+    MaterialColor.Pink.a100,
+    MaterialColor.Purple.a100,
+    MaterialColor.DeepPurple.a100,
+    MaterialColor.Indigo.a100,
+    MaterialColor.Blue.a100,
+    MaterialColor.LightBlue.a100,
+    MaterialColor.Cyan.a100,
+    MaterialColor.Teal.a100,
+    MaterialColor.Green.a100,
+    MaterialColor.LightGreen.a100,
+    MaterialColor.Lime.a100,
+    MaterialColor.Yellow.a100,
+    MaterialColor.Amber.a100,
+    MaterialColor.Orange.a100,
+    MaterialColor.DeepOrange.a100
+  )
 
-  def color(hash: Int): Color = {
+  def accentForIndex(i: Int) = accents(i % accents.size)
+
+  def background[A](a: A)(implicit ah: ArcHashable[A]): Color = background(ah.arcHash(a))
+
+  def background(hash: Int): Color = {
     backgroundForIndex((hash >> 24) & 0xFF)
+  }
+
+  def accent[A](a: A)(implicit ah: ArcHashable[A]): Color = accent(ah.arcHash(a))
+
+  def accent(hash: Int): Color = {
+    accentForIndex((hash >> 24) & 0xFF)
   }
 
   def icon[A](a: A)(implicit ah: ArcHashable[A]): ReactTagOf[SVG] = icon(ah.arcHash(a))
 
   def icon(hash: Int): ReactTagOf[SVG] = {
     import japgolly.scalajs.react.vdom.svg.prefix_<^._
+    val size = 24
+    val c = size / 2
+    val r = size / 8
+
     <.svg(
       ^.width := "24px",
       ^.height := "24px",
       ^.fill := "none",
-      ^.stroke := "#fff",
+//      ^.stroke := MaterialColor.DeepPurple(100).,
       ^.strokeWidth := 2,
       ^.strokeLinecap := "round",
       ^.viewBox := "0 0 24 24",
-      <.path(^.transform := "translate(0, 0)", ^.d := arcHashIconPath(24, hash))
+      <.path(^.transform := "translate(0, 0)", ^.stroke := accentForIndex((hash >> 28) & 0xF).toString, ^.d := arcHashSymRingPath(c, r, hash, 0)),
+      <.path(^.transform := "translate(0, 0)", ^.stroke := accentForIndex((hash >> 24) & 0xF).toString, ^.d := arcHashSymRingPath(c, r, hash, 1)),
+      <.path(^.transform := "translate(0, 0)", ^.stroke := accentForIndex((hash >> 20) & 0xF).toString, ^.d := arcHashSymRingPath(c, r, hash, 2))
     )
   }
 
@@ -103,11 +136,31 @@ object ArcHash {
     ).mkString(" ")
   }
 
+  def arcHashRingPath(c: Double, r: Double, hash: Int, i: Int): String = {
+    arcHashRingPath(c, r * (i + 1), hash >> (i * 6))
+  }
+
+  def arcHashSymRingPath(c: Double, r: Double, hash: Int): String = {
+    def b(i: Int) = ((hash >> i) & 1) == 1
+    def a(i: Int) = arc(c, c, i, i + 1, r)
+
+    List(
+      if (b(0)) a(0) + " " + a(2) else "",
+      if (b(1)) a(1) else "",
+      if (b(2)) a(3) + " " + a(5) else "",
+      if (b(3)) a(4) else ""
+    ).mkString(" ")
+  }
+
+  def arcHashSymRingPath(c: Double, r: Double, hash: Int, i: Int): String = {
+    arcHashSymRingPath(c, r * (i + 1), hash >> (i * 4))
+  }
+
   def arcHashIconPath(size: Double, hash: Int): String = {
     val c = size / 2
     val r = size / 8
     (0 until 3).map(
-      i => arcHashRingPath(c, r * (i + 1), hash >> (i * 3))
+      i => arcHashRingPath(c, r, hash, i)
     ).mkString(" ")
   }
 
