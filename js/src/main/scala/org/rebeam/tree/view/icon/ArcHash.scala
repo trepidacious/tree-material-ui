@@ -24,6 +24,7 @@ object ArcHashable {
   implicit val arcHashableGuid: ArcHashable[Guid] = create(hashGuid)
   implicit val arcHashableId: ArcHashable[Id[_]] = create(id => hashGuid(id.guid))
   implicit val arcHashableRef: ArcHashable[Ref[_]] = create(ref => hashGuid(ref.id.guid))
+  implicit val arcHashableString: ArcHashable[String] = create(s => CRC32(s.getBytes("utf-8")).value)
 
 }
 
@@ -93,7 +94,7 @@ object ArcHash {
     val xe = xc + radius * de._1
     val ye = yc + radius * de._2
 
-    s"M $xs $ys A $radius $radius 0 0 0 $xe $ye"
+    s"M$xs,$ys A$radius,$radius,0,0,0,$xe,$ye"
   }
 
   def arcHashRingPath(c: Double, r: Double, hash: Int): String = {

@@ -273,6 +273,8 @@ object View {
 
   val avatarArcHashGuid: ReqProps[Guid, Unit, Unit, TopNode] = avatarArcHash(ArcHashable.arcHashableGuid)
 
+  val avatarArcHashString: ReqProps[String, Unit, Unit, TopNode] = avatarArcHash(ArcHashable.arcHashableString)
+
   def avatarArcHash[A](implicit ah: ArcHashable[A]): ReqProps[A, Unit, Unit, TopNode] = ReactComponentB[A]("avatarArcHash")
     .render(d => {
       val hash = d.props

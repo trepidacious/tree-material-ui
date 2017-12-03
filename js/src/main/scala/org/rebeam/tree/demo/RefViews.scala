@@ -51,6 +51,7 @@ object RefViews {
   val DataItemSummary = ListItem.listItemWithContentsAndDelete[DataItem](
     "DataItemSummary",
     cp => ListTextView(cp.zoom(DataItem.name).label("Name")),
+//    item => avatarArcHashString(item.name)
     item => avatarArcHashId(item.id)
   )
 
