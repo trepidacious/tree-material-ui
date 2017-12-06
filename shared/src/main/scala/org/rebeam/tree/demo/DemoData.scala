@@ -322,37 +322,5 @@ object DemoData {
 
   }
 
-//  def main(args: Array[String]): Unit = {
-//    import Searchable._
-//    val todo = Todo(Id[Todo](Guid(ClientId(0), ClientDeltaId(0), WithinDeltaId(0))), "name", true, Priority.Medium)
-//
-//    val todoList = TodoList(
-//      Id[TodoList](Guid(ClientId(0), ClientDeltaId(0), WithinDeltaId(1))),
-//      "list",
-//      Priority.Medium,
-//      MaterialColor.Grey(500),
-//      List(todo)
-//    )
-//
-//    val todoProject = TodoProject(
-//      Id[TodoProject](Guid(ClientId(0), ClientDeltaId(0), WithinDeltaId(2))),
-//      "project",
-//      MaterialColor.Grey(500),
-//      List(todoList)
-//    )
-//
-////    println(todoProject)
-////    println(todoProject.allRefGuids)
-//    println(MaterialColor.Grey(500).allRefGuids)
-//    println(Id[Todo](Guid(ClientId(0), ClientDeltaId(0), WithinDeltaId(0))).allRefGuids)
-//
-//    println(Id[TodoList](Guid(ClientId(0), ClientDeltaId(0), WithinDeltaId(0))).allRefGuids)
-//    println(todo.allRefGuids)
-//    println(List(todo).allRefGuids)
-//    println(todoList.allRefGuids)
-//    println(todoProject.allRefGuids)
-//
-//  }
-
 }
 
