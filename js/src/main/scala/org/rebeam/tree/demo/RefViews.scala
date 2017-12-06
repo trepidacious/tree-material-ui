@@ -6,11 +6,13 @@ import japgolly.scalajs.react.vdom.prefix_<^._
 import org.rebeam.tree.DeltaIOContextSource
 import org.rebeam.tree.demo.DemoRoutes.RefPage
 import org.rebeam.tree.demo.RefData._
-import org.rebeam.tree.ref.{Mirror, MirrorAndId, Ref}
-import org.rebeam.tree.sync.Sync.{ClientDeltaId, ClientId, Guid}
+import org.rebeam.tree.ref.{Mirror, MirrorAndId}
+import org.rebeam.tree.sync.Sync.{ClientDeltaId, ClientId}
+import org.rebeam.tree.sync._
 import org.rebeam.tree.view.View._
 import org.rebeam.tree.view._
 import RefData._
+import org.rebeam.tree.util.CRC32
 import org.rebeam.tree.view.list.ListItem.{DeleteAction, EditAndDeleteActions}
 import org.rebeam.tree.view.list.{ListItem, ListTextView, ListView}
 import org.rebeam.tree.view.pages.Pages
@@ -41,7 +43,7 @@ object RefViews {
   val RefMirrorView = cursorView[MirrorAndId[DataItemList], Pages[RefPage.type, RefPage.type]]("RefMirrorView"){
     c =>
 //      System.out.println(c.model)
-      c.followRef(Ref(c.model.id))
+      c.followRef(org.rebeam.tree.sync.Ref(c.model.id))
       .map(RefView(_))
       .getOrElse(RefEmptyView)
   }
@@ -49,7 +51,8 @@ object RefViews {
   val DataItemSummary = ListItem.listItemWithContentsAndDelete[DataItem](
     "DataItemSummary",
     cp => ListTextView(cp.zoom(DataItem.name).label("Name")),
-    _ => avatarText(("!", MaterialColor.DeepPurple(500)))
+//    item => avatarArcHashString(item.name)
+    item => avatarArcHashId(item.id)
   )
 
   val DataItemListView = ListView.usingRef[DataItemList, Pages[RefPage.type, RefPage.type], DataItem, DeleteAction](

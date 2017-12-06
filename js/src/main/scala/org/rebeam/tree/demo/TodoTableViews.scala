@@ -3,14 +3,17 @@ package org.rebeam.tree.demo
 import chandu0101.scalajs.react.components.materialui._
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.prefix_<^._
-import org.rebeam.tree.DeltaIOContextSource
+import org.rebeam.tree.{DeltaIOContextSource, Searchable}
 import org.rebeam.tree.demo.DemoData.Priority._
 import org.rebeam.tree.demo.DemoData._
 import org.rebeam.tree.view.Cursor._
 import org.rebeam.tree.view.View._
 import org.rebeam.tree.view._
+import org.rebeam.tree.sync._
 
 import scala.scalajs.js
+import Searchable._
+import org.rebeam.tree.sync.Guid
 
 object TodoTableViews {
 
@@ -84,6 +87,7 @@ object TodoTableViews {
   implicit val contextSource = DeltaIOContextSource.default
 
   implicit val rootSourceTodoList = ServerRootComponent.noRootSource[TodoList]
+
 
   val todoListView = ServerRootComponent[TodoList](noTodoList, "api/todolist") {
     c => {

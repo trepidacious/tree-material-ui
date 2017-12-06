@@ -79,7 +79,8 @@ object DemoViews {
         |*Italic*
         |# HTML
         |<span>This should appear with escaped HTML span tags</span>
-      """.stripMargin)
+      """.stripMargin),
+      ReactGridLayoutDemo.c()
     )
 
     <.div(

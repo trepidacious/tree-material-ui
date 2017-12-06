@@ -7,6 +7,7 @@ import org.rebeam.tree.view.Navigation
 import org.rebeam.tree.view.pages._
 import org.rebeam.tree.demo.DemoData._
 import org.rebeam.tree.sync.Sync._
+import org.rebeam.tree.sync._
 
 object DemoRoutes {
 
@@ -21,13 +22,13 @@ object DemoRoutes {
   }
 
   sealed trait PageWithTodoProjectList extends TodoPage {
-    def listId: Guid[TodoList]
-    def toItem(todoId: Guid[Todo]) = TodoProjectListItemPage(listId, todoId)
+    def listId: Id[TodoList]
+    def toItem(todoId: Id[Todo]) = TodoProjectListItemPage(listId, todoId)
     override def back: TodoPage = TodoProjectPage
   }
 
   sealed trait PageWithTodoProjectListItem extends PageWithTodoProjectList {
-    def todoId: Guid[Todo]
+    def todoId: Id[Todo]
     override def back: TodoPage = TodoProjectListPage(listId)
   }
 
@@ -39,8 +40,8 @@ object DemoRoutes {
     override def back: TodoPage = TodoProjectCachePage
   }
 
-  case class TodoProjectListPage(listId: Guid[TodoList]) extends PageWithTodoProjectList
-  case class TodoProjectListItemPage(listId: Guid[TodoList], todoId: Guid[Todo]) extends PageWithTodoProjectListItem
+  case class TodoProjectListPage(listId: Id[TodoList]) extends PageWithTodoProjectList
+  case class TodoProjectListItemPage(listId: Id[TodoList], todoId: Id[Todo]) extends PageWithTodoProjectListItem
 
   implicit val transitions = new PagesToTransition[TodoPage] {
     override def apply(from: TodoPage, to: TodoPage) = {
@@ -57,15 +58,15 @@ object DemoRoutes {
     def dynRenderP[P <: Page](g: Pages[P, P] => ReactElement): P => Renderer =
       p => Renderer(r => g(Pages(p, r.narrow[P])))
 
-    def guid[A] = new RouteB[Guid[A]](Guid.regex.regex, 1, g => Guid.fromString[A](g(0)), _.toString)
+    def id[A] = new RouteB[Id[A]](Id.regex.regex, 1, g => Id.fromString[A](g(0)), Id.toString(_))
 
     def caseObject[A](s: String, a: A) = RouteB.literal(s).xmap(_ => a)(_ => ())
 
     val refRoute = caseObject("#ref", RefPage)
 
     val todoProjectRoute = caseObject("#todo", TodoProjectPage)
-    val todoProjectListRoute = ("#todo/list" / guid[TodoList]).caseClass[TodoProjectListPage]
-    val todoProjectListItemRoute = ("#todo/list" / guid[TodoList] / "item" / guid[Todo]).caseClass[TodoProjectListItemPage]
+    val todoProjectListRoute = ("#todo/list" / id[TodoList]).caseClass[TodoProjectListPage]
+    val todoProjectListItemRoute = ("#todo/list" / id[TodoList] / "item" / id[Todo]).caseClass[TodoProjectListItemPage]
 
     val todoProjectCacheRoute = caseObject("#todocache", TodoProjectCachePage)
 
