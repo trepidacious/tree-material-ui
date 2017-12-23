@@ -23,6 +23,30 @@ import scala.collection.mutable.ListBuffer
 
 object DemoData {
 
+//  import Priority._
+//  @JsonCodec
+//  sealed trait Priority
+//  object Priority {
+//    object Low extends Priority {
+//      override def toString = "low"
+//    }
+//    object Medium extends Priority {
+//      override def toString = "medium"
+//    }
+//    object High extends Priority {
+//      override def toString = "high"
+//    }
+//    implicit val s: Searchable[Priority, Guid] = notSearchable
+//  }
+
+  @JsonCodec
+  case class Priority(level: Int)
+  object Priority {
+    val low = Priority(1)
+    val medium = Priority(2)
+    val high = Priority(3)
+  }
+
   @JsonCodec
   @Lenses
   case class Street(name: String, number: Int, temperature: Double)
@@ -64,20 +88,6 @@ object DemoData {
     def genId(a: Address) = None
   }
 
-  @JsonCodec
-  sealed trait Priority
-  object Priority {
-    object Low extends Priority {
-      override def toString = "low"
-    }
-    object Medium extends Priority {
-      override def toString = "medium"
-    }
-    object High extends Priority {
-      override def toString = "high"
-    }
-    implicit val s: Searchable[Priority, Guid] = notSearchable
-  }
 
 
   @JsonCodec
@@ -86,7 +96,7 @@ object DemoData {
                             id: Id[Todo],
                             name: String,
                             completed: Boolean = false,
-                            priority: Priority = Priority.Medium
+                            priority: Priority = Priority.medium
                           ) extends Identified[Todo]
 
   @JsonCodec
@@ -94,15 +104,16 @@ object DemoData {
   object TodoAction {
     case object CyclePriority extends TodoAction {
       def apply(t: Todo): DeltaIO[Todo] = pure {
-        t.copy(priority =
-          if (t.priority == Priority.Low) {
-            Priority.Medium
-          } else if (t.priority == Priority.Medium) {
-            Priority.High
-          } else {
-            Priority.Low
-          }
-        )
+//        t.copy(priority =
+//          if (t.priority == Priority.Low) {
+//            Priority.Medium
+//          } else if (t.priority == Priority.Medium) {
+//            Priority.High
+//          } else {
+//            Priority.Low
+//          }
+//        )
+        t
       }
     }
   }
@@ -112,7 +123,7 @@ object DemoData {
   case class TodoList (
     id: Id[TodoList],
     name: String,
-    priority: Priority = Priority.Medium,
+    priority: Priority = Priority.medium,
     color: Color = MaterialColor.Grey(500),
     items: List[Todo] = Nil
   )
@@ -127,7 +138,7 @@ object DemoData {
   sealed trait TodoListAction extends Delta[TodoList]
   object TodoListAction {
 
-    case class CreateTodo(name: String = "New todo", priority: Priority = Priority.Medium) extends TodoListAction {
+    case class CreateTodo(name: String = "New todo", priority: Priority = Priority.medium) extends TodoListAction {
       def apply(l: TodoList): DeltaIO[TodoList] = for {
         id <- getId[Todo]
       } yield {
@@ -181,7 +192,7 @@ object DemoData {
   sealed trait TodoProjectAction extends Delta[TodoProject]
   object TodoProjectAction {
 
-    case class CreateTodoList(name: String = "New todo list", priority: Priority = Priority.Medium) extends TodoProjectAction {
+    case class CreateTodoList(name: String = "New todo list", priority: Priority = Priority.medium) extends TodoProjectAction {
       def apply(p: TodoProject): DeltaIO[TodoProject] = for {
         id <- getId[TodoList]
       } yield {
@@ -288,9 +299,9 @@ object DemoData {
         id,
         "Todo " + i,
         priority = i % 3 match {
-          case 0 => Priority.Low
-          case 1 => Priority.Medium
-          case _ => Priority.High
+          case 0 => Priority.low
+          case 1 => Priority.medium
+          case _ => Priority.high
         }
       )
     }
@@ -302,7 +313,7 @@ object DemoData {
       TodoList(
         id,
         s"Todo list $listIndex",
-        Priority.Medium,
+        Priority.medium,
         MaterialColor.backgroundForIndex(id.guid.withinDeltaId.id.toInt - 1),
         todos
       )

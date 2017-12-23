@@ -20,10 +20,10 @@ object TodoTableViews {
   val todoView = cursorView[Todo, Unit]("TodoView") { c =>
 
     val t = c.model
-    val icon  = t.priority match {
-      case High => Mui.SvgIcons.ToggleStar(color = Mui.Styles.colors.amber700)()
-      case Medium => Mui.SvgIcons.ToggleStarHalf(color = Mui.Styles.colors.blue300)()
-      case Low => Mui.SvgIcons.ToggleStarBorder(color = Mui.Styles.colors.grey300)()
+    val icon  = t.priority.level match {
+      case 3 => Mui.SvgIcons.ToggleStar(color = Mui.Styles.colors.amber700)()
+      case 2 => Mui.SvgIcons.ToggleStarHalf(color = Mui.Styles.colors.blue300)()
+      case _ => Mui.SvgIcons.ToggleStarBorder(color = Mui.Styles.colors.grey300)()
     }
 
     MuiTableRow(key = t.id.toString, style = js.Dynamic.literal("border-bottom" -> "0px"))(
