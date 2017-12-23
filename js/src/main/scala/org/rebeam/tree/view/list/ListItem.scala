@@ -6,6 +6,8 @@ import japgolly.scalajs.react.vdom.ReactTagOf
 import japgolly.scalajs.react.vdom.prefix_<^._
 import japgolly.scalajs.react.{BackendScope, Callback, ReactComponentB, ReactComponentU, ReactComponentU_, ReactElement, TopNode}
 import org.rebeam.lenses.LensN
+import org.rebeam.tree.ValueDelta.BooleanValueDelta
+import org.rebeam.tree.{DLens, Delta}
 import org.rebeam.tree.view.View._
 import org.rebeam.tree.view.icon.Icons
 import org.rebeam.tree.view.transition.CSSTransitionGroup
@@ -172,7 +174,7 @@ object ListItem {
 
   case class DeleteAction(delete: Action)
 
-  def listItemWithDelete[A](name: String, firstLine: A => String, secondLine: A => String, avatar: A => ReactElement): ReqProps[Cursor[A, DeleteAction], Unit, Unit, TopNode] = cursorView[A, DeleteAction](name){
+  def listItemWithDelete[U, A, D <: Delta[U, A]](name: String, firstLine: A => String, secondLine: A => String, avatar: A => ReactElement): ReqProps[Cursor[U, A, D, DeleteAction], Unit, Unit, TopNode] = cursorView[U, A, D, DeleteAction](name){
     cp => {
       val m = cp.model
 
@@ -187,7 +189,7 @@ object ListItem {
     }
   }
 
-  def listItemWithContentsAndDelete[A](name: String, contents: Cursor[A, DeleteAction] => ReactElement, avatar: A => ReactElement): ReqProps[Cursor[A, DeleteAction], Unit, Unit, TopNode] = cursorView[A, DeleteAction](name){
+  def listItemWithContentsAndDelete[U, A, D <: Delta[U, A]](name: String, contents: Cursor[U, A, D, DeleteAction] => ReactElement, avatar: A => ReactElement): ReqProps[Cursor[U, A, D, DeleteAction], Unit, Unit, TopNode] = cursorView[U, A, D, DeleteAction](name){
     cp => {
       val m = cp.model
 
@@ -205,7 +207,7 @@ object ListItem {
 
   case class EditAndDeleteActions(edit: Action, delete: Action)
 
-  def listItemWithEditAndDelete[A](name: String, firstLine: A => String, secondLine: A => String, avatar: A => ReactElement): ReqProps[Cursor[A, EditAndDeleteActions], Unit, Unit, TopNode] = cursorView[A, EditAndDeleteActions](name){
+  def listItemWithEditAndDelete[U, A, D <: Delta[U, A]](name: String, firstLine: A => String, secondLine: A => String, avatar: A => ReactElement): ReqProps[Cursor[U, A, D, EditAndDeleteActions], Unit, Unit, TopNode] = cursorView[U, A, D, EditAndDeleteActions](name){
     cp => {
       val m = cp.model
 
@@ -224,7 +226,9 @@ object ListItem {
     }
   }
 
-  def listItemWithCompleteEditAndDelete[A](name: String, firstLine: A => String, secondLine: A => String, completionLens: LensN[A, Boolean]): ReqProps[Cursor[A, EditAndDeleteActions], Unit, Unit, TopNode] = cursorView(name){
+  def listItemWithCompleteEditAndDelete[U, A, D <: Delta[U, A]](
+    name: String, firstLine: A => String, secondLine: A => String, completionLens: DLens[U, A, D, Boolean, BooleanValueDelta[U]]
+  ): ReqProps[Cursor[U, A, D, EditAndDeleteActions], Unit, Unit, TopNode] = cursorView(name){
     cp => {
       val m = cp.model
 

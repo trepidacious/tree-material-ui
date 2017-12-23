@@ -1,14 +1,18 @@
 package org.rebeam.tree.demo
 
 import japgolly.scalajs.react.vdom.prefix_<^._
-import org.rebeam.tree.{DeltaIOContextSource, Moment}
+import org.rebeam.tree.{DeltaIOContextSource, Moment, ValueDelta}
 import org.rebeam.tree.view.View._
 import org.rebeam.tree.view._
 import org.rebeam.tree.view.Cursor._
 import DemoData._
 import chandu0101.scalajs.react.components.materialui._
+import io.circe.Encoder
 import japgolly.scalajs.react._
-import org.rebeam.tree.demo.DemoData.Priority._
+import japgolly.scalajs.react.extra.Reusability
+import org.rebeam.tree.ValueDelta.StringValueDelta
+import org.rebeam.tree.view.View.AsStringView.Backend
+//import org.rebeam.tree.demo.DemoData.Priority._
 import org.rebeam.tree.demo.DemoRoutes._
 import org.rebeam.tree.view.infinite.Infinite
 import org.rebeam.tree.view.pages.{Breadcrumbs, Pages}
@@ -20,21 +24,32 @@ import scala.scalajs.js
 
 object DemoViews {
 
-  val streetView = cursorView[Street, Unit]("StreetView") { c =>
+  def stringViewThing = ReactComponentB[String]("stringViewThing")
+    .render_P(s => <.div(s): ReactElement)
+    .configure(Reusability.shouldComponentUpdateWithOverlay)
+    .build
+
+//  ReactComponentB[A](name).render_P(render).build
+
+  val streetView = cursorView[Unit, Street, StreetDelta, Unit]("StreetView") { c => {
     <.div(
-      <.p("Blah"),
-      intView(c.zoom(Street.number).label("Number")),
-      textView(c.zoom(Street.name).label("Name")),
-      doubleView(c.zoom(Street.temperature).label("Temperature")),
+      ^.paddingTop := "20px",
+      stringViewThing(c.model.number.toString),
+      stringViewThing(c.model.name),
+      stringViewThing(c.model.temperature.toString),
+      intView(c.zoom(StreetDelta.number).label("Number")),
+      textView(c.zoom(StreetDelta.name).label("Name")),
+      doubleView(c.zoom(StreetDelta.temperature).label("Temperature")),
       raisedButton("Number multiple", primary = true){
-        c.act(StreetAction.NumberMultiple(10): StreetAction)
+        c.act(StreetDelta.NumberMultiple(10))
       },
       raisedButton("Capitalise", secondary = true){
-        c.act(StreetAction.Capitalise: StreetAction)
+        c.act(StreetDelta.Capitalise)
       }
     )
-  }
+  }}
 
+  
   val noAddress = <.div(
     <.h3("Address"),
     spinner()
@@ -42,18 +57,19 @@ object DemoViews {
 
   implicit val contextSource = DeltaIOContextSource.default
 
-  implicit val rootSourceAddress = ServerRootComponent.noRootSource[Address]
+  implicit val rootSourceAddress = ServerRootComponent.noRootSource[Unit, Address, AddressDelta]
 
-  val addressView = ServerRootComponent[Address](noAddress, "api/address") {
+  val addressView = ServerRootComponent[Unit, Address, AddressDelta](noAddress, "api/address") {
     addressCursor => {
-      val streetCursor = addressCursor.zoom(Address.street)
+      val streetCursor = addressCursor.zoom(AddressDelta.street)
       <.div(
         <.h3("Address"),
-        streetView(streetCursor)
+        streetView(streetCursor),
+        stringViewThing("Just some string that totally shouldn't change!"),
+        stringViewThing("And another one for luck!")
       )
     }
   }
-
 
   val homeView = staticView("home") {
     val title = Breadcrumbs.container(

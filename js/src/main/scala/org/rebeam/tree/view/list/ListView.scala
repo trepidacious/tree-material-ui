@@ -4,8 +4,7 @@ import chandu0101.scalajs.react.components.materialui._
 import io.circe.Encoder
 import japgolly.scalajs.react.ReactComponentC.ReqProps
 import japgolly.scalajs.react.{Callback, ReactComponentU_, TopNode}
-import org.rebeam.tree.Searchable
-import org.rebeam.tree.ref._
+import org.rebeam.tree.{Delta, ListMatchDelta, Searchable}
 import org.rebeam.tree.sync._
 import org.rebeam.tree.sync.Sync._
 import org.rebeam.tree.view._
@@ -18,138 +17,144 @@ import org.rebeam.tree.view.transition._
 import scala.scalajs.js
 
 object ListView {
-
-  /**
-    * Create a component viewing a list
-    *
-    * @param name      The name of the component
-    * @param toItem    Function from an item to a finder, used for CursorP.zoomAllMatchesP
-    * @param itemToKey Maps items to their react keys
-    * @param itemView  Component viewing items
-    * @param subheader The subheader text to display in list
-    * @param fEncoder  Encoder for finder
-    * @tparam A The type of list element
-    * @tparam C The type of current page
-    * @tparam P The type of all pages
-    * @tparam F The type of finder used to find items
-    * @return A view of the list, with infinite scrolling, suitable for use in a SortableContainer
-    */
-  def legacy[A, C, P, F <: A => Boolean](
-                                         name: String,
-                                         toItem: A => F,
-                                         itemToKey: A => js.Any,
-                                         itemView: ReqProps[Cursor[A, Pages[C, P]], Unit, Unit, TopNode],
-                                         subheader: String,
-                                         mode: ListMode = ListMode.Infinite)(implicit fEncoder: Encoder[F], s: Searchable[A, Guid]): ((IndexChange) => Callback) => (Cursor[List[A], Pages[C, P]]) => ReactComponentU_ = {
-    ListView[List[A], Pages[C, P], Cursor[A, Pages[C, P]]](
-      name,
-      _.zoomAllMatches(toItem),
-      c => itemToKey(c.model),
-      itemView,
-      subheader,
-      mode
-    )
-  }
-
-  /**
-    * Create a list view
-    * @param name               Name of view
-    * @param listCursorToItems  Take a cursor with root model (type R) and location as a page (type P) and yield a list
-    *                           of cursors to the list items (type A) and locations as actions on them (type Q). Note we
-    *                           are using the location parameter as an action to perform on list items.
-    * @param itemToKey          Get a key for given list item
-    * @param itemView           Get a view for Cursor[A, Q], which displays list items of type A, allowing actions to
-    *                           be performed using location of type Q.
-    * @param subheader          Subheader text for the list
-    * @param mode               Mode for list display
-    * @tparam R                 The type of root model - some data type from which we can get to a list of items - doesn't
-    *                           need to actually be a list
-    * @tparam P                 The type of location for the root cursor - normally some kind of "page" location
-    * @tparam A                 The type of list items
-    * @tparam Q                 The type of location for list items - often some kind of action that can be performed
-    *                           on list items, but can be an actual location.
-    * @return                   A List view
-    */
-  def withAction[R, P, A, Q](
-    name: String,
-    listCursorToItems: Cursor[R, P] => List[Cursor[A, Q]],
-    itemToKey: A => js.Any,
-    itemView: ReqProps[Cursor[A, Q], Unit, Unit, TopNode],
-    subheader: String,
-    mode: ListMode = ListMode.Infinite
-   ): ((IndexChange) => Callback) => (Cursor[R, P]) => ReactComponentU_ = {
-    ListView[R, P, Cursor[A, Q]](
-      name,
-      listCursorToItems,
-      c => itemToKey(c.model),
-      itemView,
-      subheader,
-      mode
-    )
-  }
-
-  def usingRef[R, P, A, Q](
-                            name: String,
-                            rootToItemRefs: Cursor[R, P] => Cursor[List[Ref[A]], P],
-                            itemAndCursorToAction: (A, Cursor[R, P]) => Q,
-                            itemView: ReqProps[Cursor[A, Q], Unit, Unit, TopNode],
-                            subheader: String,
-                            mode: ListMode = ListMode.Infinite
-                          )(implicit fEncoder: Encoder[FindRefById[A]], mCodec: MirrorCodec[A], toId: Identifiable[A], s: Searchable[A, Guid]): ((IndexChange) => Callback) => (Cursor[R, P]) => ReactComponentU_ = {
-
-    ListView.withAction[R, P, A, Q](
-      name,
-      (cp: Cursor[R, P]) =>
-        rootToItemRefs(cp)
-          .zoomAllMatches(a => FindRefById(a.id))
-          .flatMap(cursorToRef => cursorToRef.followRef(cursorToRef.model))
-          .map(ca => ca.move(itemAndCursorToAction(ca.model, cp))),
-      a => toId.id(a).toString(),
-      itemView,
-      subheader,
-      mode
-    )
-  }
-
-  def usingMatches[R, P, A, Q, F <: A => Boolean](
-    name: String,
-    rootToItems: Cursor[R, P] => Cursor[List[A], P],
-    itemToFinder: A => F,
-    itemAndCursorToAction: (A, Cursor[R, P]) => Q,
-    itemToKey: A => js.Any,
-    itemView: ReqProps[Cursor[A, Q], Unit, Unit, TopNode],
-    subheader: String,
-    mode: ListMode = ListMode.Infinite
-  )(implicit fEncoder: Encoder[F], s: Searchable[A, Guid]): ((IndexChange) => Callback) => (Cursor[R, P]) => ReactComponentU_ = {
-    ListView.withAction[R, P, A, Q](
-      name              = name,
-      listCursorToItems = (cp: Cursor[R, P]) => rootToItems(cp).zoomAllMatches(itemToFinder).map(ca => ca.move(itemAndCursorToAction(ca.model, cp))),
-      itemToKey         = c => itemToKey(c),
-      itemView          = itemView,
-      subheader         = subheader,
-      mode              = mode
-    )
-  }
-
-  def usingId[R, P, A <: Identified[A], Q](
-    name: String,
-    rootToItems: Cursor[R, P] => Cursor[List[A], P],
-    itemAndCursorToAction: (A, Cursor[R, P]) => Q,
-    itemView: ReqProps[Cursor[A, Q], Unit, Unit, TopNode],
-    subheader: String,
-    mode: ListMode = ListMode.Infinite
-  )(implicit fEncoder: Encoder[FindById[A]], s: Searchable[A, Guid]): ((IndexChange) => Callback) => (Cursor[R, P]) => ReactComponentU_ = {
-    ListView.usingMatches[R, P, A, Q, FindById[A]](
-      name                  = name,
-      rootToItems           = rootToItems,
-      itemToFinder          = a => FindById[A](a.id),
-      itemAndCursorToAction = itemAndCursorToAction,
-      itemToKey             = a => a.id.toString(),
-      itemView              = itemView,
-      subheader             = subheader,
-      mode                  = mode
-    )
-  }
+//
+//  /**
+//    * Create a component viewing a list
+//    *
+//    * @param name      The name of the component
+//    * @param toItem    Function from an item to a finder, used for CursorP.zoomAllMatchesP
+//    * @param itemToKey Maps items to their react keys
+//    * @param itemView  Component viewing items
+//    * @param subheader The subheader text to display in list
+//    * @param fEncoder  Encoder for finder
+//    * @tparam A The type of list element
+//    * @tparam C The type of current page
+//    * @tparam P The type of all pages
+//    * @tparam F The type of finder used to find items
+//    * @return A view of the list, with infinite scrolling, suitable for use in a SortableContainer
+//    */
+//  def legacy[U, A, D <: Delta[U, A], C, P, F <: A => Boolean]
+//  (
+//    name: String,
+//    toItem: A => F,
+//    itemToKey: A => js.Any,
+//    itemView: ReqProps[Cursor[U, A, D, Pages[C, P]], Unit, Unit, TopNode],
+//    subheader: String,
+//    mode: ListMode = ListMode.Infinite
+//  )(
+//    implicit
+//    fEncoder: Encoder[F],
+//    s: Searchable[A, Guid]
+//  ): ((IndexChange) => Callback) => (Cursor[U, List[A], ListMatchDelta[U, A, D, F], Pages[C, P]]) => ReactComponentU_ = {
+//    ListView[List[A], Pages[C, P], Cursor[U, A, D, Pages[C, P]]](
+//      name,
+//      _.zoomAllMatches(toItem),
+//      c => itemToKey(c.model),
+//      itemView,
+//      subheader,
+//      mode
+//    )
+//  }
+//
+//  /**
+//    * Create a list view
+//    * @param name               Name of view
+//    * @param listCursorToItems  Take a cursor with root model (type R) and location as a page (type P) and yield a list
+//    *                           of cursors to the list items (type A) and locations as actions on them (type Q). Note we
+//    *                           are using the location parameter as an action to perform on list items.
+//    * @param itemToKey          Get a key for given list item
+//    * @param itemView           Get a view for Cursor[A, Q], which displays list items of type A, allowing actions to
+//    *                           be performed using location of type Q.
+//    * @param subheader          Subheader text for the list
+//    * @param mode               Mode for list display
+//    * @tparam R                 The type of root model - some data type from which we can get to a list of items - doesn't
+//    *                           need to actually be a list
+//    * @tparam P                 The type of location for the root cursor - normally some kind of "page" location
+//    * @tparam A                 The type of list items
+//    * @tparam Q                 The type of location for list items - often some kind of action that can be performed
+//    *                           on list items, but can be an actual location.
+//    * @return                   A List view
+//    */
+//  def withAction[R, P, A, Q](
+//    name: String,
+//    listCursorToItems: Cursor[R, P] => List[Cursor[A, Q]],
+//    itemToKey: A => js.Any,
+//    itemView: ReqProps[Cursor[A, Q], Unit, Unit, TopNode],
+//    subheader: String,
+//    mode: ListMode = ListMode.Infinite
+//   ): ((IndexChange) => Callback) => (Cursor[R, P]) => ReactComponentU_ = {
+//    ListView[R, P, Cursor[A, Q]](
+//      name,
+//      listCursorToItems,
+//      c => itemToKey(c.model),
+//      itemView,
+//      subheader,
+//      mode
+//    )
+//  }
+//
+//  def usingRef[R, P, A, Q](
+//                            name: String,
+//                            rootToItemRefs: Cursor[R, P] => Cursor[List[Ref[A]], P],
+//                            itemAndCursorToAction: (A, Cursor[R, P]) => Q,
+//                            itemView: ReqProps[Cursor[A, Q], Unit, Unit, TopNode],
+//                            subheader: String,
+//                            mode: ListMode = ListMode.Infinite
+//                          )(implicit fEncoder: Encoder[FindRefById[A]], mCodec: MirrorCodec[A], toId: Identifiable[A], s: Searchable[A, Guid]): ((IndexChange) => Callback) => (Cursor[R, P]) => ReactComponentU_ = {
+//
+//    ListView.withAction[R, P, A, Q](
+//      name,
+//      (cp: Cursor[R, P]) =>
+//        rootToItemRefs(cp)
+//          .zoomAllMatches(a => FindRefById(a.id))
+//          .flatMap(cursorToRef => cursorToRef.followRef(cursorToRef.model))
+//          .map(ca => ca.move(itemAndCursorToAction(ca.model, cp))),
+//      a => toId.id(a).toString(),
+//      itemView,
+//      subheader,
+//      mode
+//    )
+//  }
+//
+//  def usingMatches[R, P, A, Q, F <: A => Boolean](
+//    name: String,
+//    rootToItems: Cursor[R, P] => Cursor[List[A], P],
+//    itemToFinder: A => F,
+//    itemAndCursorToAction: (A, Cursor[R, P]) => Q,
+//    itemToKey: A => js.Any,
+//    itemView: ReqProps[Cursor[A, Q], Unit, Unit, TopNode],
+//    subheader: String,
+//    mode: ListMode = ListMode.Infinite
+//  )(implicit fEncoder: Encoder[F], s: Searchable[A, Guid]): ((IndexChange) => Callback) => (Cursor[R, P]) => ReactComponentU_ = {
+//    ListView.withAction[R, P, A, Q](
+//      name              = name,
+//      listCursorToItems = (cp: Cursor[R, P]) => rootToItems(cp).zoomAllMatches(itemToFinder).map(ca => ca.move(itemAndCursorToAction(ca.model, cp))),
+//      itemToKey         = c => itemToKey(c),
+//      itemView          = itemView,
+//      subheader         = subheader,
+//      mode              = mode
+//    )
+//  }
+//
+//  def usingId[R, P, A <: Identified[A], Q](
+//    name: String,
+//    rootToItems: Cursor[R, P] => Cursor[List[A], P],
+//    itemAndCursorToAction: (A, Cursor[R, P]) => Q,
+//    itemView: ReqProps[Cursor[A, Q], Unit, Unit, TopNode],
+//    subheader: String,
+//    mode: ListMode = ListMode.Infinite
+//  )(implicit fEncoder: Encoder[FindById[A]], s: Searchable[A, Guid]): ((IndexChange) => Callback) => (Cursor[R, P]) => ReactComponentU_ = {
+//    ListView.usingMatches[R, P, A, Q, FindById[A]](
+//      name                  = name,
+//      rootToItems           = rootToItems,
+//      itemToFinder          = a => FindById[A](a.id),
+//      itemAndCursorToAction = itemAndCursorToAction,
+//      itemToKey             = a => a.id.toString(),
+//      itemView              = itemView,
+//      subheader             = subheader,
+//      mode                  = mode
+//    )
+//  }
 
   sealed trait ListMode
   object ListMode {
@@ -169,13 +174,13 @@ object ListView {
     * @tparam A           The type of list element
     * @return             A view of the list, with infinite scrolling, suitable for use in a SortableContainer
     */
-  def apply[L, P, A](
+  def apply[U, L, D <: Delta[U, L], P, A](
                                       name: String,
-                                      listCursorToItems: Cursor[L, P] => List[A],
+                                      listCursorToItems: Cursor[U, L, D, P] => List[A],
                                       itemToKey: A => js.Any,
                                       itemView: ReqProps[A, Unit, Unit, TopNode],
                                       subheader: String,
-                                      mode: ListMode = ListMode.Infinite): ((IndexChange) => Callback) => (Cursor[L, P]) => ReactComponentU_ =
+                                      mode: ListMode = ListMode.Infinite): ((IndexChange) => Callback) => (Cursor[U, L, D, P]) => ReactComponentU_ =
   {
     val sortableElement = SortableElement.wrap(itemView)
 
@@ -184,7 +189,7 @@ object ListView {
       case ListMode.Infinite =>
         // Use a height view to get us the height of the rendered element as an extra part of prop.
         // This lets us scale the Infinite list appropriately to fill space.
-        val view = CursorHeightView[L, P](name) {
+        val view = CursorHeightView[U, L, D, P](name) {
           (cp, height) =>
             val h: Int = height.map(_.toInt).getOrElse(60)
 
@@ -207,7 +212,7 @@ object ListView {
       // Don't wrap with infinite, therefore doesn't need a height view.
       // For this case we can also provide enter/leave transitions.
       case ListMode.Finite =>
-        val view = cursorView[L, P](name) {
+        val view = cursorView[U, L, D, P](name) {
           cp =>
             CSSTransitionGroup(
               "tree-list-view--transition",

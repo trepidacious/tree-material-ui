@@ -5,10 +5,13 @@ import japgolly.scalajs.react.ReactComponentC.ReqProps
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.ReactTagOf
 import japgolly.scalajs.react.vdom.prefix_<^._
+import org.rebeam.tree.ValueDelta._
 import org.rebeam.tree.view._
 import org.scalajs.dom.html.Div
 
 object ListTextView {
+
+  type StringCursor = Cursor[_, String, StringValueDelta[_], String]
 
   private val focus = (input: MuiTextFieldM) =>
     if (input != null) {
@@ -17,12 +20,12 @@ object ListTextView {
 
   case class State(editing: Boolean)
 
-  class Backend(scope: BackendScope[Cursor[String, String], State]) {
+  class Backend(scope: BackendScope[StringCursor, State]) {
 
     private val edit = scope.modState(s => s.copy(editing = true))
     private val unedit = scope.modState(s => s.copy(editing = false))
 
-    private def renderPlain(c: Cursor[String, String]): ReactTagOf[Div] = {
+    private def renderPlain(c: StringCursor): ReactTagOf[Div] = {
       <.div(
         ^.key := "plain",
         ^.className := "tree-list-text-view__plain",
@@ -35,7 +38,7 @@ object ListTextView {
       )
     }
 
-    private def renderEditing(c: Cursor[String, String]) = {
+    private def renderEditing(c: StringCursor) = {
       <.div(
         ^.key := "editing",
         ^.className := "tree-list-text-view__editing",
@@ -49,7 +52,7 @@ object ListTextView {
           // On focus, select all text for spreadsheet cell-style editing
           onFocus =  (e: ReactFocusEventI) => Callback{e.target.select},
           // Normal bound editing
-          onChange = (e: ReactEventI) => e.preventDefaultCB >> c.set(e.target.value),
+          onChange = (e: ReactEventI) => e.preventDefaultCB >> c.act(StringValueDelta(e.target.value)),
           hintText = c.location: ReactNode//,
 //          onEnterKeyDown = (e: ReactEventI) => e.preventDefaultCB >> Callback{println("ENTER!")},
 //          onKeyDown = (e: ReactKeyboardEvent) => if (e.keyCode == 9) {
@@ -61,7 +64,7 @@ object ListTextView {
       )
     }
 
-    def render(p: Cursor[String, String], state: State): ReactTagOf[Div] = {
+    def render(p: StringCursor, state: State): ReactTagOf[Div] = {
       if (state.editing) {
         renderEditing(p)
       } else {
@@ -70,14 +73,14 @@ object ListTextView {
     }
   }
 
-  val component: ReqProps[Cursor[String, String], State, Backend, TopNode] =
-    ReactComponentB[Cursor[String, String]]("ListTextView")
+  val component: ReqProps[StringCursor, State, Backend, TopNode] =
+    ReactComponentB[StringCursor]("ListTextView")
     .initialState(State(false))
     .backend(new Backend(_))
     .render(s => s.backend.render(s.props, s.state))
     .build
 
-  def apply(c: Cursor[String, String]): ReactComponentU[Cursor[String, String], State, Backend, TopNode] =
+  def apply(c: StringCursor): ReactComponentU[StringCursor, State, Backend, TopNode] =
     component(c)
 
 }

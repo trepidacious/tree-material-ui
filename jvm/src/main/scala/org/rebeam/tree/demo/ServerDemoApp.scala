@@ -15,81 +15,81 @@ import org.rebeam.tree.view.MaterialColor
 import org.rebeam.tree.Delta._
 import org.rebeam.tree.sync.Sync._
 import org.rebeam.tree.sync.DeltaIORun._
-import org.rebeam.tree.demo.DemoData.Address
-import org.rebeam.tree.demo.RefData.DataItemList
-import org.rebeam.tree.ref.{Mirror, MirrorAndId}
+import org.rebeam.tree.demo.DemoData._
+//import org.rebeam.tree.demo.RefData.DataItemList
+//import org.rebeam.tree.ref.{Mirror, MirrorAndId}
 import org.rebeam.tree.sync.{RefAdder, Ref}
 
 object ServerDemoApp extends ServerApp {
 
-  val address: ServerStore[Address] = {
+  val address: ServerStore[Unit, Address, AddressDelta] = {
     import DemoData._
-    new ServerStore(Address(Street("OLD STREET", 1, 22.3)))
+    new ServerStore[Unit, Address, AddressDelta](Address(Street("OLD STREET", 1, 22.3)))
   }
 
-  private val todoProjectMirrorStore = {
-    import DemoData._
-
-    //FIXME update to use put
-    val todoProjectMirrorIO: DeltaIO[Mirror] = for {
-      todoProject <- TodoExample.todoProjectIO
-      revision <- getGuid
-    } yield {
-      Mirror.empty.updated(todoProject.id, todoProject, revision)
-    }
-
-    val todoProjectMirror = todoProjectMirrorIO.runWith(
-      DeltaIOContext(Moment(0)),
-      DeltaId(ClientId(0), ClientDeltaId(0))
-    ).data
-
-    new ServerStore(todoProjectMirror)
-  }
-
-  private val todoListStore = {
-    import DemoData._
-    val todoProject = TodoExample.todoProjectIO.runWith(
-      DeltaIOContext(Moment(0)),
-      DeltaId(ClientId(0), ClientDeltaId(0))
-    ).data
-    new ServerStore(todoProject.lists.head)
-  }
-
-
-  private val todoProjectStore = {
-    import DemoData._
-    val todoProject = TodoExample.todoProjectIO.runWith(
-      DeltaIOContext(Moment(0)),
-      DeltaId(ClientId(0), ClientDeltaId(0))
-    ).data
-    new ServerStore(todoProject)
-  }
-
-  private val taskStore = {
-    import TaskData._
-    val taskIO: DeltaIO[Task] = for {
-      user <- User.create("A", "User", "user", Email("a@user.com"))
-      task <- Task.example(Ref(user.id))
-    } yield task
-
-    val task = taskIO.runWith(
-      DeltaIOContext(Moment(0)),
-      DeltaId(ClientId(0), ClientDeltaId(0))
-    ).data
-    new ServerStore(task)
-  }
-
-  private val refDemoStore: ServerStore[MirrorAndId[DataItemList]] = {
-    import RefData._
-
-    val result = RefData.exampleDataMirrorIO.runWith(
-      DeltaIOContext(Moment(0)),
-      DeltaId(ClientId(0), ClientDeltaId(0))
-    )
-
-    val mirrorAndId = RefAdder.mirrorAndIdRefAdder.addRefs(result)
-    new ServerStore(mirrorAndId)
-  }
+//  private val todoProjectMirrorStore = {
+//    import DemoData._
+//
+//    //FIXME update to use put
+//    val todoProjectMirrorIO: DeltaIO[Mirror] = for {
+//      todoProject <- TodoExample.todoProjectIO
+//      revision <- getGuid
+//    } yield {
+//      Mirror.empty.updated(todoProject.id, todoProject, revision)
+//    }
+//
+//    val todoProjectMirror = todoProjectMirrorIO.runWith(
+//      DeltaIOContext(Moment(0)),
+//      DeltaId(ClientId(0), ClientDeltaId(0))
+//    ).data
+//
+//    new ServerStore(todoProjectMirror)
+//  }
+//
+//  private val todoListStore = {
+//    import DemoData._
+//    val todoProject = TodoExample.todoProjectIO.runWith(
+//      DeltaIOContext(Moment(0)),
+//      DeltaId(ClientId(0), ClientDeltaId(0))
+//    ).data
+//    new ServerStore(todoProject.lists.head)
+//  }
+//
+//
+//  private val todoProjectStore = {
+//    import DemoData._
+//    val todoProject = TodoExample.todoProjectIO.runWith(
+//      DeltaIOContext(Moment(0)),
+//      DeltaId(ClientId(0), ClientDeltaId(0))
+//    ).data
+//    new ServerStore(todoProject)
+//  }
+//
+//  private val taskStore = {
+//    import TaskData._
+//    val taskIO: DeltaIO[Task] = for {
+//      user <- User.create("A", "User", "user", Email("a@user.com"))
+//      task <- Task.example(Ref(user.id))
+//    } yield task
+//
+//    val task = taskIO.runWith(
+//      DeltaIOContext(Moment(0)),
+//      DeltaId(ClientId(0), ClientDeltaId(0))
+//    ).data
+//    new ServerStore(task)
+//  }
+//
+//  private val refDemoStore: ServerStore[MirrorAndId[DataItemList]] = {
+//    import RefData._
+//
+//    val result = RefData.exampleDataMirrorIO.runWith(
+//      DeltaIOContext(Moment(0)),
+//      DeltaId(ClientId(0), ClientDeltaId(0))
+//    )
+//
+//    val mirrorAndId = RefAdder.mirrorAndIdRefAdder.addRefs(result)
+//    new ServerStore(mirrorAndId)
+//  }
 
   // TODO better way of doing this - start from 1 since we use 0 to generate example data
   private val nextClientId = new AtomicLong(1)
@@ -104,52 +104,52 @@ object ServerDemoApp extends ServerApp {
     case GET -> Root / "pwd" =>
       Ok(System.getProperty("user.dir"))
 
-    case GET -> Root / "todolist" =>
-      WS(
-        ServerStoreValueExchange(
-          todoListStore,
-          ClientId(nextClientId.getAndIncrement()),
-          contextSource
-        )
-      )
-
-    case GET -> Root / "todoproject" =>
-      WS(
-        ServerStoreValueExchange(
-          todoProjectStore,
-          ClientId(nextClientId.getAndIncrement()),
-          contextSource
-        )
-      )
-
-    case GET -> Root / "todoprojectmirror" =>
-      import DemoData._
-      WS(
-        ServerStoreValueExchange(
-          todoProjectMirrorStore,
-          ClientId(nextClientId.getAndIncrement()),
-          contextSource
-        )
-      )
-
-    case GET -> Root / "refs" =>
-      import RefData._
-      WS(
-        ServerStoreValueExchange(
-          refDemoStore,
-          ClientId(nextClientId.getAndIncrement()),
-          contextSource
-        )
-      )
-
-    case GET -> Root / "task" =>
-      WS(
-        ServerStoreValueExchange(
-          taskStore,
-          ClientId(nextClientId.getAndIncrement()),
-          contextSource
-        )
-      )
+//    case GET -> Root / "todolist" =>
+//      WS(
+//        ServerStoreValueExchange(
+//          todoListStore,
+//          ClientId(nextClientId.getAndIncrement()),
+//          contextSource
+//        )
+//      )
+//
+//    case GET -> Root / "todoproject" =>
+//      WS(
+//        ServerStoreValueExchange(
+//          todoProjectStore,
+//          ClientId(nextClientId.getAndIncrement()),
+//          contextSource
+//        )
+//      )
+//
+//    case GET -> Root / "todoprojectmirror" =>
+//      import DemoData._
+//      WS(
+//        ServerStoreValueExchange(
+//          todoProjectMirrorStore,
+//          ClientId(nextClientId.getAndIncrement()),
+//          contextSource
+//        )
+//      )
+//
+//    case GET -> Root / "refs" =>
+//      import RefData._
+//      WS(
+//        ServerStoreValueExchange(
+//          refDemoStore,
+//          ClientId(nextClientId.getAndIncrement()),
+//          contextSource
+//        )
+//      )
+//
+//    case GET -> Root / "task" =>
+//      WS(
+//        ServerStoreValueExchange(
+//          taskStore,
+//          ClientId(nextClientId.getAndIncrement()),
+//          contextSource
+//        )
+//      )
 
     case GET -> Root / "address" =>
       WS(

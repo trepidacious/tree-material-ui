@@ -15,6 +15,8 @@ import japgolly.scalajs.react.ReactComponentC.ReqProps
 import scala.language.implicitConversions
 import scala.scalajs.js
 import japgolly.scalajs.react.vdom.prefix_<^._
+import org.rebeam.tree._
+import ValueDelta._
 import org.rebeam.tree.sync.{Guid, Id}
 import org.rebeam.tree.view.icon.{ArcHash, ArcHashable, Icons}
 import org.scalajs.dom.html.Span
@@ -28,8 +30,8 @@ object View {
   def view[A](name: String, overlay: Boolean = true)(render: A => ReactElement) =
     ReactComponentB[A](name).render_P(render).build
 
-  def cursorView[A, P](name: String)(render: Cursor[A, P] => ReactElement): ReqProps[Cursor[A, P], Unit, Unit, TopNode] =
-    ReactComponentB[Cursor[A, P]](name).render_P(render).configure(Reusability.shouldComponentUpdate).build
+  def cursorView[U, A, D <: Delta[U, A], P](name: String)(render: Cursor[U, A, D, P] => ReactElement): ReqProps[Cursor[U, A, D, P], Unit, Unit, TopNode] =
+    ReactComponentB[Cursor[U, A, D, P]](name).render_P(render).configure(Reusability.shouldComponentUpdateWithOverlay).build
 
   def staticView(name: String)(e: ReactElement) = ReactComponentB[Unit](name)
     .render(_ => e)
@@ -39,36 +41,38 @@ object View {
     MuiCircularProgress(mode = DeterminateIndeterminate.indeterminate)()
   )
 
-  val textView = cursorView[String, String]("textView") { p =>
-    MuiTextField(
-      value = p.model,
-      onChange = (e: ReactEventI) => e.preventDefaultCB >>  p.set(e.target.value),
-      floatingLabelText = p.location: ReactNode
-    )()
-  }
+  def textView[U]: ReqProps[Cursor[U, String, StringValueDelta[U], String], Unit, Unit, TopNode] =
+    cursorView[U, String, StringValueDelta[U], String]("textView") { p =>
+      MuiTextField(
+        value = p.model,
+        onChange = (e: ReactEventI) => e.preventDefaultCB >>  p.set(e.target.value),
+        floatingLabelText = p.location: ReactNode
+      )()
+    }
 
-  val textViewHero = cursorView[String, String]("textViewHero") { p =>
-    MuiTextField(
-      value = p.model,
-      onChange = (e: ReactEventI) => e.preventDefaultCB >>  p.set(e.target.value),
-//      floatingLabelText = p.label: ReactNode,
-//      floatingLabelStyle = js.Dynamic.literal("font-size" -> "16px", "color" -> "rgba(255, 255, 255, 0.87"),
-      hintText = p.location: ReactNode,
-      hintStyle = js.Dynamic.literal("color" -> "rgba(255, 255, 255, 0.87)"),
-      style = js.Dynamic.literal("font-size" -> "24px"),
-      inputStyle = js.Dynamic.literal("color" -> "rgba(255, 255, 255, 1.00)"),
-      underlineStyle = js.Dynamic.literal(
-        "bottom" -> "6px"
-      ),
-      underlineDisabledStyle = js.Dynamic.literal(
-        "bottom" -> "6px"
-      ),
-      underlineFocusStyle = js.Dynamic.literal(
-        "border-bottom" -> "2px solid rgb(224, 224, 224)",
-        "bottom" -> "6px"
-      )
-    )()
-  }
+  def textViewHero[U]: ReqProps[Cursor[U, String, StringValueDelta[U], String], Unit, Unit, TopNode] =
+    cursorView[U, String, StringValueDelta[U], String]("textViewHero") { p =>
+      MuiTextField(
+        value = p.model,
+        onChange = (e: ReactEventI) => e.preventDefaultCB >>  p.set(e.target.value),
+  //      floatingLabelText = p.label: ReactNode,
+  //      floatingLabelStyle = js.Dynamic.literal("font-size" -> "16px", "color" -> "rgba(255, 255, 255, 0.87"),
+        hintText = p.location: ReactNode,
+        hintStyle = js.Dynamic.literal("color" -> "rgba(255, 255, 255, 0.87)"),
+        style = js.Dynamic.literal("font-size" -> "24px"),
+        inputStyle = js.Dynamic.literal("color" -> "rgba(255, 255, 255, 1.00)"),
+        underlineStyle = js.Dynamic.literal(
+          "bottom" -> "6px"
+        ),
+        underlineDisabledStyle = js.Dynamic.literal(
+          "bottom" -> "6px"
+        ),
+        underlineFocusStyle = js.Dynamic.literal(
+          "border-bottom" -> "2px solid rgb(224, 224, 224)",
+          "bottom" -> "6px"
+        )
+      )()
+    }
 
   //FIXME work out a better way to align with textViewHero
   def labelHero(s: String): ReactTagOf[Span] = <.span(
@@ -78,13 +82,14 @@ object View {
     s
   )
 
-  val textViewPlainLabel = cursorView[String, String]("textViewPlainLabel") { p =>
-    MuiTextField(
-      value = p.model,
-      onChange = (e: ReactEventI) => e.preventDefaultCB >>  p.set(e.target.value),
-      hintText = p.location: ReactNode
-    )()
-  }
+  def textViewPlainLabel[U]: ReqProps[Cursor[U, String, StringValueDelta[U], String], Unit, Unit, TopNode] =
+    cursorView[U, String, StringValueDelta[U], String]("textViewPlainLabel") { p =>
+      MuiTextField(
+        value = p.model,
+        onChange = (e: ReactEventI) => e.preventDefaultCB >>  p.set(e.target.value),
+        hintText = p.location: ReactNode
+      )()
+    }
 
   trait StringCodec[A] {
     def format(a: A): String
@@ -125,9 +130,9 @@ object View {
     */
   object AsStringView {
 
-    class Backend[A](scope: BackendScope[Cursor[A, String], (String, Boolean)])(implicit codec: StringCodec[A], encoder: Encoder[A]) {
+    class Backend[U, A](scope: BackendScope[Cursor[U, A, ValueDelta[U, A], String], (String, Boolean)])(implicit codec: StringCodec[A], encoder: Encoder[A]) {
 
-      def render(props: Cursor[A, String], state: (String, Boolean)) = {
+      def render(props: Cursor[U, A, ValueDelta[U, A], String], state: (String, Boolean)) = {
         val model = props.model
 
         // If we have had a prop change since the last time we set state,
@@ -155,7 +160,7 @@ object View {
               // If we have a parsed new model, and it is different to cursor's model, then set new state and model
               // We set the state so that if the input is a non-standard representation of the model, it will still be
               // preserved, since it will be in place on our next render when we check it against the new prop.
-              case Right(newModel) if newModel != model => e.preventDefaultCB >> scope.setState((input, false)) >> props.set(newModel)
+              case Right(newModel) if newModel != model => e.preventDefaultCB >> scope.setState((input, false)) >> props.act(ValueDelta(newModel))
 
               // Otherwise just change state - we are editing without producing a valid new value,
               // but we may be on the way to a valid new value
@@ -178,9 +183,9 @@ object View {
       }
     }
 
-    def component[A](name: String, codec: StringCodec[A])(implicit encoder: Encoder[A]) = ReactComponentB[Cursor[A, String]](name)
+    def component[U, A](name: String, codec: StringCodec[A])(implicit encoder: Encoder[A]) = ReactComponentB[Cursor[U, A, ValueDelta[U, A], String]](name)
       .getInitialState[(String, Boolean)](scope => (scope.props.model.toString, false))
-      .backend(new Backend[A](_)(codec, encoder))
+      .backend(new Backend[U, A](_)(codec, encoder))
       .render(s => s.backend.render(s.props, s.state))
       .componentWillReceiveProps(
         scope => if (scope.currentProps.model != scope.nextProps.model) {
@@ -189,7 +194,7 @@ object View {
           Callback.empty
         }
       )
-      .configure(Reusability.shouldComponentUpdate)
+      .configure(Reusability.shouldComponentUpdateWithOverlay)
       .build
   }
 
@@ -204,7 +209,7 @@ object View {
     override def prefilter(s: String): String = s.replaceAll("""[^\+\-\.eE\d]""", "")
   }
 
-  val doubleView = AsStringView.component[Double]("doubleView", doubleStringCodec)
+  def doubleView[U] = AsStringView.component[U, Double]("doubleView", doubleStringCodec)
 
   val intStringCodec: StringCodec[Int] = new StringCodec[Int] {
     def format(d: Int): String = d.toString
@@ -217,9 +222,9 @@ object View {
     override def prefilter(s: String): String = s.replaceAll("""[^\+\-\d]""", "")
   }
 
-  val intView = AsStringView.component[Int]("intView", intStringCodec)
+  def intView[U] = AsStringView.component[U, Int]("intView", intStringCodec)
 
-  val booleanView = cursorView[Boolean, String]("booleanView") { p =>
+  def booleanView[U] = cursorView[U, Boolean, BooleanValueDelta[U], String]("booleanView") { p =>
     MuiCheckbox(
       label = p.location,
       checked = p.model,
@@ -228,7 +233,7 @@ object View {
   }
 
 
-  val booleanViewUnlabelled = cursorView[Boolean, String]("booleanView") { p =>
+  def booleanViewUnlabelled[U] = cursorView[U, Boolean, BooleanValueDelta[U], String]("booleanView") { p =>
     MuiCheckbox(
       checked = p.model,
       onCheck = (e: ReactEventH, b: Boolean) => e.preventDefaultCB >> p.set(!p.model)

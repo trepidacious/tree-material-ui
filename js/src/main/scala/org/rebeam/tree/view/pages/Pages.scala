@@ -2,6 +2,7 @@ package org.rebeam.tree.view.pages
 
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.extra.router.RouterCtl
+import org.rebeam.tree.Delta
 import org.rebeam.tree.view.{Action, Cursor}
 
 import scala.reflect.ClassTag
@@ -15,50 +16,58 @@ case class SetPageAction[P](ctl: RouterCtl[P], p: P) extends Action {
   * @param current  The currently displayed page
   * @param ctl      The RouterCtl
   * @tparam P       The type of page we can route to
-  * @tparam C       The type of current page
+  * @tparam L       The type of current page
   */
-case class Pages[+C, P](current: C, ctl: RouterCtl[P]) {
+case class Pages[+L, P](current: L, ctl: RouterCtl[P]) {
   def set(target: P): Action = SetPageAction(ctl, target)
-  def modify(f: C => P): Action = set(f(current))
-  def withCurrent[D](d: D): Pages[D, P] = copy(current = d)
+  def modify(f: L => P): Action = set(f(current))
+  def withCurrent[M](m: M): Pages[M, P] = copy(current = m)
 }
 
 object Pages {
 
-  type CursorPages[M, C, P] = Cursor[M, Pages[C, P]]
+  type CursorPages[U, A, D <: Delta[U, A], L, P] = Cursor[U, A, D, Pages[L, P]]
 
-  implicit class CursorPagesEnriched[M, C, P](cursor: Cursor[M, Pages[C, P]]) {
+  implicit class CursorPagesEnriched[U, A, D <: Delta[U, A], L, P](cursor: Cursor[U, A, D, Pages[L, P]]) {
 
-    class PageZoomer[D <: C] {
-      def apply()(implicit ct: ClassTag[D]): Option[Cursor[M, Pages[D, P]]]
+    class PageZoomer[M <: L] {
+      def apply()(implicit ct: ClassTag[M]): Option[Cursor[U, A, D, Pages[M, P]]]
       = zoomPage(ct.unapply)
     }
 
-    def zoomPageCT[D <: C] = new PageZoomer[D]
+    def zoomPageCT[M <: L] = new PageZoomer[M]
 
-    def zoomPagePF[D <: C](cToD: PartialFunction[C, D]): Option[Cursor[M, Pages[D, P]]] =
-      zoomPage(cToD.lift)
+    def zoomPagePF[M <: L](toNewPage: PartialFunction[L, M]): Option[Cursor[U, A, D, Pages[M, P]]] =
+      zoomPage(toNewPage.lift)
 
-    def zoomPageEqual[D <: C](d: D): Option[Cursor[M, Pages[D, P]]] =
-      zoomPage(c => if (c == d) Some(d) else None)
+    def zoomPageEqual[M <: L](m: M): Option[Cursor[U, A, D, Pages[M, P]]] =
+      zoomPage(l => if (l == m) Some(m) else None)
 
-    def zoomPage[D <: C](cToD: C => Option[D]): Option[Cursor[M, Pages[D, P]]] = {
-      val c = cursor.location.current
-      cToD(c).map(d => cursor.move(cursor.location.withCurrent(d)))
+    def zoomPage[M <: L](toNewPage: L => Option[M]): Option[Cursor[U, A, D, Pages[M, P]]] = {
+      val l = cursor.location.current
+      toNewPage(l).map(m => cursor.move(cursor.location.withCurrent(m)))
     }
 
-    def zoomModelAndPage[N, D](cToD: C => Option[(Cursor[N, Pages[C, P]], D)]): Option[Cursor[N, Pages[D, P]]] = {
-      val c = cursor.location.current
-      cToD(c).map{case (cn, d) => cn.move(cursor.location.withCurrent(d))}
+    def zoomModelAndPage[B, M, E <: Delta[U, B]](toNewCursor: L => Option[(Cursor[U, B, E, Pages[L, P]], M)]): Option[Cursor[U, B, E, Pages[M, P]]] = {
+      val l = cursor.location.current
+      toNewCursor(l).map{
+        case (newCursor, e) => newCursor.move(cursor.location.withCurrent(e))
+      }
     }
 
-    class ModelAndPageZoomer[N, D <: C] {
-      def apply(zoomWithD: D => Option[Cursor[N, Pages[C, P]]])(implicit ct: ClassTag[D]): Option[Cursor[N, Pages[D, P]]]
-      = zoomModelAndPage[N, D](c => for (d <- ct.unapply(c); cn <- zoomWithD(d)) yield (cn, d))
+    class ModelAndPageZoomer[B, M <: L, E <: Delta[U, B]] {
+      def apply(zoomWithM: M => Option[Cursor[U, B, E, Pages[L, P]]])(implicit ct: ClassTag[M]): Option[Cursor[U, B, E, Pages[M, P]]]
+      = zoomModelAndPage[B, M, E](l => for (m <- ct.unapply(l); newCursor <- zoomWithM(m)) yield (newCursor, m))
     }
 
-    def zoomModelAndPageCT[N, D <: C] = new ModelAndPageZoomer[N, D]
-
+    /**
+      * Zoom to a new model and page
+      * @tparam B The new model type
+      * @tparam M The new page type
+      * @tparam E The delta type for the new model
+      * @return ModelAndPageZoomer - call apply with a function to use the new page to zoom to the new model
+      */
+    def zoomModelAndPageCT[B, M <: L, E <: Delta[U, B]] = new ModelAndPageZoomer[B, M, E]
   }
 }
 

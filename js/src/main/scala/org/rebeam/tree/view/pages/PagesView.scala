@@ -4,6 +4,7 @@ import japgolly.scalajs.react.Addons.ReactCssTransitionGroup
 import japgolly.scalajs.react.{BackendScope, ReactComponentB, ReactElement}
 import japgolly.scalajs.react.extra.Reusability
 import japgolly.scalajs.react.vdom.prefix_<^._
+import org.rebeam.tree.Delta
 import org.rebeam.tree.view.Cursor
 
 object PagesView {
@@ -12,9 +13,9 @@ object PagesView {
 
   val stateReuse: Reusability[State] = Reusability.byRefOr_==
 
-  class Backend[M, P](scope: BackendScope[Cursor[M, Pages[P, P]], State])(renderToList: Cursor[M, Pages[P, P]] => List[ReactElement])(transitions: PagesToTransition[P]) {
+  class Backend[U, M, D <: Delta[U, M], P](scope: BackendScope[Cursor[U, M, D, Pages[P, P]], State])(renderToList: Cursor[U, M, D, Pages[P, P]] => List[ReactElement])(transitions: PagesToTransition[P]) {
 
-    def render(cp: Cursor[M, Pages[P, P]], state: State): ReactElement = {
+    def render(cp: Cursor[U, M, D, Pages[P, P]], state: State): ReactElement = {
       val panes = renderToList(cp)
       // We get an unavoidable extra div from the ReactCssTransitionGroup,
       // so we set a class to allow us to style it with flex etc. using CSS
@@ -39,9 +40,9 @@ object PagesView {
     }
   }
 
-  def apply[M, P](name: String)(renderToList: Cursor[M, Pages[P, P]] => List[ReactElement])(implicit transitions: PagesToTransition[P]) = ReactComponentB[Cursor[M, Pages[P, P]]](name)
+  def apply[U, M, D <: Delta[U, M], P](name: String)(renderToList: Cursor[U, M, D, Pages[P, P]] => List[ReactElement])(implicit transitions: PagesToTransition[P]) = ReactComponentB[Cursor[U, M, D, Pages[P, P]]](name)
     .getInitialState[State](_=> State(PagesTransition.Left))
-    .backend(new Backend[M, P](_)(renderToList)(transitions))
+    .backend(new Backend[U, M, D, P](_)(renderToList)(transitions))
     .render(s => s.backend.render(s.props, s.state))
     .componentWillReceiveProps(
       scope => scope.$.setState(State(transitions(scope.currentProps.location.current, scope.nextProps.location.current)))

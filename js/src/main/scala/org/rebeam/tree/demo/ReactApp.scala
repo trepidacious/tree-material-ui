@@ -5,10 +5,12 @@ import japgolly.scalajs.react.ReactComponentB
 import org.scalajs.dom
 
 import scala.scalajs.js.JSApp
+import scala.scalajs.js.annotation.JSExportTopLevel
 import scala.scalajs.js.timers._
 
-object ReactApp extends JSApp {
+object ReactApp {
 
+  @JSExportTopLevel("org.rebeam.tree.demo.ReactApp.main")
   def main(): Unit = {
 
     //Update body class to app-loaded, this will

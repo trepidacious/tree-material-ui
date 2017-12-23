@@ -4,7 +4,7 @@ version in ThisBuild := "0.1-SNAPSHOT"
 
 organization in ThisBuild := "org.rebeam"
 
-scalaVersion in ThisBuild := "2.11.8"
+scalaVersion in ThisBuild := "2.11.12"
 
 scalacOptions in ThisBuild ++= Seq(
   "-feature",
@@ -13,7 +13,8 @@ scalacOptions in ThisBuild ++= Seq(
   "-unchecked",
   "-Xfatal-warnings",
   "-Xlint",
-  "-Xcheckinit"
+  "-Xcheckinit",
+  "-Ypartial-unification"
 )
 
 resolvers += Resolver.sonatypeRepo("snapshots")
@@ -41,7 +42,6 @@ lazy val treeMaterialUi = crossProject.in(file(".")).
     libraryDependencies ++= Seq(
       "org.rebeam"                  %%%  "tree"    % "0.1-SNAPSHOT",
 
-      "org.log4s"   %% "log4s"                % "1.2.1",
       "org.slf4j"   % "slf4j-simple"          % "1.7.21"
     ),
     //For @Lenses
