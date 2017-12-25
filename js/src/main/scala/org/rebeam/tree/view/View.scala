@@ -197,7 +197,7 @@ object View {
       .configure(Reusability.shouldComponentUpdate)
       .build
   }
-  
+
   val doubleStringCodec: StringCodec[Double] = new StringCodec[Double] {
     override def format(d: Double): String = d.toString
     override def parse(s: String): Either[String, Double] = try {

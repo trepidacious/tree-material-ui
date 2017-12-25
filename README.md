@@ -1,7 +1,7 @@
 # tree-material-ui
 Material-UI views and demo using tree
 
-To install JS dependencies, run `npm install`. Then run `npm run build` to build all assets in `assets` directory using webpack.
+To install JS dependencies, run `npm install`. Then run `npm run dev-build` for development or `npm run build` production to build all assets in `assets` directory using webpack.
 To run server run sbt then `treeMaterialUiJVM/reStart`, and `treeMaterialUiJVM/reStop` to stop. `~treeMaterialUiJVM/reStart` to keep restarting server on code changes.
 To compile client with fast optimisation, run sbt then `treeMaterialUiJS/fastOptJS`.
 
