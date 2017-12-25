@@ -9,6 +9,7 @@
   },
   "scripts": {
     "start": "webpack --watch & webpack-dev-server --progress --colors --port 8090",
+    "dev-build": "webpack --config webpack.config.js",
     "build": "webpack --config webpack.config.prod.js",
     "dist": "webpack --config webpack.config.prod.js"
   },

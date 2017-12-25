@@ -31,7 +31,7 @@ object View {
     ReactComponentB[A](name).render_P(render).build
 
   def cursorView[U, A, D <: Delta[U, A], P](name: String)(render: Cursor[U, A, D, P] => ReactElement): ReqProps[Cursor[U, A, D, P], Unit, Unit, TopNode] =
-    ReactComponentB[Cursor[U, A, D, P]](name).render_P(render).configure(Reusability.shouldComponentUpdateWithOverlay).build
+    ReactComponentB[Cursor[U, A, D, P]](name).render_P(render).configure(Reusability.shouldComponentUpdate).componentWillUnmount(_=>Callback{println(name + " will unmount")}).build
 
   def staticView(name: String)(e: ReactElement) = ReactComponentB[Unit](name)
     .render(_ => e)
@@ -194,10 +194,10 @@ object View {
           Callback.empty
         }
       )
-      .configure(Reusability.shouldComponentUpdateWithOverlay)
+      .configure(Reusability.shouldComponentUpdate)
       .build
   }
-
+  
   val doubleStringCodec: StringCodec[Double] = new StringCodec[Double] {
     override def format(d: Double): String = d.toString
     override def parse(s: String): Either[String, Double] = try {

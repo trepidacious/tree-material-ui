@@ -20,26 +20,26 @@ import org.rebeam.tree.view.list.{SortableContainer, SortableElement, SortableLi
 import Pages._
 import org.rebeam.tree.view.markdown.MarkdownView
 
-import scala.scalajs.js
+import org.scalajs.dom._
 
 object DemoViews {
 
-  def stringViewThing = ReactComponentB[String]("stringViewThing")
-    .render_P(s => <.div(s): ReactElement)
-    .configure(Reusability.shouldComponentUpdateWithOverlay)
-    .build
+  val iv = intView[Unit]
+  val tv = textView[Unit]
+  val dv = doubleView[Unit]
 
-//  ReactComponentB[A](name).render_P(render).build
+//  val PlainStringView = ReactComponentB[String]("StringViewThing")
+//    .render_P(s => <.div(s): ReactElement)
+//    .configure(Reusability.shouldComponentUpdateWithOverlay)
+//    .componentWillUnmount(_ => Callback{println("StringViewThing unmounted! Again! FFS!")})
+//    .build
 
-  val streetView = cursorView[Unit, Street, StreetDelta, Unit]("StreetView") { c => {
+  val streetView = cursorView[Unit, Street, StreetDelta, Unit]("StreetView") { c =>
     <.div(
-      ^.paddingTop := "20px",
-      stringViewThing(c.model.number.toString),
-      stringViewThing(c.model.name),
-      stringViewThing(c.model.temperature.toString),
-      intView(c.zoom(StreetDelta.number).label("Number")),
-      textView(c.zoom(StreetDelta.name).label("Name")),
-      doubleView(c.zoom(StreetDelta.temperature).label("Temperature")),
+//      ^.paddingTop := "20px",
+      iv(c.zoom(StreetDelta.number).label("Number")),
+      tv(c.zoom(StreetDelta.name).label("Name")),
+      dv(c.zoom(StreetDelta.temperature).label("Temperature")),
       raisedButton("Number multiple", primary = true){
         c.act(StreetDelta.NumberMultiple(10))
       },
@@ -47,9 +47,8 @@ object DemoViews {
         c.act(StreetDelta.Capitalise)
       }
     )
-  }}
+  }
 
-  
   val noAddress = <.div(
     <.h3("Address"),
     spinner()
@@ -64,9 +63,7 @@ object DemoViews {
       val streetCursor = addressCursor.zoom(AddressDelta.street)
       <.div(
         <.h3("Address"),
-        streetView(streetCursor),
-        stringViewThing("Just some string that totally shouldn't change!"),
-        stringViewThing("And another one for luck!")
+        streetView(streetCursor)
       )
     }
   }
