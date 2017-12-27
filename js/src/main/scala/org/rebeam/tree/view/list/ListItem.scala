@@ -227,7 +227,7 @@ object ListItem {
   }
 
   def listItemWithCompleteEditAndDelete[U, A, D <: Delta[U, A]](
-    name: String, firstLine: A => String, secondLine: A => String, completionLens: DLens[U, A, D, Boolean, BooleanValueDelta[U]]
+    name: String, firstLine: A => String, secondLine: A => String, completionLens: DLens[U, A, D, Nothing, Boolean, BooleanValueDelta]
   ): ReqProps[Cursor[U, A, D, EditAndDeleteActions], Unit, Unit, TopNode] = cursorView(name){
     cp => {
       val m = cp.model
@@ -236,7 +236,8 @@ object ListItem {
         ^.position := "relative",
         ^.top := "8px",
         ^.left := "8px",
-        booleanViewUnlabelled(cp.zoom(completionLens).label(""))
+        // TODO why do we need type parameters for zoom here? Everything is in completionLens...
+        booleanViewUnlabelled(cp.zoom[Nothing, Boolean, BooleanValueDelta](completionLens).label(""))
       )
 
       val buttons = List(

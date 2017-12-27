@@ -24,22 +24,18 @@ import org.scalajs.dom._
 
 object DemoViews {
 
-  val iv = intView[Unit]
-  val tv = textView[Unit]
-  val dv = doubleView[Unit]
-
 //  val PlainStringView = ReactComponentB[String]("StringViewThing")
 //    .render_P(s => <.div(s): ReactElement)
 //    .configure(Reusability.shouldComponentUpdateWithOverlay)
 //    .componentWillUnmount(_ => Callback{println("StringViewThing unmounted! Again! FFS!")})
 //    .build
 
-  val streetView = cursorView[Unit, Street, StreetDelta, Unit]("StreetView") { c =>
+  val streetView = cursorView[Nothing, Street, StreetDelta, Unit]("StreetView") { c =>
     <.div(
 //      ^.paddingTop := "20px",
-      iv(c.zoom(StreetDelta.number).label("Number")),
-      tv(c.zoom(StreetDelta.name).label("Name")),
-      dv(c.zoom(StreetDelta.temperature).label("Temperature")),
+      intView(c.zoom(StreetDelta.number).label("Number")),
+      textView(c.zoom(StreetDelta.name).label("Name")),
+      doubleView(c.zoom(StreetDelta.temperature).label("Temperature")),
       raisedButton("Number multiple", primary = true){
         c.act(StreetDelta.NumberMultiple(10))
       },
@@ -56,9 +52,9 @@ object DemoViews {
 
   implicit val contextSource = DeltaIOContextSource.default
 
-  implicit val rootSourceAddress = ServerRootComponent.noRootSource[Unit, Address, AddressDelta]
+  implicit val rootSourceAddress = ServerRootComponent.noRootSource[Nothing, Address, AddressDelta]
 
-  val addressView = ServerRootComponent[Unit, Address, AddressDelta](noAddress, "api/address") {
+  val addressView = ServerRootComponent[Nothing, Address, AddressDelta](noAddress, "api/address") {
     addressCursor => {
       val streetCursor = addressCursor.zoom(AddressDelta.street)
       <.div(

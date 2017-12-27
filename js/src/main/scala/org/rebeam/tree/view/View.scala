@@ -41,8 +41,8 @@ object View {
     MuiCircularProgress(mode = DeterminateIndeterminate.indeterminate)()
   )
 
-  def textView[U]: ReqProps[Cursor[U, String, StringValueDelta[U], String], Unit, Unit, TopNode] =
-    cursorView[U, String, StringValueDelta[U], String]("textView") { p =>
+  val textView: ReqProps[Cursor[Nothing, String, StringValueDelta, String], Unit, Unit, TopNode] =
+    cursorView[Nothing, String, StringValueDelta, String]("textView") { p =>
       MuiTextField(
         value = p.model,
         onChange = (e: ReactEventI) => e.preventDefaultCB >>  p.set(e.target.value),
@@ -50,8 +50,8 @@ object View {
       )()
     }
 
-  def textViewHero[U]: ReqProps[Cursor[U, String, StringValueDelta[U], String], Unit, Unit, TopNode] =
-    cursorView[U, String, StringValueDelta[U], String]("textViewHero") { p =>
+  val textViewHero: ReqProps[Cursor[Nothing, String, StringValueDelta, String], Unit, Unit, TopNode] =
+    cursorView[Nothing, String, StringValueDelta, String]("textViewHero") { p =>
       MuiTextField(
         value = p.model,
         onChange = (e: ReactEventI) => e.preventDefaultCB >>  p.set(e.target.value),
@@ -82,8 +82,8 @@ object View {
     s
   )
 
-  def textViewPlainLabel[U]: ReqProps[Cursor[U, String, StringValueDelta[U], String], Unit, Unit, TopNode] =
-    cursorView[U, String, StringValueDelta[U], String]("textViewPlainLabel") { p =>
+  val textViewPlainLabel: ReqProps[Cursor[Nothing, String, StringValueDelta, String], Unit, Unit, TopNode] =
+    cursorView[Nothing, String, StringValueDelta, String]("textViewPlainLabel") { p =>
       MuiTextField(
         value = p.model,
         onChange = (e: ReactEventI) => e.preventDefaultCB >>  p.set(e.target.value),
@@ -130,9 +130,9 @@ object View {
     */
   object AsStringView {
 
-    class Backend[U, A](scope: BackendScope[Cursor[U, A, ValueDelta[U, A], String], (String, Boolean)])(implicit codec: StringCodec[A], encoder: Encoder[A]) {
+    class Backend[A](scope: BackendScope[Cursor[Nothing, A, ValueDelta[A], String], (String, Boolean)])(implicit codec: StringCodec[A], encoder: Encoder[A]) {
 
-      def render(props: Cursor[U, A, ValueDelta[U, A], String], state: (String, Boolean)) = {
+      def render(props: Cursor[Nothing, A, ValueDelta[A], String], state: (String, Boolean)) = {
         val model = props.model
 
         // If we have had a prop change since the last time we set state,
@@ -183,9 +183,9 @@ object View {
       }
     }
 
-    def component[U, A](name: String, codec: StringCodec[A])(implicit encoder: Encoder[A]) = ReactComponentB[Cursor[U, A, ValueDelta[U, A], String]](name)
+    def component[A](name: String, codec: StringCodec[A])(implicit encoder: Encoder[A]) = ReactComponentB[Cursor[Nothing, A, ValueDelta[A], String]](name)
       .getInitialState[(String, Boolean)](scope => (scope.props.model.toString, false))
-      .backend(new Backend[U, A](_)(codec, encoder))
+      .backend(new Backend[A](_)(codec, encoder))
       .render(s => s.backend.render(s.props, s.state))
       .componentWillReceiveProps(
         scope => if (scope.currentProps.model != scope.nextProps.model) {
@@ -209,7 +209,7 @@ object View {
     override def prefilter(s: String): String = s.replaceAll("""[^\+\-\.eE\d]""", "")
   }
 
-  def doubleView[U] = AsStringView.component[U, Double]("doubleView", doubleStringCodec)
+  val doubleView = AsStringView.component[Double]("doubleView", doubleStringCodec)
 
   val intStringCodec: StringCodec[Int] = new StringCodec[Int] {
     def format(d: Int): String = d.toString
@@ -222,9 +222,9 @@ object View {
     override def prefilter(s: String): String = s.replaceAll("""[^\+\-\d]""", "")
   }
 
-  def intView[U] = AsStringView.component[U, Int]("intView", intStringCodec)
+  val intView = AsStringView.component[Int]("intView", intStringCodec)
 
-  def booleanView[U] = cursorView[U, Boolean, BooleanValueDelta[U], String]("booleanView") { p =>
+  val booleanView = cursorView[Nothing, Boolean, BooleanValueDelta, String]("booleanView") { p =>
     MuiCheckbox(
       label = p.location,
       checked = p.model,
@@ -233,7 +233,7 @@ object View {
   }
 
 
-  def booleanViewUnlabelled[U] = cursorView[U, Boolean, BooleanValueDelta[U], String]("booleanView") { p =>
+  val booleanViewUnlabelled = cursorView[Nothing, Boolean, BooleanValueDelta, String]("booleanView") { p =>
     MuiCheckbox(
       checked = p.model,
       onCheck = (e: ReactEventH, b: Boolean) => e.preventDefaultCB >> p.set(!p.model)

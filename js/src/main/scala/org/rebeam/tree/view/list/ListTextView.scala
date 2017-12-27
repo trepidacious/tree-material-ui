@@ -11,7 +11,7 @@ import org.scalajs.dom.html.Div
 
 object ListTextView {
 
-  type StringCursor = Cursor[_, String, StringValueDelta[_], String]
+  type StringCursor = Cursor[Nothing, String, StringValueDelta, String]
 
   private val focus = (input: MuiTextFieldM) =>
     if (input != null) {

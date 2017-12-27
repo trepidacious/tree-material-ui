@@ -38,53 +38,47 @@ object DemoData {
 //  @Lenses
 //  case class Employee(name: String, company: Company)
 
-  abstract class FancyLensDelta[U, A, B](lens: Lens[A, B], delta: Delta[U, B]) extends Delta[U, A] {
-    def apply(a: A): DeltaIO[U, A] = delta(lens.get(a)).map(lens.set(_)(a)) //  lens.modify(delta.apply)(a)
-  }
-
-  def lensToDLens[U, A, D <: Delta[U, A], B, E <: Delta[U, B]](lens: Lens[A, B], eToD: E => D): DLens[U, A, D, B, E] =
-    DLens.createInstance[U, A, D, B, E](lens.get, eToD)
-
   @JsonCodec
-  sealed trait StreetDelta extends Delta[Unit, Street]
+  sealed trait StreetDelta extends Delta[Nothing, Street]
   object StreetDelta {
 
     case class NumberMultiple(multiple: Int) extends StreetDelta {
-      def apply(s: Street): DeltaIO[Unit, Street] = pure(s.copy(number = s.name.length * multiple))
+      def apply(s: Street): DeltaIO[Nothing, Street] = pure(s.copy(number = s.name.length * multiple))
     }
 
     case object Capitalise extends StreetDelta {
-      def apply(s: Street): DeltaIO[Unit, Street] = pure(s.copy(name = s.name.toLowerCase.capitalize))
+      def apply(s: Street): DeltaIO[Nothing, Street] = pure(s.copy(name = s.name.toLowerCase.capitalize))
     }
 
-    case class Value(s: Street) extends AbstractValueDelta[Unit, Street](s) with StreetDelta
+    case class Value(s: Street) extends AbstractValueDelta[Street](s) with StreetDelta
 
-    val name = DLens.apply[Unit, Street, StreetDelta, String, StringValueDelta[Unit]](Street.name, Name)
-    case class Name(d: StringValueDelta[Unit]) extends LensDelta(Street.name, d) with StreetDelta
+    val name = DLens.apply[Nothing, Street, StreetDelta, Nothing, String, StringValueDelta](Street.name, Name)
+    case class Name(d: StringValueDelta) extends LensDelta[Nothing, Street, String](Street.name, d) with StreetDelta
 
-    val number = DLens.apply[Unit, Street, StreetDelta, Int, IntValueDelta[Unit]](Street.number, Number)
-    case class Number(d: IntValueDelta[Unit]) extends LensDelta(Street.number, d) with StreetDelta
+    val number = DLens.apply[Nothing, Street, StreetDelta, Nothing, Int, IntValueDelta](Street.number, Number)
+    case class Number(d: IntValueDelta) extends LensDelta[Nothing, Street, Int](Street.number, d) with StreetDelta
 
     // Can we make do with just temperature value?
-    val temperature = DLens.apply[Unit, Street, StreetDelta, Double, DoubleValueDelta[Unit]](Street.temperature, Temperature)
-    case class Temperature(d: DoubleValueDelta[Unit]) extends LensDelta(Street.temperature, d) with StreetDelta
+    val temperature = DLens.apply[Nothing, Street, StreetDelta, Nothing, Double, DoubleValueDelta](Street.temperature, Temperature)
+    case class Temperature(d: DoubleValueDelta) extends LensDelta[Nothing, Street, Double](Street.temperature, d) with StreetDelta
   }
 
+
   @JsonCodec
-  sealed trait AddressDelta extends Delta[Unit, Address]
+  sealed trait AddressDelta extends Delta[Nothing, Address]
   object AddressDelta {
 
-    case class Value(a: Address) extends AbstractValueDelta[Unit, Address](a) with AddressDelta
+    case class Value(a: Address) extends AbstractValueDelta[Address](a) with AddressDelta
 
-    val street = DLens.apply[Unit, Address, AddressDelta, Street, StreetDelta](Address.street, StreetD)
-    case class StreetD(d: StreetDelta) extends LensDelta(Address.street, d) with AddressDelta
+    val street = DLens.apply[Nothing, Address, AddressDelta, Nothing, Street, StreetDelta](Address.street, StreetD)
+    case class StreetD(d: StreetDelta) extends LensDelta[Nothing, Address, Street](Address.street, d) with AddressDelta
   }
 
   implicit val addressIdGen = new ModelIdGen[Address] {
     def genId(a: Address) = None
   }
 
-  implicit val addressRefAdder: RefAdder[Unit, Address] = RefAdder.noOpRefAdder[Unit, Address]
+  implicit val addressRefAdder: RefAdder[Nothing, Address] = RefAdder.noOpRefAdder[Nothing, Address]
 
 //  @JsonCodec
 //  sealed trait Priority

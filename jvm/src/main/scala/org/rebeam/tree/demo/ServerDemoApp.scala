@@ -22,9 +22,9 @@ import org.rebeam.tree.sync.{RefAdder, Ref}
 
 object ServerDemoApp extends ServerApp {
 
-  val address: ServerStore[Unit, Address, AddressDelta] = {
+  val address: ServerStore[Nothing, Address, AddressDelta] = {
     import DemoData._
-    new ServerStore[Unit, Address, AddressDelta](Address(Street("OLD STREET", 1, 22.3)))
+    new ServerStore[Nothing, Address, AddressDelta](Address(Street("OLD STREET", 1, 22.3)))
   }
 
 //  private val todoProjectMirrorStore = {
@@ -153,7 +153,7 @@ object ServerDemoApp extends ServerApp {
 
     case GET -> Root / "address" =>
       WS(
-        ServerStoreValueExchange(
+        ServerStoreValueExchange[Nothing, Address, AddressDelta](
           address,
           ClientId(nextClientId.getAndIncrement()),
           contextSource
