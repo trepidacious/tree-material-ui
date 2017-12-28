@@ -1,38 +1,18 @@
 package org.rebeam.tree.demo
 
 import japgolly.scalajs.react.vdom.prefix_<^._
-import org.rebeam.tree.{DeltaIOContextSource, Moment, ValueDelta}
+import org.rebeam.tree._
 import org.rebeam.tree.view.View._
 import org.rebeam.tree.view._
-import org.rebeam.tree.view.Cursor._
 import DemoData._
-import chandu0101.scalajs.react.components.materialui._
-import io.circe.Encoder
 import japgolly.scalajs.react._
-import japgolly.scalajs.react.extra.Reusability
-import org.rebeam.tree.ValueDelta.StringValueDelta
-import org.rebeam.tree.view.View.AsStringView.Backend
-//import org.rebeam.tree.demo.DemoData.Priority._
-import org.rebeam.tree.demo.DemoRoutes._
-import org.rebeam.tree.view.infinite.Infinite
-import org.rebeam.tree.view.pages.{Breadcrumbs, Pages}
-import org.rebeam.tree.view.list.{SortableContainer, SortableElement, SortableListItem}
-import Pages._
+import org.rebeam.tree.view.pages._
 import org.rebeam.tree.view.markdown.MarkdownView
-
-import org.scalajs.dom._
 
 object DemoViews {
 
-//  val PlainStringView = ReactComponentB[String]("StringViewThing")
-//    .render_P(s => <.div(s): ReactElement)
-//    .configure(Reusability.shouldComponentUpdateWithOverlay)
-//    .componentWillUnmount(_ => Callback{println("StringViewThing unmounted! Again! FFS!")})
-//    .build
-
   val streetView = cursorView[Nothing, Street, StreetDelta, Unit]("StreetView") { c =>
     <.div(
-//      ^.paddingTop := "20px",
       intView(c.zoom(StreetDelta.number).label("Number")),
       textView(c.zoom(StreetDelta.name).label("Name")),
       doubleView(c.zoom(StreetDelta.temperature).label("Temperature")),
