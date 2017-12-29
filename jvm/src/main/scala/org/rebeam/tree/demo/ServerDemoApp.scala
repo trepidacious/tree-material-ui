@@ -13,6 +13,7 @@ import org.rebeam.tree.{DeltaIOContext, DeltaIOContextSource, Moment}
 import org.rebeam.tree.server.{ServerStore, ServerStoreValueExchange}
 import org.rebeam.tree.view.MaterialColor
 import org.rebeam.tree.Delta._
+import org.rebeam.tree.demo.DemoData.TodoData._
 import org.rebeam.tree.sync.Sync._
 import org.rebeam.tree.sync.DeltaIORun._
 import org.rebeam.tree.demo.DemoData._
@@ -55,16 +56,16 @@ object ServerDemoApp extends ServerApp {
 //    new ServerStore(todoProject.lists.head)
 //  }
 //
-//
-//  private val todoProjectStore = {
-//    import DemoData._
-//    val todoProject = TodoExample.todoProjectIO.runWith(
-//      DeltaIOContext(Moment(0)),
-//      DeltaId(ClientId(0), ClientDeltaId(0))
-//    ).data
-//    new ServerStore(todoProject)
-//  }
-//
+
+  private val todoProjectStore = {
+    import DemoData._
+    val todoProject = TodoExample.todoProjectIO.runWith(
+      DeltaIOContext(Moment(0)),
+      DeltaId(ClientId(0), ClientDeltaId(0))
+    ).data
+    new ServerStore[TodoData, TodoProject, TodoProjectDelta] (todoProject)
+  }
+
 //  private val taskStore = {
 //    import TaskData._
 //    val taskIO: DeltaIO[Task] = for {
@@ -112,16 +113,16 @@ object ServerDemoApp extends ServerApp {
 //          contextSource
 //        )
 //      )
-//
-//    case GET -> Root / "todoproject" =>
-//      WS(
-//        ServerStoreValueExchange(
-//          todoProjectStore,
-//          ClientId(nextClientId.getAndIncrement()),
-//          contextSource
-//        )
-//      )
-//
+
+    case GET -> Root / "todoproject" =>
+      WS(
+        ServerStoreValueExchange(
+          todoProjectStore,
+          ClientId(nextClientId.getAndIncrement()),
+          contextSource
+        )
+      )
+
 //    case GET -> Root / "todoprojectmirror" =>
 //      import DemoData._
 //      WS(

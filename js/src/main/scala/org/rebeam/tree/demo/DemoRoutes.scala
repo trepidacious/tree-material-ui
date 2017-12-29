@@ -3,6 +3,7 @@ package org.rebeam.tree.demo
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.extra.router.StaticDsl._
 import japgolly.scalajs.react.extra.router._
+import org.rebeam.tree.demo.DemoData.TodoData._
 import org.rebeam.tree.view.Navigation
 import org.rebeam.tree.view.pages._
 import org.rebeam.tree.demo.DemoData._
@@ -17,37 +18,37 @@ object DemoRoutes {
 
 //  case object RefPage           extends Page
 //
-//  sealed trait TodoPage extends Page {
-//    def back: TodoPage
-//  }
-//
-//  sealed trait PageWithTodoProjectList extends TodoPage {
-//    def listId: Id[TodoList]
-//    def toItem(todoId: Id[Todo]) = TodoProjectListItemPage(listId, todoId)
-//    override def back: TodoPage = TodoProjectPage
-//  }
-//
-//  sealed trait PageWithTodoProjectListItem extends PageWithTodoProjectList {
-//    def todoId: Id[Todo]
-//    override def back: TodoPage = TodoProjectListPage(listId)
-//  }
-//
-//  case object TodoProjectPage extends TodoPage {
-//    override def back: TodoPage = TodoProjectPage
-//  }
-//
-//  case object TodoProjectCachePage extends TodoPage {
-//    override def back: TodoPage = TodoProjectCachePage
-//  }
-//
-//  case class TodoProjectListPage(listId: Id[TodoList]) extends PageWithTodoProjectList
-//  case class TodoProjectListItemPage(listId: Id[TodoList], todoId: Id[Todo]) extends PageWithTodoProjectListItem
-//
-//  implicit val transitions = new PagesToTransition[TodoPage] {
-//    override def apply(from: TodoPage, to: TodoPage) = {
-//      if (from == to.back) PagesTransition.Right else PagesTransition.Left
-//    }
-//  }
+  sealed trait TodoPage extends Page {
+    def back: TodoPage
+  }
+
+  sealed trait PageWithTodoProjectList extends TodoPage {
+    def listId: Id[TodoList]
+    def toItem(todoId: Id[Todo]) = TodoProjectListItemPage(listId, todoId)
+    override def back: TodoPage = TodoProjectPage
+  }
+
+  sealed trait PageWithTodoProjectListItem extends PageWithTodoProjectList {
+    def todoId: Id[Todo]
+    override def back: TodoPage = TodoProjectListPage(listId)
+  }
+
+  case object TodoProjectPage extends TodoPage {
+    override def back: TodoPage = TodoProjectPage
+  }
+
+  case object TodoProjectCachePage extends TodoPage {
+    override def back: TodoPage = TodoProjectCachePage
+  }
+
+  case class TodoProjectListPage(listId: Id[TodoList]) extends PageWithTodoProjectList
+  case class TodoProjectListItemPage(listId: Id[TodoList], todoId: Id[Todo]) extends PageWithTodoProjectListItem
+
+  implicit val transitions = new PagesToTransition[TodoPage] {
+    override def apply(from: TodoPage, to: TodoPage) = {
+      if (from == to.back) PagesTransition.Right else PagesTransition.Left
+    }
+  }
 
   val routerConfig = RouterConfigDsl[Page].buildConfig { dsl =>
     import dsl._
@@ -61,11 +62,11 @@ object DemoRoutes {
     def caseObject[A](s: String, a: A) = RouteB.literal(s).xmap(_ => a)(_ => ())
 
 //    val refRoute = caseObject("#ref", RefPage)
-//
-//    val todoProjectRoute = caseObject("#todo", TodoProjectPage)
-//    val todoProjectListRoute = ("#todo/list" / id[TodoList]).caseClass[TodoProjectListPage]
-//    val todoProjectListItemRoute = ("#todo/list" / id[TodoList] / "item" / id[Todo]).caseClass[TodoProjectListItemPage]
-//
+
+    val todoProjectRoute = caseObject("#todo", TodoProjectPage)
+    val todoProjectListRoute = ("#todo/list" / id[TodoList]).caseClass[TodoProjectListPage]
+    val todoProjectListItemRoute = ("#todo/list" / id[TodoList] / "item" / id[Todo]).caseClass[TodoProjectListItemPage]
+
 //    val todoProjectCacheRoute = caseObject("#todocache", TodoProjectCachePage)
 
 
@@ -73,9 +74,9 @@ object DemoRoutes {
       | staticRoute(root,   HomePage) ~> render(DemoViews.homeView())
       | staticRoute("#address", AddressPage) ~> render(DemoViews.addressView)
 //      | dynamicRouteCT(refRoute) ~> dynRenderP[RefPage.type](RefViews.refViewFactory)
-//      | dynamicRouteCT(todoProjectRoute) ~> dynRenderP[TodoPage](TodoPagesViews.todoProjectViewFactory)
-//      | dynamicRouteCT(todoProjectListRoute) ~> dynRenderP[TodoPage](TodoPagesViews.todoProjectViewFactory)
-//      | dynamicRouteCT(todoProjectListItemRoute) ~> dynRenderP[TodoPage](TodoPagesViews.todoProjectViewFactory)
+      | dynamicRouteCT(todoProjectRoute) ~> dynRenderP[TodoPage](TodoPagesViews.todoProjectViewFactory)
+      | dynamicRouteCT(todoProjectListRoute) ~> dynRenderP[TodoPage](TodoPagesViews.todoProjectViewFactory)
+      | dynamicRouteCT(todoProjectListItemRoute) ~> dynRenderP[TodoPage](TodoPagesViews.todoProjectViewFactory)
 //      | dynamicRouteCT(todoProjectCacheRoute) ~> dynRenderP[TodoPage](TodoPagesViews.todoProjectCacheViewFactory)
       )
 
@@ -88,7 +89,7 @@ object DemoRoutes {
 
   val navs = Map(
     "Home" -> HomePage,
-//    "Todo List" -> TodoProjectPage,
+    "Todo List" -> TodoProjectPage,
     "Address" -> AddressPage
   )
 
