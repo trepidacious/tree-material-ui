@@ -11,7 +11,6 @@ import org.rebeam.tree.sync.Sync._
 import org.rebeam.tree.sync._
 import org.rebeam.tree.BasicDeltaDecoders._
 import cats.instances.list._
-import cats.instances.option._
 import cats.syntax.traverse._
 
 import scala.collection.mutable.ListBuffer

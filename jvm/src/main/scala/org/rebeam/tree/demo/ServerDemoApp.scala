@@ -11,7 +11,6 @@ import org.http4s.server.staticcontent._
 import org.http4s.server.websocket._
 import org.rebeam.tree.{DeltaIOContext, DeltaIOContextSource, Moment}
 import org.rebeam.tree.server.{ServerStore, ServerStoreValueExchange}
-import org.rebeam.tree.view.MaterialColor
 import org.rebeam.tree.Delta._
 import org.rebeam.tree.sync.Sync._
 import org.rebeam.tree.sync.DeltaIORun._

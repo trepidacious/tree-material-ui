@@ -16,8 +16,6 @@ import org.rebeam.tree.sync._
 import org.rebeam.tree.sync.Sync._
 import cats.instances.list._
 import cats.syntax.traverse._
-import org.rebeam.tree.Searchable.notSearchable
-import shapeless.{::,HNil}
 
 import scala.collection.mutable.ListBuffer
 

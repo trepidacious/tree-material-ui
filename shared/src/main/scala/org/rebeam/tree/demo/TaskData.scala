@@ -1,6 +1,5 @@
 package org.rebeam.tree.demo
 
-import io.circe._
 import io.circe.generic.JsonCodec
 import org.rebeam.lenses.macros.Lenses
 import org.rebeam.tree.Delta._
