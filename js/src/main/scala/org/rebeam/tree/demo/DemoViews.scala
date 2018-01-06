@@ -52,6 +52,7 @@ object DemoViews {
     }
   }
 
+  val stringView = ScalaFnComponent.apply((s: String) => <.span("stringView of " + s))
 
   val homeView = staticView("home") {
     val title = Breadcrumbs.container(
@@ -78,7 +79,8 @@ object DemoViews {
         |# HTML
         |<span>This should appear with escaped HTML span tags</span>
       """.stripMargin),
-      ReactGridLayoutDemo.c()
+      ReactGridLayoutDemo.c(),
+      WidthProvider.wrap(stringView)(WidthProvider.Props(true))("I'm totally wrapped!")
     )
 
     <.div(
