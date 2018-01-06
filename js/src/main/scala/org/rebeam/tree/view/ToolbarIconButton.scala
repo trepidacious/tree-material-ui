@@ -2,14 +2,17 @@ package org.rebeam.tree.view
 
 import chandu0101.scalajs.react.components.materialui._
 import japgolly.scalajs.react._
+import japgolly.scalajs.react.vdom.VdomElement
+
+import japgolly.scalajs.react.vdom.html_<^._
 
 import scala.scalajs.js
 
 object ToolbarIconButton {
 
-  case class Props(icon: ReactElement, onClick: Callback)
+  case class Props(icon: VdomElement, onClick: Callback)
 
-  private val component = ReactComponentB[Props]("ToolbarIcon")
+  private val component = ScalaComponent.builder[Props]("ToolbarIcon")
     .render_P(p =>
       MuiIconButton(
         onTouchTap = View.touch(p.onClick),
@@ -19,5 +22,6 @@ object ToolbarIconButton {
       )(p.icon)
     ).build
 
-  def apply(icon: ReactElement, onClick: Callback): RCP[Props] = component(Props(icon, onClick))
+
+  def apply(icon: VdomElement, onClick: Callback) = component(Props(icon, onClick))
 }

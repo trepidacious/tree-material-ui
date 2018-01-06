@@ -1,10 +1,29 @@
 package org.rebeam.tree.view.markdown
 
 import japgolly.scalajs.react._
-
-import scala.scalajs.js
+import scalajs.js
 
 object MarkdownView {
+
+  @js.native
+  trait Props extends js.Object {
+    var source: String = js.native
+    var className: String = js.native
+    var containerTagName: String = js.native
+    //    containerProps - object An object containing custom element props to put on the container element such as id and htmlFor.
+    //    childBefore - object A single child object that is rendered before the markdown source but within the container element
+    //    childAfter - object A single child object that is rendered after the markdown source but within the container element
+    var escapeHtml: Boolean = js.native
+    var skipHtml: Boolean = js.native
+    var sourcePos: Boolean = js.native
+    var softBreak: String = js.native
+    var allowedTypes: Array[String] = js.native
+    var disallowedTypes: Array[String] = js.native
+    var unwrapDisallowed: Boolean = js.native
+  }
+
+  private val rawComponent = js.Dynamic.global.ReactMarkdown
+  private val component = JsComponent[Props, Children.None, Null](rawComponent)
 
   sealed trait Element
 
@@ -96,7 +115,7 @@ object MarkdownView {
   /**
     * Props for Markdown
     * @param source The Markdown source to parse (required)
-    * @param className Class name of the container element (default if None: '').
+    * @param className Class name of the container element (default if None is empty string).
     * @param containerTagName Tag name for the container element, since Markdown can have many root-level
     *                         elements, the component need to wrap them in something (default: div).
     * @param escapeHtml Setting to true will escape HTML blocks, rendering plain text instead of inserting
@@ -135,7 +154,7 @@ object MarkdownView {
 //    renderers - object An object where the keys represent the node type and the value is a React component. The object is merged with the default renderers. The props passed to the component varies based on the type of node. See the type renderer options of commonmark-react-renderer for more details.
 //    transformLinkUri - function|null Function that gets called for each encountered link with a single argument - uri. The returned value is used in place of the original. The default link URI transformer acts as an XSS-filter, neutralizing things like javascript:, vbscript: and file: protocols. If you specify a custom function, this default filter won't be called, but you can access it as require('react-markdown').uriTransformer. If you want to disable the default transformer, pass null to this option.
 //    transformImageUri - function|null Function that gets called for each encountered image with a single argument - uri. The returned value is used in place of the original.
-  ): ReactComponentU_ = {
+  ): JsComponent.Unmounted[Props, Null] = {
 
     def elementToJS(e: Element) = e match {
       case HtmlInline     => "HtmlInline"
@@ -157,25 +176,24 @@ object MarkdownView {
       case ThematicBreak  => "ThematicBreak"
     }
 
-    val f = React.asInstanceOf[js.Dynamic].createFactory(js.Dynamic.global.ReactMarkdown) // access real js component
+    val p = (new js.Object).asInstanceOf[Props]
 
-    val p = js.Dynamic.literal(
-      "source" -> source
-    )
-    className.foreach(p.updateDynamic("className")(_))
-    containerTagName.foreach(p.updateDynamic("containerTagName")(_))
-    escapeHtml.foreach(p.updateDynamic("escapeHtml")(_))
-    skipHtml.foreach(p.updateDynamic("skipHtml")(_))
-    sourcePos.foreach(p.updateDynamic("sourcePos")(_))
-    softBreak.foreach(p.updateDynamic("softBreak")(_))
+    p.source = source
+
+    className.foreach(p.className = _)
+    containerTagName.foreach(p.containerTagName = _)
+    escapeHtml.foreach(p.escapeHtml = _)
+    skipHtml.foreach(p.skipHtml = _)
+    sourcePos.foreach(p.sourcePos = _)
+    softBreak.foreach(p.softBreak = _)
     if (allowedTypes.nonEmpty) {
-      p.updateDynamic("allowedTypes")(allowedTypes.map(elementToJS))
+      p.allowedTypes = allowedTypes.map(elementToJS).toArray
     }
     if (disallowedTypes.nonEmpty) {
-      p.updateDynamic("disallowedTypes")(disallowedTypes.map(elementToJS))
+      p.disallowedTypes = disallowedTypes.map(elementToJS).toArray
     }
-    unwrapDisallowed.foreach(p.updateDynamic("unwrapDisallowed")(_))
+    unwrapDisallowed.foreach(p.unwrapDisallowed = _)
 
-    f(p).asInstanceOf[ReactComponentU_]
+    component(p)
   }
 }

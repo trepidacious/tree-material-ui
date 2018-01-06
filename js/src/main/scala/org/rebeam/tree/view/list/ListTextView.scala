@@ -1,10 +1,9 @@
 package org.rebeam.tree.view.list
 
 import chandu0101.scalajs.react.components.materialui._
-import japgolly.scalajs.react.ReactComponentC.ReqProps
-import japgolly.scalajs.react._
-import japgolly.scalajs.react.vdom.ReactTagOf
-import japgolly.scalajs.react.vdom.prefix_<^._
+import japgolly.scalajs.react.{CtorType, _}
+import japgolly.scalajs.react.component.Scala.Component
+import japgolly.scalajs.react.vdom.html_<^._
 import org.rebeam.tree.view._
 import org.scalajs.dom.html.Div
 
@@ -22,7 +21,7 @@ object ListTextView {
     private val edit = scope.modState(s => s.copy(editing = true))
     private val unedit = scope.modState(s => s.copy(editing = false))
 
-    private def renderPlain(c: Cursor[String, String]): ReactTagOf[Div] = {
+    private def renderPlain(c: Cursor[String, String]): VdomTagOf[Div] = {
       <.div(
         ^.key := "plain",
         ^.className := "tree-list-text-view__plain",
@@ -30,7 +29,7 @@ object ListTextView {
         ^.onClick --> edit,
         ^.onFocus --> edit,
         ^.onBlur --> unedit,
-        ^.tabIndex := "0",
+        ^.tabIndex := 0,
         c.model
       )
     }
@@ -47,11 +46,11 @@ object ListTextView {
           ref = focus,
           fullWidth = true,
           // On focus, select all text for spreadsheet cell-style editing
-          onFocus =  (e: ReactFocusEventI) => Callback{e.target.select},
+          onFocus =  (e: ReactFocusEventFromInput) => Callback{e.target.select},
           // Normal bound editing
-          onChange = (e: ReactEventI) => e.preventDefaultCB >> c.set(e.target.value),
-          hintText = c.location: ReactNode//,
-//          onEnterKeyDown = (e: ReactEventI) => e.preventDefaultCB >> Callback{println("ENTER!")},
+          onChange = (e: ReactEventFromInput, s: String) => e.preventDefaultCB >> c.set(s),
+          hintText = c.location: VdomNode//,
+//          onEnterKeyDown = (e: ReactEventFromInput) => e.preventDefaultCB >> Callback{println("ENTER!")},
 //          onKeyDown = (e: ReactKeyboardEvent) => if (e.keyCode == 9) {
 //            e.preventDefaultCB >> Callback{println("TAB!")}
 //          } else {
@@ -61,7 +60,7 @@ object ListTextView {
       )
     }
 
-    def render(p: Cursor[String, String], state: State): ReactTagOf[Div] = {
+    def render(p: Cursor[String, String], state: State): VdomTagOf[Div] = {
       if (state.editing) {
         renderEditing(p)
       } else {
@@ -70,14 +69,14 @@ object ListTextView {
     }
   }
 
-  val component: ReqProps[Cursor[String, String], State, Backend, TopNode] =
-    ReactComponentB[Cursor[String, String]]("ListTextView")
+  val component =
+    ScalaComponent.builder[Cursor[String, String]]("ListTextView")
     .initialState(State(false))
     .backend(new Backend(_))
     .render(s => s.backend.render(s.props, s.state))
     .build
 
-  def apply(c: Cursor[String, String]): ReactComponentU[Cursor[String, String], State, Backend, TopNode] =
+  def apply(c: Cursor[String, String]) =
     component(c)
 
 }

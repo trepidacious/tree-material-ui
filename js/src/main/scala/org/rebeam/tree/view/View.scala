@@ -1,39 +1,33 @@
 package org.rebeam.tree.view
 
-import cats.syntax.either._
 import chandu0101.scalajs.react.components.Implicits._
 import chandu0101.scalajs.react.components.materialui._
 import io.circe.Encoder
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.extra.Reusability
-import japgolly.scalajs.react.vdom.{ReactStyle, ReactTagOf}
 
 import scala.scalajs.js.UndefOr
 import Mui.Styles.colors
-import japgolly.scalajs.react.ReactComponentC.ReqProps
 
 import scala.language.implicitConversions
 import scala.scalajs.js
-import japgolly.scalajs.react.vdom.prefix_<^._
-import org.rebeam.tree.sync.{Guid, Id}
-import org.rebeam.tree.view.icon.{ArcHash, ArcHashable, Icons}
+import japgolly.scalajs.react.vdom.html_<^._
+import org.rebeam.tree.view.icon.{ArcHash, ArcHashable}
 import org.scalajs.dom.html.Span
 
 object View {
 
-  def touch(c: Callback): js.UndefOr[ReactTouchEventH => Callback] = {
-    e: ReactTouchEventH => e.preventDefaultCB >> c
+  def touch(c: Callback): js.UndefOr[TouchTapEvent => Callback] = {
+    e: TouchTapEvent => e.preventDefaultCB >> c
   }
 
-  def view[A](name: String, overlay: Boolean = true)(render: A => ReactElement) =
-    ReactComponentB[A](name).render_P(render).build
+  def view[A](name: String, overlay: Boolean = true)(render: A => VdomElement) =
+    ScalaComponent.builder[A](name).render_P(render).build
 
-  def cursorView[A, P](name: String)(render: Cursor[A, P] => ReactElement): ReqProps[Cursor[A, P], Unit, Unit, TopNode] =
-    ReactComponentB[Cursor[A, P]](name).render_P(render).configure(Reusability.shouldComponentUpdate).build
+  def cursorView[A, P](name: String)(render: Cursor[A, P] => VdomElement) =
+    ScalaComponent.builder[Cursor[A, P]](name).render_P(render).configure(Reusability.shouldComponentUpdate).build
 
-  def staticView(name: String)(e: ReactElement) = ReactComponentB[Unit](name)
-    .render(_ => e)
-    .build
+  def staticView(name: String)(e: VdomElement) = ScalaComponent.static(name)(e)
 
   val spinner = staticView("Spinner")(
     MuiCircularProgress(mode = DeterminateIndeterminate.indeterminate)()
@@ -42,18 +36,18 @@ object View {
   val textView = cursorView[String, String]("textView") { p =>
     MuiTextField(
       value = p.model,
-      onChange = (e: ReactEventI) => e.preventDefaultCB >>  p.set(e.target.value),
-      floatingLabelText = p.location: ReactNode
+      onChange = (e: ReactEventFromInput, s: String) => e.preventDefaultCB >>  p.set(s),
+      floatingLabelText = p.location: VdomNode
     )()
   }
 
   val textViewHero = cursorView[String, String]("textViewHero") { p =>
     MuiTextField(
       value = p.model,
-      onChange = (e: ReactEventI) => e.preventDefaultCB >>  p.set(e.target.value),
-//      floatingLabelText = p.label: ReactNode,
+      onChange = (e: ReactEventFromInput, s: String) => e.preventDefaultCB >>  p.set(s),
+//      floatingLabelText = p.label: VdomNode,
 //      floatingLabelStyle = js.Dynamic.literal("font-size" -> "16px", "color" -> "rgba(255, 255, 255, 0.87"),
-      hintText = p.location: ReactNode,
+      hintText = p.location: VdomNode,
       hintStyle = js.Dynamic.literal("color" -> "rgba(255, 255, 255, 0.87)"),
       style = js.Dynamic.literal("font-size" -> "24px"),
       inputStyle = js.Dynamic.literal("color" -> "rgba(255, 255, 255, 1.00)"),
@@ -71,7 +65,7 @@ object View {
   }
 
   //FIXME work out a better way to align with textViewHero
-  def labelHero(s: String): ReactTagOf[Span] = <.span(
+  def labelHero(s: String): VdomTagOf[Span] = <.span(
     ^.fontSize := "23px",
     ^.paddingTop := "16px",
     ^.color := "rgba(255, 255, 255, 1.00)",
@@ -81,8 +75,8 @@ object View {
   val textViewPlainLabel = cursorView[String, String]("textViewPlainLabel") { p =>
     MuiTextField(
       value = p.model,
-      onChange = (e: ReactEventI) => e.preventDefaultCB >>  p.set(e.target.value),
-      hintText = p.location: ReactNode
+      onChange = (e: ReactEventFromInput, s: String) => e.preventDefaultCB >>  p.set(s),
+      hintText = p.location: VdomNode
     )()
   }
 
@@ -125,9 +119,11 @@ object View {
     */
   object AsStringView {
 
-    class Backend[A](scope: BackendScope[Cursor[A, String], (String, Boolean)])(implicit codec: StringCodec[A], encoder: Encoder[A]) {
+    type State = (String, Boolean)
 
-      def render(props: Cursor[A, String], state: (String, Boolean)) = {
+    class Backend[A](scope: BackendScope[Cursor[A, String], State])(implicit codec: StringCodec[A], encoder: Encoder[A]) {
+
+      def render(props: Cursor[A, String], state: State) = {
         val model = props.model
 
         // If we have had a prop change since the last time we set state,
@@ -141,14 +137,14 @@ object View {
           state._1
         }
 
-        val error: UndefOr[ReactNode] = codec.parse(text) match {
+        val error: UndefOr[VdomNode] = codec.parse(text) match {
           case Left(e) => e
           case _ => js.undefined
         }
 
         MuiTextField(
           value = text,
-          onChange = (e: ReactEventI) => {
+          onChange = (e: ReactEventFromInput, s: String) => {
             val input = codec.prefilter(e.target.value)
             val parsed = codec.parse(input)
             parsed match {
@@ -164,7 +160,7 @@ object View {
           },
 
           //On blur, update state to match model if it does not parse to model
-          onBlur = (e: ReactEventI) => {
+          onBlur = (e: ReactFocusEventFromInput) => {
             val parsed = codec.parse(state._1)
             parsed match {
               case Right(p) if p == model => Callback.empty
@@ -172,19 +168,19 @@ object View {
             }
           },
 //          errorText = error,
-//          hintText = props.label: ReactNode
-            floatingLabelText = props.location: ReactNode
+//          hintText = props.label: VdomNode
+            floatingLabelText = props.location: VdomNode
         )()
       }
     }
 
-    def component[A](name: String, codec: StringCodec[A])(implicit encoder: Encoder[A]) = ReactComponentB[Cursor[A, String]](name)
-      .getInitialState[(String, Boolean)](scope => (scope.props.model.toString, false))
+    def component[A](name: String, codec: StringCodec[A])(implicit encoder: Encoder[A]) = ScalaComponent.builder[Cursor[A, String]](name)
+      .initialStateFromProps(c => (codec.format(c.model), false))
       .backend(new Backend[A](_)(codec, encoder))
       .render(s => s.backend.render(s.props, s.state))
       .componentWillReceiveProps(
         scope => if (scope.currentProps.model != scope.nextProps.model) {
-          scope.$.modState(s => (s._1, true))
+          scope.modState(s => (s._1, true))
         } else {
           Callback.empty
         }
@@ -198,7 +194,7 @@ object View {
     override def parse(s: String): Either[String, Double] = try {
       Right(s.toDouble)
     } catch {
-      case e: NumberFormatException => Left("Valid number required (e.g. 1, -1.1, 1.1E1)")
+      case _: NumberFormatException => Left("Valid number required (e.g. 1, -1.1, 1.1E1)")
     }
     //Remove anything but + - . e E or a digit
     override def prefilter(s: String): String = s.replaceAll("""[^\+\-\.eE\d]""", "")
@@ -211,7 +207,7 @@ object View {
     def parse(s: String): Either[String, Int] = try {
       Right(s.toInt)
     } catch {
-      case e: NumberFormatException => Left("Valid whole number required (e.g. 1, 100)")
+      case _: NumberFormatException => Left("Valid whole number required (e.g. 1, 100)")
     }
     //Remove anything but + - or a digit
     override def prefilter(s: String): String = s.replaceAll("""[^\+\-\d]""", "")
@@ -221,9 +217,10 @@ object View {
 
   val booleanView = cursorView[Boolean, String]("booleanView") { p =>
     MuiCheckbox(
-      label = p.location,
+      label = p.location: VdomNode,
       checked = p.model,
-      onCheck = (e: ReactEventH, b: Boolean) => e.preventDefaultCB >> p.set(!p.model)
+      // TODO should this be p.set(b) ?
+      onCheck = (e: ReactMouseEvent, b: Boolean) => e.preventDefaultCB >> p.set(!p.model)
     )()
   }
 
@@ -231,7 +228,8 @@ object View {
   val booleanViewUnlabelled = cursorView[Boolean, String]("booleanView") { p =>
     MuiCheckbox(
       checked = p.model,
-      onCheck = (e: ReactEventH, b: Boolean) => e.preventDefaultCB >> p.set(!p.model)
+      // TODO should this be p.set(b) ?
+      onCheck = (e: ReactMouseEvent, b: Boolean) => e.preventDefaultCB >> p.set(!p.model)
     )()
   }
 
@@ -246,9 +244,11 @@ object View {
 
   implicit def color2MuiColor(c: Color): MuiColor = c.toString().asInstanceOf[MuiColor]
   implicit def color2UndefOrMuiColor(c: Color): UndefOr[MuiColor] = c.toString().asInstanceOf[MuiColor]
-  implicit final val _react_styleColor  : ReactStyle.ValueType[Color] = ReactStyle.ValueType.stringValue
 
-  val avatarText = ReactComponentB[(String, Color)]("avatarText")
+  //FIXME reinstate
+//  implicit final val _react_styleColor  : ReactStyle.ValueType[Color] = ReactStyle.ValueType.stringValue
+
+  val avatarText = ScalaComponent.builder[(String, Color)]("avatarText")
     .render(d => {
       val text = d.props._1
       val color = d.props._2
@@ -266,19 +266,18 @@ object View {
         style = js.Dynamic.literal("font-size" -> s"${fontSize}px"),
         color = colors.white,
         backgroundColor = color
-      )(text: ReactNode)
+      )(text: VdomNode)
     }).build
 
-  val avatarArcHashId: ReqProps[Id[_], Unit, Unit, TopNode] = avatarArcHash(ArcHashable.arcHashableId)
+  val avatarArcHashId = avatarArcHash(ArcHashable.arcHashableId)
 
-  val avatarArcHashGuid: ReqProps[Guid, Unit, Unit, TopNode] = avatarArcHash(ArcHashable.arcHashableGuid)
+  val avatarArcHashGuid = avatarArcHash(ArcHashable.arcHashableGuid)
 
-  val avatarArcHashString: ReqProps[String, Unit, Unit, TopNode] = avatarArcHash(ArcHashable.arcHashableString)
+  val avatarArcHashString = avatarArcHash(ArcHashable.arcHashableString)
 
-  def avatarArcHash[A](implicit ah: ArcHashable[A]): ReqProps[A, Unit, Unit, TopNode] = ReactComponentB[A]("avatarArcHash")
+  def avatarArcHash[A](implicit ah: ArcHashable[A]) = ScalaComponent.builder[A]("avatarArcHash")
     .render(d => {
       val hash = d.props
-
       MuiAvatar(
 //        backgroundColor = ArcHash.background(hash)
         backgroundColor = MaterialColor.BlueGrey(700)
@@ -299,7 +298,7 @@ object View {
     )()
   }
 
-  def coloredCard(color: Color, title: ReactNode, content: ReactNode, actions: List[(String, Callback)]) = {
+  def coloredCard(color: Color, title: VdomNode, content: VdomNode, actions: List[(String, Callback)]) = {
     MuiCard(
       style = js.Dynamic.literal(
         "background-color" -> color,
@@ -318,8 +317,8 @@ object View {
 
       <.div(
         ^.className := "tree-colored-card__buttons",
-        actions.zipWithIndex.map{
-          case((text, action), index) => coloredCardButton("Details", primary = index==0)(action)
+        actions.zipWithIndex.toTagMod {
+          case((text, action), index) => coloredCardButton(text, primary = index==0)(action)
         }
       )
     )

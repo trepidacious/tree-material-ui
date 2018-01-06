@@ -1,16 +1,17 @@
 package org.rebeam.tree.view.pages
 
-import chandu0101.scalajs.react.components.materialui.{Mui, MuiIconButton}
-import japgolly.scalajs.react.vdom.prefix_<^._
+import chandu0101.scalajs.react.components.materialui.{Mui, MuiIconButton, MuiSvgIcon}
+import japgolly.scalajs.react.vdom.html_<^._
 import japgolly.scalajs.react._
 import org.rebeam.tree.view.Color
 import org.rebeam.tree.view.View._
+import MuiSvgIcon.SvgIconApply
 
 import scala.scalajs.js
 
 object Breadcrumbs {
 
-  val container = ReactComponentB[Unit]("PathBreadcrumbs")
+  val container = ScalaComponent.builder[Unit]("PathBreadcrumbs")
     .render_C(children => {
       <.div(
         ^.paddingTop := "8px",
@@ -37,7 +38,7 @@ object Breadcrumbs {
 
     case class PathElementProps(content: String, callback: Callback)
 
-    private val pathElementComponent = ReactComponentB[PathElementProps]("PathElement")
+    private val pathElementComponent = ScalaComponent.builder[PathElementProps]("PathElement")
       .render_P(p => {
         <.span(
           ^.color := "rgba(255, 255, 255, 0.54)",
@@ -55,7 +56,7 @@ object Breadcrumbs {
 
     case class PathBackProps(callback: Callback)
 
-    private val pathBackComponent = ReactComponentB[PathBackProps]("PathBack")
+    private val pathBackComponent = ScalaComponent.builder[PathBackProps]("PathBack")
       .render_P(p =>
 
         <.div(

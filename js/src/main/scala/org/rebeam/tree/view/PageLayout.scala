@@ -1,8 +1,9 @@
 package org.rebeam.tree.view
 
 import chandu0101.scalajs.react.components.materialui._
+import MuiSvgIcon.SvgIconApply
 import japgolly.scalajs.react._
-import japgolly.scalajs.react.vdom.prefix_<^._
+import japgolly.scalajs.react.vdom.html_<^._
 import org.rebeam.tree.view.View._
 
 import scala.scalajs.js
@@ -13,16 +14,16 @@ object PageLayout {
     color: Color,
     height: Int,
     toolbarText: String,
-    listFAB: Option[ReactElement],
-    title: Option[ReactElement],
-    contents: Option[ReactElement],
-    footer: Option[ReactElement],
-    iconButtons: List[ReactElement],
+    listFAB: Option[VdomElement],
+    title: Option[VdomElement],
+    contents: Option[VdomElement],
+    footer: Option[VdomElement],
+    iconButtons: List[VdomElement],
     backgroundColor: Color,
     scrollContents: Boolean
   )
 
-  private val component = ReactComponentB[Props]("PageLayout")
+  private val component = ScalaComponent.builder[Props]("PageLayout")
     .render_P(p => {
 
       //Full size container
@@ -39,7 +40,7 @@ object PageLayout {
             ^.top := s"${p.height - 20}px",
             ^.zIndex := "1150"
           )(fab)
-        ).getOrElse(EmptyTag),
+        ).getOrElse(EmptyVdom),
 
         //Everything else animates by sliding
         <.div(
@@ -52,7 +53,7 @@ object PageLayout {
             ^.position := "absolute",
             ^.top := "0px",
             ^.left := "0px",
-            ^.backgroundColor := p.color,
+            ^.backgroundColor := p.color.toString,
             //        ^.boxSizing := "border-box",
             ^.boxShadow := "rgba(0, 0, 0, 0.117647) 0px 1px 6px, rgba(0, 0, 0, 0.117647) 0px 1px 4px",
             ^.width := "100%",
@@ -74,14 +75,15 @@ object PageLayout {
               <.div(
                 ^.flex := "0 0 auto",
                 ^.paddingTop := "4px",
-                ^.paddingRight := "4px"
-              )(p.iconButtons)
+                ^.paddingRight := "4px",
+                p.iconButtons.toTagMod
+              )
             ),
             <.div(
               ^.position := "absolute",
               ^.top := "56px",
               ^.left := "72px",
-              p.title
+              p.title.whenDefined
             )
           ),
 
@@ -93,11 +95,14 @@ object PageLayout {
               ^.bottom := "0px",
               ^.left := "0px",
               ^.width := "100%",
-              ^.backgroundColor := p.backgroundColor,
+              ^.backgroundColor := p.backgroundColor.toString,
               ^.overflowX := "hidden",
               ^.overflowY := "scroll",
-              ^.style := "-webkit-overflow-scrolling: touch;"
-            )(p.contents)
+              ^.style := js.Dictionary(
+                "WebkitOverflowScrolling" -> "touch"
+              ),
+              p.contents.whenDefined
+            )
           } else {
             <.div(
               ^.position := "absolute",
@@ -105,8 +110,9 @@ object PageLayout {
               ^.bottom := "0px",
               ^.left := "0px",
               ^.width := "100%",
-              ^.backgroundColor := p.backgroundColor
-            )(p.contents)
+              ^.backgroundColor := p.backgroundColor.toString,
+              p.contents.whenDefined
+            )
           },
 
           // Optional footer
@@ -118,7 +124,7 @@ object PageLayout {
               ^.left := "0px",
               tb
             )
-          ).getOrElse(EmptyTag)
+          ).getOrElse(EmptyVdom)
 
         )
       )
@@ -129,16 +135,16 @@ object PageLayout {
        color: Color,
        height: Int = 128,
        toolbarText: String = "",
-       listFAB: Option[ReactElement] = None,
-       title: Option[ReactElement] = None,
-       contents: Option[ReactElement] = None,
-       footer: Option[ReactElement] = None,
-       iconButtons: List[ReactElement] = Nil,
+       listFAB: Option[VdomElement] = None,
+       title: Option[VdomElement] = None,
+       contents: Option[VdomElement] = None,
+       footer: Option[VdomElement] = None,
+       iconButtons: List[VdomElement] = Nil,
        backgroundColor: Color = MaterialColor.White(),
-       scrollContents: Boolean = false): RCP[Props] =
+       scrollContents: Boolean = false) =
     component(Props(color, height, toolbarText, listFAB, title, contents, footer, iconButtons, backgroundColor, scrollContents))
 
-  def addFAB(callback: Callback): ReactComponentU_ = {
+  def addFAB(callback: Callback) = {
     MuiFloatingActionButton(
       backgroundColor = MaterialColor.White(),
       mini = true,

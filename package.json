@@ -9,6 +9,7 @@
   },
   "scripts": {
     "start": "webpack --watch & webpack-dev-server --progress --colors --port 8090",
+    "dev-build": "webpack --config webpack.config.js",
     "build": "webpack --config webpack.config.prod.js",
     "dist": "webpack --config webpack.config.prod.js"
   },
@@ -31,15 +32,13 @@
   },
   "dependencies": {
     "json-loader": "^0.5.4",
-    "material-ui": "0.15.2",
+    "material-ui": "0.17.0",
     "paths-js": "0.4.5",
-    "react": "15.4.1",
-    "react-addons-create-fragment": "15.4.1",
-    "react-addons-css-transition-group": "15.4.1",
-    "react-addons-pure-render-mixin": "15.4.1",
-    "react-addons-transition-group": "15.4.1",
-    "react-addons-update": "15.4.1",
-    "react-dom": "15.4.1",
+    "react": "15.6.2",
+    "react-addons-create-fragment": "15.6.2",
+    "react-addons-pure-render-mixin": "15.6.2",
+    "react-addons-update": "15.6.2",
+    "react-dom": "15.6.2",
     "react-geomicons": "^2.0.4",
     "react-grid-layout": "^0.13.9",
     "react-infinite": "^0.7.1",
@@ -50,6 +49,7 @@
     "react-spinner": "^0.2.3",
     "react-tagsinput": "^3.0.3",
     "react-tap-event-plugin": "2.0.1",
+    "react-transition-group": "^1.2.1",
     "svg-loader": "0.0.2"
   }
 }

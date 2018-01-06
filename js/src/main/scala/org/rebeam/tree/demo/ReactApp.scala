@@ -1,11 +1,12 @@
 package org.rebeam.tree.demo
 
 import chandu0101.scalajs.react.components.materialui._
-import japgolly.scalajs.react.ReactComponentB
+import japgolly.scalajs.react.ScalaComponent
 import org.scalajs.dom
 
 import scala.scalajs.js.annotation.JSExportTopLevel
 import scala.scalajs.js.timers._
+import japgolly.scalajs.react.vdom.html_<^._
 
 object ReactApp {
 
@@ -44,14 +45,14 @@ object ReactApp {
     val router = DemoRoutes.router
 
     // Need to wrap our top-level router component in a theme for Material-UI to work
-    val themedView = ReactComponentB[Unit]("themedView").render(p =>
+    val themedView = ScalaComponent.builder[Unit]("themedView").render(p =>
       MuiMuiThemeProvider(muiTheme = theme)(
         router()
       )
     ).build
 
     // Finally, render the themed top-level view to the predefined HTML div with id "container"
-    themedView() render dom.document.getElementById("container")
+    themedView().renderIntoDOM(dom.document.getElementById("container"))
   }
 
 }

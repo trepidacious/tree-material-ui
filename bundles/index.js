@@ -8,7 +8,9 @@
 window.ReactDOM = require('react-dom');
 window.React    = require('react');
 window.React.addons = {};
-window.React.addons.CSSTransitionGroup = require('react-addons-css-transition-group');
+
+//Deprecated
+//window.React.addons.CSSTransitionGroup = require('react-addons-css-transition-group');
 
 
 // rebeam: Improves click/tap performance, see
@@ -56,4 +58,5 @@ window.Measure = require('react-measure');
 // rebeam: react-markdown
 window.ReactMarkdown = require('react-markdown');
 
-
+// rebeam: react-transition-group v1, drop in replacement for react-addons-css-transition-group (CSS only)
+window.CSSTransitionGroup = require('react-transition-group/CSSTransitionGroup')

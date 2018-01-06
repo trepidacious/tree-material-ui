@@ -1,6 +1,7 @@
 package org.rebeam.tree.view
 
-import japgolly.scalajs.react.{Callback, React, ReactComponentU_, ReactNode}
+import japgolly.scalajs.react._
+import japgolly.scalajs.react.vdom.html_<^._
 import org.rebeam.tree.view.ReactGridLayout._
 import org.scalajs.dom.MouseEvent
 import org.scalajs.dom.raw.HTMLElement
@@ -11,18 +12,18 @@ object ReactGridLayout {
 
   @js.native
   trait LayoutItemJS extends js.Object {
-    val i: String                           = js.native
-    val x: Int                              = js.native
-    val y: Int                              = js.native
-    val w: Int                              = js.native
-    val h: Int                              = js.native
-    val minW: js.UndefOr[Int]               = js.native
-    val maxW: js.UndefOr[Int]               = js.native
-    val minH: js.UndefOr[Int]               = js.native
-    val maxH: js.UndefOr[Int]               = js.native
-    val static: js.UndefOr[Boolean]         = js.native
-    val isDraggable: js.UndefOr[Boolean]    = js.native
-    val isResizable: js.UndefOr[Boolean]    = js.native
+    var i: String                           = js.native
+    var x: Int                              = js.native
+    var y: Int                              = js.native
+    var w: Int                              = js.native
+    var h: Int                              = js.native
+    var minW: js.UndefOr[Int]               = js.native
+    var maxW: js.UndefOr[Int]               = js.native
+    var minH: js.UndefOr[Int]               = js.native
+    var maxH: js.UndefOr[Int]               = js.native
+    var static: js.UndefOr[Boolean]         = js.native
+    var isDraggable: js.UndefOr[Boolean]    = js.native
+    var isResizable: js.UndefOr[Boolean]    = js.native
   }
 
   case class LayoutItem(
@@ -39,20 +40,20 @@ object ReactGridLayout {
     isDraggable: js.UndefOr[Boolean]    = js.undefined,
     isResizable: js.UndefOr[Boolean]    = js.undefined
   ) {
-    def toJS = {
-      val p = js.Dynamic.literal()
-      p.updateDynamic("i")(i)
-      p.updateDynamic("x")(x)
-      p.updateDynamic("y")(y)
-      p.updateDynamic("w")(w)
-      p.updateDynamic("h")(h)
-      minW.foreach(p.updateDynamic("minW")(_))
-      maxW.foreach(p.updateDynamic("maxW")(_))
-      minH.foreach(p.updateDynamic("minH")(_))
-      maxH.foreach(p.updateDynamic("maxH")(_))
-      static.foreach(p.updateDynamic("static")(_))
-      isDraggable.foreach(p.updateDynamic("isDraggable")(_))
-      isResizable.foreach(p.updateDynamic("isResizable")(_))
+    def toJS: LayoutItemJS = {
+      val p = (new js.Object).asInstanceOf[LayoutItemJS]
+      p.i = i
+      p.x = x
+      p.y = y
+      p.w = w
+      p.h = h
+      minW.foreach(p.minW = _)
+      maxW.foreach(p.maxW = _)
+      minH.foreach(p.minH = _)
+      maxH.foreach(p.maxH = _)
+      static.foreach(p.static = _)
+      isDraggable.foreach(p.isDraggable = _)
+      isResizable.foreach(p.isResizable = _)
       p
     }
   }
@@ -60,7 +61,7 @@ object ReactGridLayout {
   type Layout = List[LayoutItem]
 
   case class XY(x: Int, y: Int) {
-    def toJS = js.Array(x, y)
+    def toJS: js.Array[Int] = js.Array(x, y)
   }
 
   case class ItemUpdate(
@@ -74,10 +75,12 @@ object ReactGridLayout {
 
   type ItemCallback = ItemUpdate => Unit
 
-  val noOpItemCallback: ItemCallback = i => ()
+  val noOpItemCallback: ItemCallback = _ => ()
 
-//  val noOpOnLayoutChange: js.Any => Unit = l => {println(JSON.stringify(l))}
-  val noOpOnLayoutChange: Layout => Callback = l => Callback{}
+  val noOpOnLayoutChange: Layout => Callback = _ => Callback{}
+
+  private val rawComponent = js.Dynamic.global.ReactGridLayout
+  private val component = JsComponent[js.Object, Children.Varargs, Null](rawComponent)
 
 }
 
@@ -169,9 +172,8 @@ case class ReactGridLayout(
     p
   }
 
-  def apply(children : ReactNode*) = {
-    val f = React.asInstanceOf[js.Dynamic].createFactory(js.Dynamic.global.ReactGridLayout) // access real js component
-    f(toJS, children.toJsArray).asInstanceOf[ReactComponentU_]
+  def apply(children : VdomNode*) = {
+    ReactGridLayout.component(toJS)(children: _*)
   }
 }
 

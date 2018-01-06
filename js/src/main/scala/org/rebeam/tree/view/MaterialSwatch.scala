@@ -1,7 +1,6 @@
 package org.rebeam.tree.view
 
-import japgolly.scalajs.react._
-import japgolly.scalajs.react.vdom.prefix_<^._
+import japgolly.scalajs.react.vdom.html_<^._
 import org.rebeam.tree.view.MaterialColor._
 import org.rebeam.tree.view.View._
 
@@ -11,7 +10,7 @@ object MaterialSwatch {
 
   def swatches(name: String, colors: Seq[(String, Color)]) = {
     <.ul(
-      colors.map(c => {
+      colors.toTagMod (c => {
         val l = c._2.toHSLA.l
         <.li(
           name + " " + c._1,
@@ -47,9 +46,9 @@ object MaterialSwatch {
 
   val AllFamiliesView = staticView("AllFamiliesView"){
     <.div(
-      accented.map(f => AccentedFamilyView(f)),
-      shaded.map(f => ShadedFamilyView(f)),
-      single.map(f => SingleFamilyView(f))
+      accented.toTagMod(f => AccentedFamilyView(f)),
+      shaded.toTagMod(f => ShadedFamilyView(f)),
+      single.toTagMod(f => SingleFamilyView(f))
     )
   }
 

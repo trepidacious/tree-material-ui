@@ -1,13 +1,11 @@
 package org.rebeam.tree.view
 
 import japgolly.scalajs.react._
-import japgolly.scalajs.react.vdom.prefix_<^._
+import japgolly.scalajs.react.vdom.html_<^._
 
 object Title {
 
-  case class Props(text: String)
-
-  private val component = ReactComponentB[Props]("Title")
+  private val component = ScalaComponent.builder[String]("Title")
     .render_P(p =>
       <.h1(
         ^.whiteSpace := "nowrap",
@@ -22,10 +20,10 @@ object Title {
         ^.height := "56px",
         ^.lineHeight := "56px",
         ^.flex := "1 1 0%",
-        p.text
+        p
       )
     ).build
 
-  def apply(text: String): RCP[Props] = component(Props(text))
+  def apply(text: String) = component(text)
 
 }

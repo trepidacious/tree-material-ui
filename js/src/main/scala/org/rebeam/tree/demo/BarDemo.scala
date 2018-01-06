@@ -1,12 +1,11 @@
-package demo.components
+package org.rebeam.tree.demo
 
 import scala.scalajs.js
-import japgolly.scalajs.react._
-import japgolly.scalajs.react.vdom.all.key
-import japgolly.scalajs.react.vdom.svg.all._
+import japgolly.scalajs.react.{CtorType, _}
+import japgolly.scalajs.react.component.Scala.Component
+import japgolly.scalajs.react.vdom.svg_<^._
 import org.rebeam.tree.demo.Colors._
 import paths.high.Bar
-
 
 object BarDemo {
 
@@ -16,7 +15,7 @@ object BarDemo {
 
   private def below(p: js.Array[Double]) = s"translate(${ p(0) }, 320)"
 
-  val BarChart = ReactComponentB[Stats]("Bar chart")
+  val BarChart = ScalaComponent.builder[Stats]("Bar chart")
     .render_P(stats => {
       val bar = Bar[Double](
         data = stats.values,
@@ -30,15 +29,29 @@ object BarDemo {
       val middle = groups / 2
       val count = stats.values.head.length
 
-      val rectangles = bar.curves.zipWithIndex map { case (curve, i) =>
-        if (curve.index == middle) g(
-          path(d := curve.line.path.print, stroke := "none", fill := string(palette(curve.index))),
-          text(transform := below(curve.line.centroid), textAnchor := "middle", stats.labels(i / count))
-        )
-        else path(d := curve.line.path.print, stroke := "none", fill := string(palette(curve.index)))
+      val rectangles = bar.curves.zipWithIndex.toTagMod{
+        case (curve, i) =>
+          if (curve.index == middle) {
+            <.g(
+              <.path(
+                ^.d := curve.line.path.print,
+                ^.stroke := "none",
+                ^.fill := string(palette(curve.index))
+              ),
+              <.text(
+                ^.transform := below(curve.line.centroid),
+                ^.textAnchor := "middle",
+                stats.labels(i / count)
+              )
+            )
+          } else {
+            <.path(^.d := curve.line.path.print, ^.stroke := "none", ^.fill := string(palette(curve.index)))
+          }
       }
 
-      svg(width := 460, height := 400,
+      <.svg (
+        ^.width := 460,
+        ^.height := 400,
         rectangles
       )
     })

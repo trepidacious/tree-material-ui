@@ -1,17 +1,17 @@
 package org.rebeam.tree.view.list
 
 import chandu0101.scalajs.react.components.materialui.{Mui, MuiIconButton}
-import japgolly.scalajs.react.vdom.prefix_<^._
-import japgolly.scalajs.react.{Callback, ReactComponentB, ReactElement}
-import org.rebeam.tree.view.{RCP, View}
+import japgolly.scalajs.react.vdom.html_<^._
+import japgolly.scalajs.react._
+import org.rebeam.tree.view.View
 
 import scala.scalajs.js
 
 object ListItemIconButton {
 
-  case class Props(icon: ReactElement, onClick: Callback)
+  case class Props(icon: VdomElement, onClick: Callback)
 
-  private val component = ReactComponentB[Props]("ListItemIconButton")
+  private val component = ScalaComponent.builder[Props]("ListItemIconButton")
     .render_P(p =>
       <.div(
         ^.margin := "4px 4px",
@@ -24,5 +24,5 @@ object ListItemIconButton {
       )
     ).build
 
-  def apply(icon: ReactElement, onClick: Callback): RCP[Props] = component(Props(icon, onClick))
+  def apply(icon: VdomElement, onClick: Callback) = component(Props(icon, onClick))
 }

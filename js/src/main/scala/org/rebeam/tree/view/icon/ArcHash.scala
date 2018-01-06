@@ -1,6 +1,6 @@
 package org.rebeam.tree.view.icon
 
-import japgolly.scalajs.react.vdom.ReactTagOf
+import japgolly.scalajs.react.vdom.TagOf
 import org.rebeam.tree.sync.{Guid, Id, Ref}
 import org.rebeam.tree.util.CRC32
 import org.rebeam.tree.view.{Color, MaterialColor}
@@ -12,19 +12,15 @@ trait ArcHashable[A] {
 
 object ArcHashable {
 
-  def create[A](f: A => Int): ArcHashable[A] = new ArcHashable[A] {
-    def arcHash(a: A): Int = f(a)
-  }
-
   def hashGuid(guid: Guid): Int = CRC32.empty
     .updateLong(guid.clientId.id)
     .updateLong(guid.clientDeltaId.id)
     .updateLong(guid.withinDeltaId.id).value
 
-  implicit val arcHashableGuid: ArcHashable[Guid] = create(hashGuid)
-  implicit val arcHashableId: ArcHashable[Id[_]] = create(id => hashGuid(id.guid))
-  implicit val arcHashableRef: ArcHashable[Ref[_]] = create(ref => hashGuid(ref.id.guid))
-  implicit val arcHashableString: ArcHashable[String] = create(s => CRC32(s.getBytes("utf-8")).value)
+  implicit val arcHashableGuid: ArcHashable[Guid] = hashGuid
+  implicit val arcHashableId: ArcHashable[Id[_]] = id => hashGuid(id.guid)
+  implicit val arcHashableRef: ArcHashable[Ref[_]] = ref => hashGuid(ref.id.guid)
+  implicit val arcHashableString: ArcHashable[String] = s => CRC32(s.getBytes("utf-8")).value
 
 }
 
@@ -84,10 +80,10 @@ object ArcHash {
     accentForIndex((hash >> 24) & 0xFF)
   }
 
-  def icon[A](a: A)(implicit ah: ArcHashable[A]): ReactTagOf[SVG] = icon(ah.arcHash(a))
+  def icon[A](a: A)(implicit ah: ArcHashable[A]): TagOf[SVG] = icon(ah.arcHash(a))
 
-  def icon(hash: Int): ReactTagOf[SVG] = {
-    import japgolly.scalajs.react.vdom.svg.prefix_<^._
+  def icon(hash: Int): TagOf[SVG] = {
+    import japgolly.scalajs.react.vdom.svg_<^._
     val size = 24
     val c = size / 2
     val r = size / 8

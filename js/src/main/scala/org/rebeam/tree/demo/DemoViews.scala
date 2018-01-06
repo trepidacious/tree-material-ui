@@ -1,6 +1,6 @@
 package org.rebeam.tree.demo
 
-import japgolly.scalajs.react.vdom.prefix_<^._
+import japgolly.scalajs.react.vdom.html_<^._
 import org.rebeam.tree.{DeltaIOContextSource, Moment}
 import org.rebeam.tree.view.View._
 import org.rebeam.tree.view._
@@ -10,9 +10,7 @@ import chandu0101.scalajs.react.components.materialui._
 import japgolly.scalajs.react._
 import org.rebeam.tree.demo.DemoData.Priority._
 import org.rebeam.tree.demo.DemoRoutes._
-import org.rebeam.tree.view.infinite.Infinite
 import org.rebeam.tree.view.pages.{Breadcrumbs, Pages}
-import org.rebeam.tree.view.list.{SortableContainer, SortableElement, SortableListItem}
 import Pages._
 import org.rebeam.tree.view.markdown.MarkdownView
 

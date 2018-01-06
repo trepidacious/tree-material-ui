@@ -4,13 +4,14 @@ import chandu0101.scalajs.react.components.materialui._
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.extra.Reusability
 import japgolly.scalajs.react.extra.router._
-import japgolly.scalajs.react.vdom.prefix_<^._
+import japgolly.scalajs.react.vdom.html_<^._
+import MuiSvgIcon.SvgIconApply
 
 import scala.scalajs.js
 
 object Navigation {
 
-  case class Props[P](routerCtl: RouterCtl[P], resolution: Resolution[P], page: P, navs: Map[String, P])
+  case class Props[P](routerCtl: RouterCtl[P], resolution: Resolution[P], page: P, navs: List[(String, P)])
 
   case class State(drawerOpen: Boolean)
 
@@ -34,7 +35,7 @@ object Navigation {
           MuiIconButton(onTouchTap = View.touch(toggleDrawerOpen), iconStyle = js.Dynamic.literal("color" -> "#FFF"))(Mui.SvgIcons.NavigationMenu()())
         ),
 //        MuiAppBar(
-////          title = p.title: ReactNode,
+////          title = p.title: VdomNode,
 //          onLeftIconButtonTouchTap  = View.touch(toggleDrawerOpen),
 ////          onRightIconButtonTouchTap = CallbackDebug.f1("onRightIconButtonTouchTap"),
 ////          onTitleTouchTap           = CallbackDebug.f1("onTitleTouchTap"),
@@ -62,7 +63,7 @@ object Navigation {
               case (name, page) =>
                 MuiMenuItem(
                   key         = name,
-                  primaryText = name: ReactNode,
+                  primaryText = name: VdomNode,
                   checked     = p.page == page,
                   insetChildren = p.page != page,   //Allow space for icon/checkmark when it's not displayed
                   onTouchTap  = View.touch(p.routerCtl.set(page) >> toggleDrawerOpen),
@@ -70,8 +71,8 @@ object Navigation {
                     "cursor" -> "pointer",
                     "user-select" -> "none"
                   )
-                )()
-            }
+                )(): VdomNode
+            } : _*
           )
         ),
 //        <.div(
@@ -84,14 +85,14 @@ object Navigation {
 
   //TODO make only the contents care about resolution
   //Reusable if all fields are equal except routerCtl, where we use its own reusability
-  implicit def navPropsReuse[P]: Reusability[Props[P]] = Reusability.fn{
+  implicit def navPropsReuse[P]: Reusability[Props[P]] = Reusability {
     case (a, b) if a eq b => true // First because most common case and fastest
     case (a, b) if a.page == b.page && a.navs == b.navs && a.resolution == b.resolution => RouterCtl.reusability[P].test(a.routerCtl, b.routerCtl)
     case _ => false
   }
 
   //Just make the component constructor - props to be supplied later to make a component
-  def apply[P] = ReactComponentB[Props[P]]("Nav")
+  def apply[P] = ScalaComponent.builder[Props[P]]("Nav")
     .initialState(State(false))
     .backend(new Backend[P](_))
     .render(s => s.backend.render(s.props, s.state))

@@ -1,6 +1,6 @@
 package org.rebeam.tree.demo
 
-import japgolly.scalajs.react.vdom.prefix_<^._
+import japgolly.scalajs.react.vdom.html_<^._
 import chandu0101.scalajs.react.components.materialui._
 import japgolly.scalajs.react._
 import org.rebeam.tree.view.{ReactGridLayout, View}
@@ -24,14 +24,14 @@ object ReactGridLayoutDemo {
       })
     }
 
-    def card(key: String) =
+    def card(key: String): VdomNode =
       <.div(^.key := key,
         MuiCard(style = js.Dynamic.literal("height" -> "100%"))(
 //          MuiCardHeader(
-//            title = "Card " + key : ReactNode,
-//            subtitle = "Subtitle for card " + key : ReactNode
+//            title = "Card " + key : VdomNode,
+//            subtitle = "Subtitle for card " + key : VdomNode
 //          )(),
-          MuiCardTitle(title = "Card " + key: ReactNode, subtitle = "Card subtitle": ReactNode)(),
+          MuiCardTitle(title = "Card " + key: VdomNode, subtitle = "Card subtitle": VdomNode)(),
           MuiCardText(style = js.Dynamic.literal("height" -> "100%"))("Text to display on card " + key),
           MuiCardActions(style = js.Dynamic.literal("position" -> "absolute", "bottom" -> "0px"))(
             MuiFlatButton(label = "Swap", onTouchTap = View.touch(swapFirstTwo))()
@@ -48,7 +48,7 @@ object ReactGridLayoutDemo {
         containerPadding = XY(0, 0),
         onLayoutChange = newLayout => scope.modState(s => newLayout)
       )(
-        List("a", "b", "c", "d").map(card)
+        List("a", "b", "c", "d").map(card): _*
       )
     }
   }
@@ -60,7 +60,7 @@ object ReactGridLayoutDemo {
     LayoutItem("d", 0, 0)
   )
 
-  val c = ReactComponentB[Unit]("ReactGridLayoutDemo")
+  val c = ScalaComponent.builder[Unit]("ReactGridLayoutDemo")
     .initialState(defaultLayout)
     .backend(new Backend(_))
     .render(s => s.backend.render(s.props, s.state))
