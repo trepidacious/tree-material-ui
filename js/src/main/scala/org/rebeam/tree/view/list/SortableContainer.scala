@@ -3,6 +3,7 @@
 //import japgolly.scalajs.react._
 //
 //import scala.scalajs.js
+//import scala.language.higherKinds
 //
 //object SortableContainer {
 //  @js.native
@@ -68,14 +69,17 @@
 //    * @tparam P               The type of Props of the wrapped component
 //    * @return                 A component wrapping the wrapped component...
 //    */
-//  def wrap[P](wrappedComponent: ReactComponentC[P,_,_,_]): Props => P => ReactComponentU_ = {
+//  def wrap[P](wrappedComponent: GenericComponent[P, CtorType.Props, _]):
+//    Props => P => JsComponent.Unmounted[js.Object, Null] = {
 //
-//    val component = js.Dynamic.global.SortableContainer(wrappedComponent.reactClass)
+//    val componentFactoryFunction = js.Dynamic.global.WidthProvider(wrappedComponent.raw)
+//
+//    val component = JsComponent[js.Object, Children.None, Null](componentFactoryFunction)
 //
 //    (props) => (wrappedProps) => {
 //      val p = props.toJS
-//      p.updateDynamic("v")(wrappedProps.asInstanceOf[js.Any])
-//      React.asInstanceOf[js.Dynamic].createElement(component, p).asInstanceOf[ReactComponentU_]
+//      p.updateDynamic("a")(wrappedProps.asInstanceOf[js.Any])
+//      component(p)
 //    }
 //  }
 //

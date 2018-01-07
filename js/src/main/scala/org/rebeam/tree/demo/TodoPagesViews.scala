@@ -1,9 +1,7 @@
 //package org.rebeam.tree.demo
 //
 //import chandu0101.scalajs.react.components.materialui._
-//import org.rebeam.tree.demo.BarDemo
 //import io.circe.Encoder
-//import japgolly.scalajs.react.Addons.ReactCssTransitionGroup
 //import japgolly.scalajs.react._
 //import japgolly.scalajs.react.extra.Reusability
 //import japgolly.scalajs.react.vdom.html_<^._
@@ -84,6 +82,7 @@
 //    ),
 //    None
 //  )
+//
 //
 //  val TodoProjectEmptyView2 = PageLayout(
 //    MaterialColor.BlueGrey(500), 128,

@@ -8,6 +8,7 @@ import org.rebeam.tree.view.pages._
 import org.rebeam.tree.demo.DemoData._
 import org.rebeam.tree.sync.Sync._
 import org.rebeam.tree.sync._
+
 import japgolly.scalajs.react.vdom.html_<^._
 
 object DemoRoutes {
@@ -16,8 +17,8 @@ object DemoRoutes {
   case object HomePage          extends Page
   case object AddressPage       extends Page
 
-//  case object RefPage           extends Page
-//
+  case object RefPage           extends Page
+
 //  sealed trait TodoPage extends Page {
 //    def back: TodoPage
 //  }
@@ -57,12 +58,13 @@ object DemoRoutes {
     def dynRenderP[P <: Page](g: Pages[P, P] => VdomElement): P => Renderer =
       p => Renderer(r => g(Pages(p, r.narrow[P])))
 
-    def id[A] = new RouteB[Id[A]](Id.regex.regex, 1, g => Id.fromString[A](g(0)), Id.toString(_))
+//    def id[A] = new RouteB[Id[A]](Id.regex.regex, 1, g => Id.fromString[A](g(0)), Id.toString(_))
 
     def caseObject[A](s: String, a: A) = RouteB.literal(s).xmap(_ => a)(_ => ())
 
-//    val refRoute = caseObject("#ref", RefPage)
-//
+
+    val refRoute = caseObject("#ref", RefPage)
+
 //    val todoProjectRoute = caseObject("#todo", TodoProjectPage)
 //    val todoProjectListRoute = ("#todo/list" / id[TodoList]).caseClass[TodoProjectListPage]
 //    val todoProjectListItemRoute = ("#todo/list" / id[TodoList] / "item" / id[Todo]).caseClass[TodoProjectListItemPage]
@@ -73,7 +75,7 @@ object DemoRoutes {
     (trimSlashes
       | staticRoute(root,   HomePage) ~> render(DemoViews.homeView())
       | staticRoute("#address", AddressPage) ~> render(DemoViews.addressView)
-//      | dynamicRouteCT(refRoute) ~> dynRenderP[RefPage.type](RefViews.refViewFactory)
+      | dynamicRouteCT(refRoute) ~> dynRenderP[RefPage.type]((g: Pages[RefPage.type, RefPage.type]) => (RefViews.refViewFactory(g): VdomElement))
 //      | dynamicRouteCT(todoProjectRoute) ~> dynRenderP[TodoPage](TodoPagesViews.todoProjectViewFactory)
 //      | dynamicRouteCT(todoProjectListRoute) ~> dynRenderP[TodoPage](TodoPagesViews.todoProjectViewFactory)
 //      | dynamicRouteCT(todoProjectListItemRoute) ~> dynRenderP[TodoPage](TodoPagesViews.todoProjectViewFactory)
@@ -81,7 +83,7 @@ object DemoRoutes {
       )
 
       .notFound(redirectToPage(HomePage)(Redirect.Replace))
-      .renderWith(layout)
+      .renderWith(layout _ )
       .verify(HomePage, AddressPage)//, TodoProjectPage)
   }
 

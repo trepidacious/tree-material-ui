@@ -1,8 +1,10 @@
 package org.rebeam.tree.view
 
 import japgolly.scalajs.react._
+import japgolly.scalajs.react.vdom.html_<^.VdomElement
 
 import scala.scalajs.js
+import scala.language.higherKinds
 
 object WidthProvider {
 
@@ -15,17 +17,20 @@ object WidthProvider {
     * @tparam P               The type of Props of the wrapped component
     * @return                 A component wrapping the wrapped component...
     */
-  def wrap[P](wrappedComponent: GenericComponent[P, CtorType.Props, _]): Props => P => JsComponent.Unmounted[js.Object, Null] = {
+  def wrap[P, CT[-p, +u] <: CtorType[p, u], U](
+    wrappedComponent: GenericComponent[P, CT, U]
+//  ): Props => P => raw.ReactElement = {
+  ): Props => P => JsComponent.Unmounted[js.Object, Null] = {
 
     //Some of the terminology here might be incorrect...
 
     //WidthProvider is a HOC, so we pass it our wrapped component's factory function
     //to produce a factory function for our output component
-    // TODO is `.raw` really want we want?
     val componentFactoryFunction = js.Dynamic.global.WidthProvider(wrappedComponent.raw)
 
     //Then we make a JsComponent from that
     val component = JsComponent[js.Object, Children.None, Null](componentFactoryFunction)
+
 
     //Finally we make the component back into a scala function. This accepts
     //props for the WidthProvider itself, then for the wrapped component, and
@@ -36,15 +41,19 @@ object WidthProvider {
     //the width property (it is outside the "a" field used to store the scala Props
     //object) but it demonstrates the principle. For a HOC that does something other
     //than inserting prop fields this would work fine.
-    (props) => (wrappedProps) =>
-      component(js.Dynamic.literal(
-      "measureBeforeMount" -> props.measureBeforeMount,
-      // Props of scala react components use a single "a" field containing the
-      // actual property value, see japgolly.scalajs.react.internal.Box.
-      // The HOC will pass this through to the wrapped component, in addition
-      // to the "width" property it inserts in.
-      // TODO use Box to wrap rather than explicit `a` field?
-      "a" -> wrappedProps.asInstanceOf[js.Any]
-    ))
+    (props) => (wrappedProps) => {
+      val p = js.Dynamic.literal(
+        "measureBeforeMount" -> props.measureBeforeMount,
+        // Props of scala react components use a single "a" field containing the
+        // actual property value, see japgolly.scalajs.react.internal.Box.
+        // The HOC will pass this through to the wrapped component, in addition
+        // to the "width" property it inserts in.
+        // TODO use Box to wrap rather than explicit `a` field?
+        "a" -> wrappedProps.asInstanceOf[js.Any]
+      )
+
+      component(p)
+//      js.Dynamic.global.React.createElement(componentFactoryFunction, p).asInstanceOf[raw.ReactElement]
+    }
   }
 }

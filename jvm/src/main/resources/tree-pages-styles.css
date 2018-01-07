@@ -174,30 +174,40 @@
   overflow: hidden;
 }
 
+/* Item in a list view, to allow animation with tree-list-view--transition styles below */
+.tree-list-view__item {
+  position: relative;
+  width: 100%;
+  height: 60px;
+  box-sizing: border-box;
+  opacity: 1.0;
+  overflow: hidden;
+}
+
 /* Animating enter/leave of list items */
 /* Start of entering */
-.tree-list-view--transition-enter.tree-list-item__transition-container {
+.tree-list-view--transition-enter.tree-list-view__item {
   will-change: height opacity;
   height: 0px;
   opacity: 0.0;
 }
 
 /* End of entering */
-.tree-list-view--transition-enter.tree-list-view--transition-enter-active.tree-list-item__transition-container {
+.tree-list-view--transition-enter.tree-list-view--transition-enter-active.tree-list-view__item {
   height: 60px;
   transition: all 225ms cubic-bezier(0.4, 0.0, 0.2, 1);
   opacity: 1.0;
 }
 
 /* Start of leaving */
-.tree-list-view--transition-leave.tree-list-item__transition-container {
+.tree-list-view--transition-leave.tree-list-view__item {
   will-change: height opacity;
   height: 60px;
   opacity: 1.0;
 }
 
 /* End of leaving */
-.tree-list-view--transition-leave.tree-list-view--transition-leave-active.tree-list-item__transition-container {
+.tree-list-view--transition-leave.tree-list-view--transition-leave-active.tree-list-view__item {
   will-change: height opacity;
   height: 0px;
   transition: all 195ms cubic-bezier(0.4, 0.0, 0.2, 1);
