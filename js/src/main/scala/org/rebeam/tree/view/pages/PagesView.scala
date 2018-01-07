@@ -12,7 +12,7 @@ object PagesView {
 
   val stateReuse: Reusability[State] = Reusability.byRefOr_==
 
-  class Backend[M, P](scope: BackendScope[Cursor[M, Pages[P, P]], State])(renderToList: Cursor[M, Pages[P, P]] => List[(String, VdomElement)])(transitions: PagesToTransition[P]) {
+  class Backend[M, P](scope: BackendScope[Cursor[M, Pages[P, P]], State])(renderToList: Cursor[M, Pages[P, P]] => List[(Key, VdomElement)])(transitions: PagesToTransition[P]) {
 
     def render(cp: Cursor[M, Pages[P, P]], state: State): VdomElement = {
       val panes = renderToList(cp)
@@ -40,7 +40,7 @@ object PagesView {
     }
   }
 
-  def apply[M, P](name: String)(renderToList: Cursor[M, Pages[P, P]] => List[(String, VdomElement)])(implicit transitions: PagesToTransition[P]) = ScalaComponent.builder[Cursor[M, Pages[P, P]]](name)
+  def apply[M, P](name: String)(renderToList: Cursor[M, Pages[P, P]] => List[(Key, VdomElement)])(implicit transitions: PagesToTransition[P]) = ScalaComponent.builder[Cursor[M, Pages[P, P]]](name)
     .initialState[State](State(PagesTransition.Left))
     .backend(new Backend[M, P](_)(renderToList)(transitions))
     .render(s => s.backend.render(s.props, s.state))
