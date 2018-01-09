@@ -12,6 +12,7 @@ import Mui.Styles.colors
 import scala.language.implicitConversions
 import scala.scalajs.js
 import japgolly.scalajs.react.vdom.html_<^._
+import org.rebeam.tree.sync.Identified
 import org.rebeam.tree.view.icon.{ArcHash, ArcHashable}
 import org.scalajs.dom.html.Span
 
@@ -275,11 +276,18 @@ object View {
 
   val avatarArcHashString = avatarArcHash(ArcHashable.arcHashableString)
 
-  def avatarArcHashColor[A](implicit ah: ArcHashable[A], c: Colorable[A]) = ScalaComponent.builder[A]("avatarArcHashColor")
+  def avatarArcHashColorable[A](implicit ah: ArcHashable[A], c: Colorable[A]) = ScalaComponent.builder[A]("avatarArcHashColor")
     .render_P(a => {
       MuiAvatar(
         backgroundColor = c.colorOf(a)
       )(ArcHash.icon(a, Some(MaterialColor.White())))
+    }).build
+
+  val avatarArcHashIdentifiedAndColored = ScalaComponent.builder[Colored with Identified[_]]("avatarArcHashIdentifiedAndColored")
+    .render_P(a => {
+      MuiAvatar(
+        backgroundColor = a.color
+      )(ArcHash.iconForHash(ArcHashable.hashGuid(a.id.guid), Some(MaterialColor.White())))
     }).build
 
   def avatarArcHash[A](implicit ah: ArcHashable[A]) = ScalaComponent.builder[A]("avatarArcHash")

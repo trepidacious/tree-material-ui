@@ -53,13 +53,11 @@ object TodoPagesViews {
 //  )
 //
 
-  val TodoListAvatar = avatarArcHashColor[TodoList]
-
   val TodoListSummary = ListItem.listItemWithEditAndDelete[TodoList](
     "TodoListSummary",
     todoList => todoList.name,
     todoList => s"${todoList.items.size} item${if (todoList.items.size == 1) "" else "s"}",
-    todoList => TodoListAvatar(todoList)
+    todoList => avatarArcHashIdentifiedAndColored(todoList)
   )
 
   val TodoProjectView = ListView.usingId[TodoProject, Pages[TodoPage, TodoPage], TodoList, EditAndDeleteActions](

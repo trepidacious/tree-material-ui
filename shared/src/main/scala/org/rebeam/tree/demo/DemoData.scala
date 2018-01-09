@@ -125,9 +125,7 @@ object DemoData {
     color: Color = MaterialColor.Grey(500),
     items: List[Todo] = Nil
   ) extends Identified[TodoList] with Colored
-
-  implicit val todoListColorable: Colorable[TodoList] = _.color
-
+  
   //Works with Cursor.zoomMatch to zoom to a particular Todo
   @JsonCodec
   case class FindTodoById(id: Id[Todo]) extends (Todo => Boolean) {
