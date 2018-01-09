@@ -1,7 +1,7 @@
 package org.rebeam.tree.view.icon
 
 import japgolly.scalajs.react.vdom.TagOf
-import org.rebeam.tree.sync.{Guid, Id, Ref}
+import org.rebeam.tree.sync._
 import org.rebeam.tree.util.CRC32
 import org.rebeam.tree.view.{Color, MaterialColor}
 import org.scalajs.dom.svg.SVG
@@ -21,6 +21,8 @@ object ArcHashable {
   implicit val arcHashableId: ArcHashable[Id[_]] = id => hashGuid(id.guid)
   implicit val arcHashableRef: ArcHashable[Ref[_]] = ref => hashGuid(ref.id.guid)
   implicit val arcHashableString: ArcHashable[String] = s => CRC32(s.getBytes("utf-8")).value
+  implicit def arcHashableIdentified[A]: ArcHashable[Identified[A]] = a => hashGuid(a.id.guid)
+  implicit def arcHashableIdentifiable[A](implicit identifiable: Identifiable[A]): ArcHashable[A] = a => hashGuid(identifiable.id(a).guid)
 
 }
 
@@ -80,9 +82,9 @@ object ArcHash {
     accentForIndex((hash >> 24) & 0xFF)
   }
 
-  def icon[A](a: A)(implicit ah: ArcHashable[A]): TagOf[SVG] = icon(ah.arcHash(a))
+  def icon[A](a: A, color: Option[Color] = None)(implicit ah: ArcHashable[A]): TagOf[SVG] = iconForHash(ah.arcHash(a), color)
 
-  def icon(hash: Int): TagOf[SVG] = {
+  def iconForHash(hash: Int, color: Option[Color] = None): TagOf[SVG] = {
     import japgolly.scalajs.react.vdom.svg_<^._
     val size = 24
     val c = size / 2
@@ -96,9 +98,9 @@ object ArcHash {
       ^.strokeWidth := 2,
       ^.strokeLinecap := "round",
       ^.viewBox := "0 0 24 24",
-      <.path(^.transform := "translate(0, 0)", ^.stroke := accentForIndex((hash >> 28) & 0xF).toString, ^.d := arcHashSymRingPath(c, r, hash, 0)),
-      <.path(^.transform := "translate(0, 0)", ^.stroke := accentForIndex((hash >> 24) & 0xF).toString, ^.d := arcHashSymRingPath(c, r, hash, 1)),
-      <.path(^.transform := "translate(0, 0)", ^.stroke := accentForIndex((hash >> 20) & 0xF).toString, ^.d := arcHashSymRingPath(c, r, hash, 2))
+      <.path(^.transform := "translate(0, 0)", ^.stroke := color.getOrElse(accentForIndex((hash >> 28) & 0xF)).toString, ^.d := arcHashSymRingPath(c, r, hash, 0)),
+      <.path(^.transform := "translate(0, 0)", ^.stroke := color.getOrElse(accentForIndex((hash >> 24) & 0xF)).toString, ^.d := arcHashSymRingPath(c, r, hash, 1)),
+      <.path(^.transform := "translate(0, 0)", ^.stroke := color.getOrElse(accentForIndex((hash >> 20) & 0xF)).toString, ^.d := arcHashSymRingPath(c, r, hash, 2))
     )
   }
 

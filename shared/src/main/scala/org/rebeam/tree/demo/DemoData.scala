@@ -2,7 +2,7 @@ package org.rebeam.tree.demo
 
 import org.rebeam.tree._
 import org.rebeam.lenses.macros.Lenses
-import org.rebeam.tree.view.{Color, MaterialColor}
+import org.rebeam.tree.view.{Color, Colorable, Colored, MaterialColor}
 import io.circe._
 import io.circe.generic.semiauto._
 
@@ -124,7 +124,9 @@ object DemoData {
     priority: Priority = Priority.medium,
     color: Color = MaterialColor.Grey(500),
     items: List[Todo] = Nil
-  )
+  ) extends Identified[TodoList] with Colored
+
+  implicit val todoListColorable: Colorable[TodoList] = _.color
 
   //Works with Cursor.zoomMatch to zoom to a particular Todo
   @JsonCodec
@@ -184,7 +186,7 @@ object DemoData {
                         name: String,
                         color: Color = MaterialColor.Grey(500),
                         lists: List[TodoList]
-                      )
+                      ) extends Identified[TodoProject] with Colored
 
   @JsonCodec
   sealed trait TodoProjectAction extends Delta[TodoProject]

@@ -275,15 +275,18 @@ object View {
 
   val avatarArcHashString = avatarArcHash(ArcHashable.arcHashableString)
 
-  def avatarArcHash[A](implicit ah: ArcHashable[A]) = ScalaComponent.builder[A]("avatarArcHash")
-    .render(d => {
-      val hash = d.props
+  def avatarArcHashColor[A](implicit ah: ArcHashable[A], c: Colorable[A]) = ScalaComponent.builder[A]("avatarArcHashColor")
+    .render_P(a => {
       MuiAvatar(
-//        backgroundColor = ArcHash.background(hash)
-        backgroundColor = MaterialColor.BlueGrey(700)
-//        style = js.Dynamic.literal("stroke" -> ArcHash.accent(hash))
+        backgroundColor = c.colorOf(a)
+      )(ArcHash.icon(a, Some(MaterialColor.White())))
+    }).build
 
-      )(ArcHash.icon(hash))
+  def avatarArcHash[A](implicit ah: ArcHashable[A]) = ScalaComponent.builder[A]("avatarArcHash")
+    .render_P(a => {
+      MuiAvatar(
+        backgroundColor = MaterialColor.BlueGrey(700)
+      )(ArcHash.icon(a))
     }).build
 
   def coloredCardButton(label: String, primary: Boolean = false, secondary: Boolean = false)(callback: Callback) = {

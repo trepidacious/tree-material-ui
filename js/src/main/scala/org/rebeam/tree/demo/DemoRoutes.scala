@@ -21,6 +21,7 @@ object DemoRoutes {
 
   sealed trait TodoPage extends Page {
     def back: TodoPage
+    def toList(listId: Id[TodoList]) = TodoProjectListPage(listId)
   }
 
   sealed trait PageWithTodoProjectList extends TodoPage {

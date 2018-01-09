@@ -13,6 +13,7 @@ import org.rebeam.tree.sync._
 import org.rebeam.tree.view.Cursor._
 import org.rebeam.tree.view.View._
 import org.rebeam.tree.view._
+import org.rebeam.tree.view.Colorable.coloredColor
 import org.rebeam.tree.view.infinite.Infinite
 import org.rebeam.tree.view.list.ListItem.EditAndDeleteActions
 import org.rebeam.tree.view.measure.{CursorHeightView, MeasureDemo}
@@ -30,26 +31,49 @@ import scala.scalajs.js.UndefOr
 
 object TodoPagesViews {
 
-  val TodoListSummaryView = cursorView[TodoList, Pages[TodoPage, TodoPage]]("TodoListSummaryView"){
-    cp => {
-      val list = cp.model
-      val toList = cp.location.set(TodoProjectListPage(list.id))
-      val idString = s"${list.id}"
-      val contents = SortableListItem.twoLines(
-        s"${list.name}",
-        s"${list.items.size} item${if (list.items.size == 1) "" else "s"}"
-      )
-      SortableListItem(avatarText((idString, list.color)), contents, toList)
-    }
-  }
+//  val TodoListSummaryView = cursorView[TodoList, Pages[TodoPage, TodoPage]]("TodoListSummaryView"){
+//    cp => {
+//      val list = cp.model
+//      val toList = cp.location.set(TodoProjectListPage(list.id))
+//      val idString = s"${list.id}"
+//      val contents = SortableListItem.twoLines(
+//        s"${list.name}",
+//        s"${list.items.size} item${if (list.items.size == 1) "" else "s"}"
+//      )
+//      SortableListItem(avatarText((idString, list.color)), contents, toList)
+//    }
+//  }
+//
+//  val TodoListsView = ListView.legacy[TodoList, TodoPage, TodoPage, FindTodoListById](
+//    "TodoListsView",
+//    l => FindTodoListById(l.id),
+//    l => l.id.toString(),
+//    TodoListSummaryView(_),
+//    "Todo lists"
+//  )
+//
 
-  val TodoListsView = ListView.legacy[TodoList, TodoPage, TodoPage, FindTodoListById](
-    "TodoListView",
-    l => FindTodoListById(l.id),
-    l => l.id.toString(),
-    TodoListSummaryView(_),
-    "Todo lists"
+  val TodoListAvatar = avatarArcHashColor[TodoList]
+
+  val TodoListSummary = ListItem.listItemWithEditAndDelete[TodoList](
+    "TodoListSummary",
+    todoList => todoList.name,
+    todoList => s"${todoList.items.size} item${if (todoList.items.size == 1) "" else "s"}",
+    todoList => TodoListAvatar(todoList)
   )
+
+  val TodoProjectView = ListView.usingId[TodoProject, Pages[TodoPage, TodoPage], TodoList, EditAndDeleteActions](
+    "TodoProjectView",
+    _.zoom(TodoProject.lists),
+    (todoList, todoProjectCursor) => EditAndDeleteActions(
+      todoProjectCursor.location.modify(_.toList(todoList.id)),
+      todoProjectCursor.act(TodoProjectAction.DeleteListById(todoList.id): TodoProjectAction)
+    ),
+    TodoListSummary(_),
+    "Todo lists",
+    mode = ListView.ListMode.Finite
+  )
+
 
   val TodoSummary = ListItem.listItemWithCompleteEditAndDelete[Todo](
     "TodoSummary",
@@ -97,7 +121,7 @@ object TodoPagesViews {
     None
   )
 
-  val TodoProjectView = cursorView[TodoProject, Pages[TodoPage, TodoPage]]("TodoProjectView") {
+  val TodoProjectPageView = cursorView[TodoProject, Pages[TodoPage, TodoPage]]("TodoProjectView") {
     cp => {
       //FIXME use actual creation time
       val fab = PageLayout.addFAB(cp.act(TodoProjectAction.CreateTodoList(): TodoProjectAction))
@@ -106,10 +130,15 @@ object TodoPagesViews {
         textViewHero(cp.zoom(TodoProject.name).label("Project name"))
       )
 
+//      val contents =
+//        TodoListsView(
+//          p => cp.act(TodoProjectAction.ListIndexChange(p.oldIndex, p.newIndex): TodoProjectAction)
+//        )(cp.zoom(TodoProject.lists))
+
       val contents =
-        TodoListsView(
+        TodoProjectView(
           p => cp.act(TodoProjectAction.ListIndexChange(p.oldIndex, p.newIndex): TodoProjectAction)
-        )(cp.zoom(TodoProject.lists))
+        )(cp)
 
       PageLayout(MaterialColor.BlueGrey(500), 128, "", Some(fab), Some(title), Some(contents))
     }
@@ -199,7 +228,7 @@ object TodoPagesViews {
 
       // TODO neater - make list of Option[VdomElement], then zip with index and flatten?
       List[Option[(Key, VdomElement)]](
-        Some((0, TodoProjectView(cp): VdomElement)),
+        Some((0, TodoProjectPageView(cp): VdomElement)),
         list.map(c => (1, TodoListPageView(c): VdomElement)),
         item.map(c => (2, TodoView(c): VdomElement))
       ).flatten
