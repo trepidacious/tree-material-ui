@@ -18,31 +18,23 @@ import cats.instances.list._
 import cats.syntax.traverse._
 
 import scala.collection.mutable.ListBuffer
+import Searchable._
 
 object DemoData {
 
-//  import Priority._
-//  @JsonCodec
-//  sealed trait Priority
-//  object Priority {
-//    object Low extends Priority {
-//      override def toString = "low"
-//    }
-//    object Medium extends Priority {
-//      override def toString = "medium"
-//    }
-//    object High extends Priority {
-//      override def toString = "high"
-//    }
-//    implicit val s: Searchable[Priority, Guid] = notSearchable
-//  }
-
   @JsonCodec
-  case class Priority(level: Int)
+  sealed trait Priority
   object Priority {
-    val low = Priority(1)
-    val medium = Priority(2)
-    val high = Priority(3)
+    object Low extends Priority {
+      override def toString = "low"
+    }
+    object Medium extends Priority {
+      override def toString = "medium"
+    }
+    object High extends Priority {
+      override def toString = "high"
+    }
+    implicit val s: Searchable[Priority, Guid] = notSearchable
   }
 
   @JsonCodec
@@ -91,27 +83,23 @@ object DemoData {
   @JsonCodec
   @Lenses
   case class Todo (
-                            id: Id[Todo],
-                            name: String,
-                            completed: Boolean = false,
-                            priority: Priority = Priority.medium
-                          ) extends Identified[Todo]
+    id: Id[Todo],
+    name: String,
+    completed: Boolean = false,
+    priority: Priority = Priority.Medium
+  ) extends Identified[Todo]
 
   @JsonCodec
   sealed trait TodoAction extends Delta[Todo]
   object TodoAction {
+    import Priority._
     case object CyclePriority extends TodoAction {
       def apply(t: Todo): DeltaIO[Todo] = pure {
-//        t.copy(priority =
-//          if (t.priority == Priority.Low) {
-//            Priority.Medium
-//          } else if (t.priority == Priority.Medium) {
-//            Priority.High
-//          } else {
-//            Priority.Low
-//          }
-//        )
-        t
+        t.copy(priority = t.priority match {
+          case Low => Medium
+          case Medium => High
+          case High => Low
+        })
       }
     }
   }
@@ -121,11 +109,11 @@ object DemoData {
   case class TodoList (
     id: Id[TodoList],
     name: String,
-    priority: Priority = Priority.medium,
+    priority: Priority = Priority.Medium,
     color: Color = MaterialColor.Grey(500),
     items: List[Todo] = Nil
   ) extends Identified[TodoList] with Colored
-  
+
   //Works with Cursor.zoomMatch to zoom to a particular Todo
   @JsonCodec
   case class FindTodoById(id: Id[Todo]) extends (Todo => Boolean) {
@@ -136,7 +124,7 @@ object DemoData {
   sealed trait TodoListAction extends Delta[TodoList]
   object TodoListAction {
 
-    case class CreateTodo(name: String = "New todo", priority: Priority = Priority.medium) extends TodoListAction {
+    case class CreateTodo(name: String = "New todo", priority: Priority = Priority.Medium) extends TodoListAction {
       def apply(l: TodoList): DeltaIO[TodoList] = for {
         id <- getId[Todo]
       } yield {
@@ -190,7 +178,7 @@ object DemoData {
   sealed trait TodoProjectAction extends Delta[TodoProject]
   object TodoProjectAction {
 
-    case class CreateTodoList(name: String = "New todo list", priority: Priority = Priority.medium) extends TodoProjectAction {
+    case class CreateTodoList(name: String = "New todo list", priority: Priority = Priority.Medium) extends TodoProjectAction {
       def apply(p: TodoProject): DeltaIO[TodoProject] = for {
         id <- getId[TodoList]
       } yield {
@@ -297,9 +285,9 @@ object DemoData {
         id,
         "Todo " + i,
         priority = i % 3 match {
-          case 0 => Priority.low
-          case 1 => Priority.medium
-          case _ => Priority.high
+          case 0 => Priority.Low
+          case 1 => Priority.Medium
+          case _ => Priority.High
         }
       )
     }
@@ -311,7 +299,7 @@ object DemoData {
       TodoList(
         id,
         s"Todo list $listIndex",
-        Priority.medium,
+        Priority.Medium,
         MaterialColor.backgroundForIndex(id.guid.withinDeltaId.id.toInt - 1),
         todos
       )

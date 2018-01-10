@@ -4,7 +4,12 @@ version in ThisBuild := "0.1-SNAPSHOT"
 
 organization in ThisBuild := "org.rebeam"
 
-scalaVersion in ThisBuild := "2.12.4"
+// Plain Scala
+//scalaVersion in ThisBuild := "2.12.4"
+
+//Typelevel Scala, also see .jsSettings below
+scalaOrganization in ThisBuild := "org.typelevel"
+scalaVersion in ThisBuild := "2.12.4-bin-typelevel-4"
 
 scalacOptions in ThisBuild ++= Seq(
   "-feature",
@@ -47,7 +52,7 @@ lazy val treeMaterialUi = crossProject.in(file(".")).
       "org.slf4j"   % "slf4j-simple"          % "1.7.21"
     ),
     //For @Lenses
-    addCompilerPlugin("org.scalamacros" %% "paradise" % "2.1.0" cross CrossVersion.full)
+    addCompilerPlugin("org.scalamacros" %% "paradise" % "2.1.0" cross CrossVersion.patch)
 
   //Settings specific to JVM
   ).jvmSettings(
@@ -68,6 +73,12 @@ lazy val treeMaterialUi = crossProject.in(file(".")).
     crossTarget in (Compile, fastOptJS) := assetsDir,
     crossTarget in (Compile, packageJSDependencies) := assetsDir,
 //    crossTarget in (Compile, packageLauncher) := assetsDir,
+
+    //Typelevel scala, see https://github.com/scala-js/scala-js/pull/2954#issuecomment-302743801
+    // Remove the dependency on the scalajs-compiler
+    libraryDependencies := libraryDependencies.value.filterNot(_.name == "scalajs-compiler"),
+    // And add a custom one
+    addCompilerPlugin("org.scala-js" % "scalajs-compiler" % scalaJSVersion cross CrossVersion.patch),
 
     // We get javascript dependencies from webpack
     jsDependencies ++= Seq()
