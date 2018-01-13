@@ -1,8 +1,7 @@
 package org.rebeam.tree.view.list
 
 import chandu0101.scalajs.react.components.materialui._
-import japgolly.scalajs.react.{CtorType, _}
-import japgolly.scalajs.react.component.Scala.Component
+import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.html_<^._
 import org.rebeam.tree.view._
 import org.scalajs.dom.html.Div

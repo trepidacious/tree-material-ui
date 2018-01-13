@@ -4,8 +4,7 @@ import chandu0101.scalajs.react.components.materialui._
 import MuiSvgIcon.SvgIconApply
 import japgolly.scalajs.react.vdom.html_<^._
 import japgolly.scalajs.react._
-import japgolly.scalajs.react.vdom.TopNode
-import org.rebeam.lenses.LensN
+import monocle.Lens
 import org.rebeam.tree.view.View._
 import org.rebeam.tree.view.icon.Icons
 import org.rebeam.tree.view.transition.CSSTransitionGroup
@@ -254,7 +253,7 @@ object ListItem {
     name: String,
     firstLine: A => String,
     secondLine: A => String,
-    completionLens: LensN[A, Boolean]
+    completionLens: Lens[A, Boolean]
   ) = cursorView[A, EditAndDeleteActions](name) {
     cp => {
       val m = cp.model

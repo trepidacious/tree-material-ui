@@ -1,12 +1,10 @@
 package org.rebeam.tree.demo
 
-import japgolly.scalajs.react._
 import japgolly.scalajs.react.extra.router.StaticDsl._
 import japgolly.scalajs.react.extra.router._
 import org.rebeam.tree.view.Navigation
 import org.rebeam.tree.view.pages._
 import org.rebeam.tree.demo.DemoData._
-import org.rebeam.tree.sync.Sync._
 import org.rebeam.tree.sync._
 
 import japgolly.scalajs.react.vdom.html_<^._

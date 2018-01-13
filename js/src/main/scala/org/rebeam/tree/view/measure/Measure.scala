@@ -2,7 +2,6 @@ package org.rebeam.tree.view.measure
 
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.VdomNode
-import org.rebeam.tree.view.measure.Measure.{Dimensions, DimensionsJS}
 
 import scala.scalajs.js
 

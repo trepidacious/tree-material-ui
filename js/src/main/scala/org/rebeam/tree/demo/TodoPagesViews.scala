@@ -1,11 +1,9 @@
 package org.rebeam.tree.demo
 
 import chandu0101.scalajs.react.components.materialui._
-import io.circe.Encoder
 import japgolly.scalajs.react._
-import japgolly.scalajs.react.extra.Reusability
 import japgolly.scalajs.react.vdom.html_<^._
-import org.rebeam.tree.{DeltaCodecs, DeltaIOContextSource, Moment}
+import org.rebeam.tree.DeltaIOContextSource
 import org.rebeam.tree.demo.DemoData._
 import org.rebeam.tree.demo.DemoRoutes._
 import org.rebeam.tree.ref.Mirror
@@ -13,21 +11,14 @@ import org.rebeam.tree.sync._
 import org.rebeam.tree.view.Cursor._
 import org.rebeam.tree.view.View._
 import org.rebeam.tree.view._
-import org.rebeam.tree.view.Colorable.coloredColor
-import org.rebeam.tree.view.infinite.Infinite
 import org.rebeam.tree.view.list.ListItem.EditAndDeleteActions
-import org.rebeam.tree.view.measure.{CursorHeightView, MeasureDemo}
 import org.rebeam.tree.view.pages.Pages._
 import org.rebeam.tree.view.pages._
 import org.rebeam.tree.view.list._
 import Mirror._
-import org.rebeam.tree.sync.Sync
 import org.rebeam.tree.sync.Sync.{ClientDeltaId, ClientId}
 
 import MuiSvgIcon.SvgIconApply
-
-import scala.scalajs.js
-import scala.scalajs.js.UndefOr
 
 object TodoPagesViews {
 

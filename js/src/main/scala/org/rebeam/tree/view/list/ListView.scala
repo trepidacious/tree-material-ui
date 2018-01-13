@@ -10,12 +10,12 @@ import org.rebeam.tree.sync._
 import org.rebeam.tree.sync.Sync._
 import org.rebeam.tree.view._
 import org.rebeam.tree.view.View._
-import org.rebeam.tree.view.infinite.Infinite
-import org.rebeam.tree.view.measure.CursorHeightView
+//import org.rebeam.tree.view.infinite.Infinite
+//import org.rebeam.tree.view.measure.CursorHeightView
 import org.rebeam.tree.view.pages.Pages
 import org.rebeam.tree.view.transition._
 import japgolly.scalajs.react.vdom.html_<^._
-import scala.language.higherKinds
+//import scala.language.higherKinds
 
 import scala.scalajs.js
 

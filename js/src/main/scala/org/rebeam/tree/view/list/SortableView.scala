@@ -1,7 +1,7 @@
 package org.rebeam.tree.view.list
 
 import japgolly.scalajs.react.vdom.html_<^._
-import org.rebeam.tree.view.View
+//import org.rebeam.tree.view.View
 import japgolly.scalajs.react._
 
 object SortableView {

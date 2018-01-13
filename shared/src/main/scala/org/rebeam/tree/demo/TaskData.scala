@@ -1,15 +1,13 @@
 package org.rebeam.tree.demo
 
 import io.circe.generic.JsonCodec
-import org.rebeam.lenses.macros.Lenses
+import monocle.macros.Lenses
 import org.rebeam.tree.Delta._
 import org.rebeam.tree.DeltaCodecs._
 import org.rebeam.tree._
 import org.rebeam.tree.sync._
 import org.rebeam.tree.sync.Sync._
 import org.rebeam.tree.view.{Color, MaterialColor}
-
-import scala.language.higherKinds
 
 object TaskData {
 
@@ -143,7 +141,10 @@ object TaskData {
   }
 
   //Delta decoders. Note we provide lenses to watching and leading to reach the refs in them
-  implicit lazy val taskDeltaDecoder: DeltaCodec[Task] = action[Task, TaskEvent] or lensN(Task.watching) or lensN(Task.leading)
+  implicit lazy val taskDeltaDecoder: DeltaCodec[Task] =
+    action[Task, TaskEvent]("TaskEvent") or
+      lens("watching", Task.watching) or
+      lens("leading", Task.leading)
 
   //TODO provide a means of making a DeltaCodec fail when used to actually decode a delta, but still perform ref updating
   //Get to the refs in watching and leading, so Mirror can update them.

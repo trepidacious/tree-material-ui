@@ -1,19 +1,14 @@
 package org.rebeam.tree.demo
 
 import chandu0101.scalajs.react.components.materialui.{DeterminateIndeterminate, Mui, MuiCircularProgress}
-import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.html_<^._
 import org.rebeam.tree.DeltaIOContextSource
 import org.rebeam.tree.demo.DemoRoutes.RefPage
-import org.rebeam.tree.demo.RefData._
-import org.rebeam.tree.ref.{Mirror, MirrorAndId}
-import org.rebeam.tree.sync.Sync.{ClientDeltaId, ClientId}
-import org.rebeam.tree.sync._
+import org.rebeam.tree.ref.MirrorAndId
 import org.rebeam.tree.view.View._
 import org.rebeam.tree.view._
 import RefData._
-import org.rebeam.tree.util.CRC32
-import org.rebeam.tree.view.list.ListItem.{DeleteAction, EditAndDeleteActions}
+import org.rebeam.tree.view.list.ListItem.DeleteAction
 import org.rebeam.tree.view.list.{ListItem, ListTextView, ListView}
 import org.rebeam.tree.view.pages.Pages
 

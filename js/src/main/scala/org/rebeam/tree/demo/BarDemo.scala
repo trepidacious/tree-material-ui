@@ -1,8 +1,7 @@
 package org.rebeam.tree.demo
 
 import scala.scalajs.js
-import japgolly.scalajs.react.{CtorType, _}
-import japgolly.scalajs.react.component.Scala.Component
+import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.svg_<^._
 import org.rebeam.tree.demo.Colors._
 import paths.high.Bar

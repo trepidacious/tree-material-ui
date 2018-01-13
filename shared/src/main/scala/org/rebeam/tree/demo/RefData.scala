@@ -2,19 +2,18 @@ package org.rebeam.tree.demo
 
 import io.circe.{Decoder, Encoder}
 import io.circe.generic.JsonCodec
-import org.rebeam.lenses.macros.Lenses
+import monocle.macros.Lenses
 import org.rebeam.tree.Delta._
-import org.rebeam.tree.{Delta, DeltaCodecs}
+import org.rebeam.tree.{BasicDeltaDecoders, Delta, DeltaCodecs}
 import org.rebeam.tree.DeltaCodecs._
 import org.rebeam.tree.ref.{Mirror, MirrorAndId, MirrorCodec}
 import org.rebeam.tree.sync.Sync._
 import org.rebeam.tree.sync._
-import org.rebeam.tree.BasicDeltaDecoders._
 import cats.instances.list._
 import cats.syntax.traverse._
+import BasicDeltaDecoders._
 
 import scala.collection.mutable.ListBuffer
-import scala.language.higherKinds
 
 object RefData {
 
@@ -61,9 +60,12 @@ object RefData {
     }
   }
 
-  implicit lazy val dataItemDeltaCodec: DeltaCodec[DataItem] = lensN(DataItem.name)
+  implicit lazy val dataItemDeltaCodec: DeltaCodec[DataItem] =
+    lens("name", DataItem.name)
 
-  implicit lazy val dataItemListDeltaCodec: DeltaCodec[DataItemList] = lensN(DataItemList.items) or action[DataItemList, DataItemListAction]
+  implicit lazy val dataItemListDeltaCodec: DeltaCodec[DataItemList] =
+    lens("items", DataItemList.items) or
+      action[DataItemList, DataItemListAction]("DataItemListAction")
 
   //Make into optional match
   implicit lazy val listOfRefToDataItemDeltaDecoder: DeltaCodec[List[Ref[DataItem]]] = optionalI[Ref[DataItem]]

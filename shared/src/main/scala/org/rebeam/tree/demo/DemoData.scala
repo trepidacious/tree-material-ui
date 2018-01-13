@@ -1,12 +1,11 @@
 package org.rebeam.tree.demo
 
 import org.rebeam.tree._
-import org.rebeam.lenses.macros.Lenses
-import org.rebeam.tree.view.{Color, Colorable, Colored, MaterialColor}
+import monocle.macros.Lenses
+import org.rebeam.tree.view.{Color, Colored, MaterialColor}
 import io.circe._
 import io.circe.generic.semiauto._
 
-import scala.language.higherKinds
 import BasicDeltaDecoders._
 import DeltaCodecs._
 import io.circe.generic.JsonCodec
@@ -69,16 +68,18 @@ object DemoData {
   //  implicit val streetDecoder: Decoder[Street] = deriveDecoder[Street]
   //  implicit val streetEncoder: Encoder[Street] = deriveEncoder[Street]
 
-  implicit val streetDeltaDecoder =
-    value[Street] or lensN(Street.name) or lensN(Street.number) or lensN(Street.temperature) or action[Street, StreetAction]
+  implicit val streetDeltaDecoder: DeltaCodec[Street] =
+    value[Street] or
+      lens("street", Street.name) or
+      lens("number", Street.number) or
+      lens("temperature", Street.temperature) or
+      action[Street, StreetAction]("StreetAction")
 
-  implicit val addressDeltaDecoder = value[Address] or lensN(Address.street)
+  implicit val addressDeltaDecoder: DeltaCodec[Address] =
+    value[Address] or
+      lens("street", Address.street)
 
-  implicit val addressIdGen = new ModelIdGen[Address] {
-    def genId(a: Address) = None
-  }
-
-
+  implicit val addressIdGen: ModelIdGen[Address] = _ => None
 
   @JsonCodec
   @Lenses
@@ -229,40 +230,59 @@ object DemoData {
   //Delta decoders
 
   //These can only be replaced with a new value
-  implicit val priorityDeltaDecoder = value[Priority]
-  implicit val colorDeltaDecoder = value[Color]
+  implicit val priorityDeltaDecoder: DeltaCodec[Priority] =
+    value[Priority]
 
-  implicit val todoDeltaDecoder = value[Todo] or lensN(Todo.name) or lensN(Todo.priority) or lensN(Todo.completed) or action[Todo, TodoAction]
+  implicit val colorDeltaDecoder: DeltaCodec[Color] =
+    value[Color]
+
+  implicit val todoDeltaDecoder: DeltaCodec[Todo] =
+    value[Todo] or
+      lens("name", Todo.name) or
+      lens("priority", Todo.priority) or
+      lens("completed", Todo.completed) or
+      action[Todo, TodoAction]("TodoAction")
 
   //FIXME stop editing list as a value, implement an action to do permutations for react-sortable-hoc drags
   //This makes it possible to act on any List[Todo] using an OptionalIDelta or an OptionalMatchDelta
-  implicit val listOfTodoDeltaDecoder = value[List[Todo]] or optionalI[Todo] or optionalMatch[Todo, FindTodoById]
+  implicit val listOfTodoDeltaDecoder: DeltaCodec[List[Todo]] =
+    value[List[Todo]] or
+      optionalI[Todo] or
+      optionalMatch[Todo, FindTodoById]("FindTodoById") or
+      optionalMatch[Todo, FindById[Todo]]("FindById")
 
-  implicit val todoListDeltaDecoder =
-      value[TodoList] or lensN(TodoList.name) or lensN(TodoList.items) or lensN(TodoList.priority) or lensN(TodoList.color) or action[TodoList, TodoListAction]
+  implicit val todoListDeltaDecoder: DeltaCodec[TodoList] =
+      value[TodoList] or
+        lens("name", TodoList.name) or
+        lens("items", TodoList.items) or
+        lens("priority", TodoList.priority) or
+        lens("color", TodoList.color) or
+        action[TodoList, TodoListAction]("TodoListAction")
 
-  implicit val todoListIdGen = new ModelIdGen[TodoList] {
-    def genId(a: TodoList) = None
-  }
+  implicit val todoListIdGen: ModelIdGen[TodoList] = _ => None
 
   //FIXME stop editing list as a value, implement an action to do permutations for react-sortable-hoc drags
   //This makes it possible to act on any List[TodoList] using a complete new list, an OptionalIDelta or an OptionalMatchDelta
-  implicit val listOfTodoListDeltaDecoder = value[List[TodoList]] or optionalI[TodoList] or optionalMatch[TodoList, FindTodoListById]
+  implicit val listOfTodoListDeltaDecoder: DeltaCodec[List[TodoList]] =
+    value[List[TodoList]] or
+      optionalI[TodoList] or
+      optionalMatch[TodoList, FindTodoListById]("FindTodoListById") or
+      optionalMatch[TodoList, FindById[TodoList]]("FindById")
 
+  implicit val todoProjectDeltaDecoder: DeltaCodec[TodoProject] =
+    value[TodoProject] or
+      lens("color", TodoProject.color) or
+      lens("name", TodoProject.name) or
+      lens("lists", TodoProject.lists) or
+      action[TodoProject, TodoProjectAction]("TodoProjectAction")
 
-  implicit val todoProjectDeltaDecoder =
-    value[TodoProject] or lensN(TodoProject.color) or lensN(TodoProject.name) or lensN(TodoProject.lists) or action[TodoProject, TodoProjectAction]
+  implicit val todoProjectIdGen: ModelIdGen[TodoProject] = _ => None
 
-  implicit val todoProjectIdGen = new ModelIdGen[TodoProject] {
-    def genId(a: TodoProject) = None
-  }
-
-  implicit val mirrorIdGen = new ModelIdGen[Mirror] {
-    def genId(a: Mirror) = None
-  }
+  implicit val mirrorIdGen: ModelIdGen[Mirror] = _ => None
 
   // Mirror codec to allow TodoProject to be handled by Mirror
-  implicit val todoProjectMirrorCodec: MirrorCodec[TodoProject] = MirrorCodec[TodoProject]("todoProject")
+  implicit val todoProjectMirrorCodec: MirrorCodec[TodoProject] =
+    MirrorCodec[TodoProject]("todoProject")
 
   // Encoder, decoder and delta codec for entire Mirror
   implicit val mirrorDecoder: Decoder[Mirror] = Mirror.decoder(todoProjectMirrorCodec)
