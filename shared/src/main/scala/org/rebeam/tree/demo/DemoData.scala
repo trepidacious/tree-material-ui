@@ -115,12 +115,6 @@ object DemoData {
     items: List[Todo] = Nil
   ) extends Identified[TodoList] with Colored
 
-  //Works with Cursor.zoomMatch to zoom to a particular Todo
-  @JsonCodec
-  case class FindTodoById(id: Id[Todo]) extends (Todo => Boolean) {
-    def apply(t: Todo): Boolean = t.id == id
-  }
-
   @JsonCodec
   sealed trait TodoListAction extends Delta[TodoList]
   object TodoListAction {
@@ -214,12 +208,6 @@ object DemoData {
 
   }
 
-  //Works with Cursor.zoomMatch to zoom to a particular TodoList
-  @JsonCodec
-  case class FindTodoListById(id: Id[TodoList]) extends (TodoList => Boolean) {
-    def apply(t: TodoList): Boolean = t.id == id
-  }
-
 
   //These don't have codecs in their own file
   implicit val colorDecoder: Decoder[Color] = deriveDecoder[Color]
@@ -248,8 +236,7 @@ object DemoData {
   implicit val listOfTodoDeltaDecoder: DeltaCodec[List[Todo]] =
     value[List[Todo]] or
       optionalI[Todo] or
-      optionalMatch[Todo, FindTodoById]("FindTodoById") or
-      optionalMatch[Todo, FindById[Todo]]("FindById")
+      optionalId[Todo]
 
   implicit val todoListDeltaDecoder: DeltaCodec[TodoList] =
       value[TodoList] or
@@ -266,8 +253,7 @@ object DemoData {
   implicit val listOfTodoListDeltaDecoder: DeltaCodec[List[TodoList]] =
     value[List[TodoList]] or
       optionalI[TodoList] or
-      optionalMatch[TodoList, FindTodoListById]("FindTodoListById") or
-      optionalMatch[TodoList, FindById[TodoList]]("FindById")
+      optionalId[TodoList]
 
   implicit val todoProjectDeltaDecoder: DeltaCodec[TodoProject] =
     value[TodoProject] or

@@ -208,11 +208,11 @@ object TodoPagesViews {
       // will produce a cursor whose model is the specified list, and where
       // Pages have current page type PageWithTodoProjectList
       val list = cp.zoomModelAndPageCT[TodoList, PageWithTodoProjectList](p =>
-        cp.zoom(TodoProject.lists).zoomMatch(FindTodoListById(p.listId))
+        cp.zoom(TodoProject.lists).zoomId(p.listId)
       )
 
       val item = cp.zoomModelAndPageCT[Todo, TodoProjectListItemPage](p =>
-        cp.zoom(TodoProject.lists).zoomMatch(FindTodoListById(p.listId)).flatMap(_.zoom(TodoList.items).zoomMatch(FindTodoById(p.todoId)))
+        cp.zoom(TodoProject.lists).zoomId(p.listId).flatMap(_.zoom(TodoList.items).zoomId(p.todoId))
       )
 
       // TODO neater - make list of Option[VdomElement], then zip with index and flatten?

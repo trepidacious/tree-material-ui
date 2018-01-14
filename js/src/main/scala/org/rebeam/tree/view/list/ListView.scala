@@ -397,20 +397,16 @@ object ListView {
     subheader: String,
     mode: ListMode = ListMode.Infinite
   )(implicit
-    fEncoder: Encoder[FindById[A]],
     s: Searchable[A, Guid]
-  ): ((IndexChange) => Callback) => (Cursor[R, P]) => VdomElement = {
-    ListView.usingMatches[R, P, A, Q, FindById[A]](
-      name                  = name,
-      rootToItems           = rootToItems,
-      itemToFinder          = a => FindById[A](a.id),
-      itemAndCursorToAction = itemAndCursorToAction,
-      itemToKey             = a => a.id.toString(),
-      itemView              = itemView,
-      subheader             = subheader,
-      mode                  = mode
+  ): ((IndexChange) => Callback) => (Cursor[R, P]) => VdomElement =
+    ListView.withAction[R, P, A, Q](
+      name              = name,
+      listCursorToItems = (cp: Cursor[R, P]) => rootToItems(cp).zoomAllIds.map(ca => ca.move(itemAndCursorToAction(ca.model, cp))),
+      itemToKey         = a => a.id.toString(),
+      itemView          = itemView,
+      subheader         = subheader,
+      mode              = mode
     )
-  }
 
   sealed trait ListMode
   object ListMode {
