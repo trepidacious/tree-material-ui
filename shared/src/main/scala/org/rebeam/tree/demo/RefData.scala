@@ -82,7 +82,7 @@ object RefData {
   implicit val mirrorDeltaCodec: DeltaCodec[Mirror] = DeltaCodecs.mirror[DataItem] or DeltaCodecs.mirror[DataItemList]
 
   object DataItem {
-    def create(name: String): DeltaIO[DataItem] = put(id => pure(DataItem(id, name)))
+    def create(name: String): DeltaIO[DataItem] = putPure(DataItem(_, name))
   }
 
   val exampleDataMirrorIO: DeltaIO[MirrorAndId[DataItemList]] = {

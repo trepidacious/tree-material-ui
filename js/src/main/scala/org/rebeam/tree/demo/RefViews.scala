@@ -29,10 +29,25 @@ object RefViews {
     None
   )
 
-  // This combines and stores the url and renderer, and will then produce a new element per page. This avoids
-  // changing state when changing pages, so we keep the same websocket etc.
-  val refViewFactory = ServerRootComponent.factory[MirrorAndId[DataItemList], Pages[RefPage.type, RefPage.type]](RefEmptyView, "api/refs") {
-    RefMirrorView(_)
+  val RefView = cursorView[DataItemList, Pages[RefPage.type, RefPage.type]]("RefView"){
+    c=> {
+
+      val fab = PageLayout.addFAB(c.act(DataItemListAction.CreateDataItem(): DataItemListAction))
+
+      val contents = DataItemListView(
+        p => c.act(DataItemListAction.DataItemIndexChange(p.oldIndex, p.newIndex): DataItemListAction)
+      )(c)
+
+      PageLayout(
+        color = MaterialColor.BlueGrey(500),
+        height = 128,
+        toolbarText = "Ref List",
+        listFAB = Some(fab),
+        title = None,
+        contents = Some(contents)//,
+        //        scrollContents = true
+      )
+    }
   }
 
   val RefMirrorView = cursorView[MirrorAndId[DataItemList], Pages[RefPage.type, RefPage.type]]("RefMirrorView"){
@@ -41,6 +56,12 @@ object RefViews {
       c.followRef(org.rebeam.tree.sync.Ref(c.model.id))
       .map(RefView(_): VdomElement)
       .getOrElse(RefEmptyView: VdomElement)
+  }
+
+  // This combines and stores the url and renderer, and will then produce a new element per page. This avoids
+  // changing state when changing pages, so we keep the same websocket etc.
+  val refViewFactory = ServerRootComponent.factory[MirrorAndId[DataItemList], Pages[RefPage.type, RefPage.type]](RefEmptyView, "api/refs") {
+    RefMirrorView(_)
   }
 
   val DataItemSummary = ListItem.listItemWithContentsAndDelete[DataItem](
@@ -60,27 +81,6 @@ object RefViews {
     "Data items",
     ListView.ListMode.Finite
   )
-
-  val RefView = cursorView[DataItemList, Pages[RefPage.type, RefPage.type]]("RefView"){
-    c=> {
-
-      val fab = PageLayout.addFAB(c.act(DataItemListAction.CreateDataItem(): DataItemListAction))
-
-      val contents = DataItemListView(
-        p => c.act(DataItemListAction.DataItemIndexChange(p.oldIndex, p.newIndex): DataItemListAction)
-      )(c)
-
-      PageLayout(
-        color = MaterialColor.BlueGrey(500),
-        height = 128,
-        toolbarText = "Ref List",
-        listFAB = Some(fab),
-        title = None,
-        contents = Some(contents)//,
-//        scrollContents = true
-      )
-    }
-  }
 
 }
 
