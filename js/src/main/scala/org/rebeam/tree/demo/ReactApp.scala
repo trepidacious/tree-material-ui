@@ -21,6 +21,7 @@ object ReactApp {
     setTimeout(1000.0){
       val loadingNode = dom.document.getElementById("loading")
       dom.document.body.removeChild(loadingNode)
+      ()
     }
 
     // We would load scala-css styles here if we had any
@@ -53,6 +54,8 @@ object ReactApp {
 
     // Finally, render the themed top-level view to the predefined HTML div with id "container"
     themedView().renderIntoDOM(dom.document.getElementById("container"))
+
+    ()
   }
 
 }

@@ -21,7 +21,15 @@ scalacOptions in ThisBuild ++= Seq(
   "-Xcheckinit",
   "-Xlint:-unused",
   "-Ywarn-unused:imports",
-  "-Ypartial-unification"
+  "-Ypartial-unification",
+  "-language:existentials",
+  "-language:higherKinds",
+  "-Yno-adapted-args",
+  //"-Ywarn-dead-code", - can't enable for JS, generates dead code warnings on js.native, so added to jvmSettings below
+  "-Ywarn-numeric-widen",
+  "-Ywarn-value-discard",
+  "-Xfuture"
+  //"-Yno-predef" ?
 )
 
 resolvers += Resolver.sonatypeRepo("snapshots")
@@ -59,6 +67,8 @@ lazy val treeMaterialUi = crossProject.in(file(".")).
 
   //Settings specific to JVM
   ).jvmSettings(
+    scalacOptions += "-Ywarn-dead-code",
+
     libraryDependencies ++= Seq()//,
     //We need to assets directory at runtime, so we can serve files in it
 //    unmanagedClasspath in (Compile, runMain) += baseDirectory.value / "assets"

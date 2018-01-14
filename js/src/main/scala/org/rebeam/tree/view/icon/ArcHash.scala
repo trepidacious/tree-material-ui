@@ -98,9 +98,9 @@ object ArcHash {
       ^.strokeWidth := 2,
       ^.strokeLinecap := "round",
       ^.viewBox := "0 0 24 24",
-      <.path(^.transform := "translate(0, 0)", ^.stroke := color.getOrElse(accentForIndex((hash >> 28) & 0xF)).toString, ^.d := arcHashSymRingPath(c, r, hash, 0)),
-      <.path(^.transform := "translate(0, 0)", ^.stroke := color.getOrElse(accentForIndex((hash >> 24) & 0xF)).toString, ^.d := arcHashSymRingPath(c, r, hash, 1)),
-      <.path(^.transform := "translate(0, 0)", ^.stroke := color.getOrElse(accentForIndex((hash >> 20) & 0xF)).toString, ^.d := arcHashSymRingPath(c, r, hash, 2))
+      <.path(^.transform := "translate(0, 0)", ^.stroke := color.getOrElse(accentForIndex((hash >> 28) & 0xF)).toString, ^.d := arcHashSymRingPath(c.doubleValue(), r.doubleValue(), hash, 0)),
+      <.path(^.transform := "translate(0, 0)", ^.stroke := color.getOrElse(accentForIndex((hash >> 24) & 0xF)).toString, ^.d := arcHashSymRingPath(c.doubleValue(), r.doubleValue(), hash, 1)),
+      <.path(^.transform := "translate(0, 0)", ^.stroke := color.getOrElse(accentForIndex((hash >> 20) & 0xF)).toString, ^.d := arcHashSymRingPath(c.doubleValue(), r.doubleValue(), hash, 2))
     )
   }
 
