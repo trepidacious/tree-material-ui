@@ -7,7 +7,6 @@ import japgolly.scalajs.react.vdom.VdomNode
 import org.rebeam.tree.Searchable
 import org.rebeam.tree.ref._
 import org.rebeam.tree.sync._
-import org.rebeam.tree.sync.Sync._
 import org.rebeam.tree.view._
 import org.rebeam.tree.view.View._
 //import org.rebeam.tree.view.infinite.Infinite
@@ -338,34 +337,6 @@ object ListView {
     )
   }
 
-  def usingRef[R, P, A, Q](
-    name: String,
-    rootToItemRefs: Cursor[R, P] => Cursor[List[Ref[A]], P],
-    itemAndCursorToAction: (A, Cursor[R, P]) => Q,
-    itemView: Cursor[A, Q] => VdomElement,
-    subheader: String,
-    mode: ListMode = ListMode.Infinite
-  )(implicit
-    fEncoder: Encoder[FindRefById[A]],
-    mCodec: MirrorCodec[A],
-    toId: Identifiable[A],
-    s: Searchable[A, Guid]
-  ): ((IndexChange) => Callback) => (Cursor[R, P]) => VdomElement = {
-
-    ListView.withAction[R, P, A, Q](
-      name,
-      (cp: Cursor[R, P]) =>
-        rootToItemRefs(cp)
-          .zoomAllMatches(a => FindRefById(a.id))
-          .flatMap(cursorToRef => cursorToRef.followRef(cursorToRef.model))
-          .map(ca => ca.move(itemAndCursorToAction(ca.model, cp))),
-      a => toId.id(a).toString,
-      itemView,
-      subheader,
-      mode
-    )
-  }
-
   def usingMatches[R, P, A, Q, F <: A => Boolean](
     name: String,
     rootToItems: Cursor[R, P] => Cursor[List[A], P],
@@ -407,6 +378,34 @@ object ListView {
       subheader         = subheader,
       mode              = mode
     )
+
+  def usingRef[R, P, A, Q](
+                            name: String,
+                            rootToItemRefs: Cursor[R, P] => Cursor[List[Ref[A]], P],
+                            itemAndCursorToAction: (A, Cursor[R, P]) => Q,
+                            itemView: Cursor[A, Q] => VdomElement,
+                            subheader: String,
+                            mode: ListMode = ListMode.Infinite
+                          )(implicit
+                            mCodec: MirrorCodec[A],
+                            // TODO use the id form the ref instead - then we won't need this Identifiable
+                            toId: Identifiable[A],
+                            s: Searchable[A, Guid]
+                          ): ((IndexChange) => Callback) => (Cursor[R, P]) => VdomElement = {
+
+    ListView.withAction[R, P, A, Q](
+      name              = name,
+      listCursorToItems = (cp: Cursor[R, P]) => rootToItemRefs(cp)
+                                                  .zoomAllRefsById
+                                                  .flatMap(cursorToRef => cursorToRef.followRef(cursorToRef.model))
+                                                  .map(ca => ca.move(itemAndCursorToAction(ca.model, cp))),
+      itemToKey         = a => toId.id(a).toString,
+      itemView          = itemView,
+      subheader         = subheader,
+      mode              = mode
+    )
+  }
+
 
   sealed trait ListMode
   object ListMode {
