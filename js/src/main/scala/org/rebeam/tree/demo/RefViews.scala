@@ -8,9 +8,10 @@ import org.rebeam.tree.ref.MirrorAndId
 import org.rebeam.tree.view.View._
 import org.rebeam.tree.view._
 import RefData._
+import japgolly.scalajs.react.Key
 import org.rebeam.tree.view.list.ListItem.DeleteAction
 import org.rebeam.tree.view.list.{ListItem, ListTextView, ListView}
-import org.rebeam.tree.view.pages.Pages
+import org.rebeam.tree.view.pages.{Pages, PagesView}
 
 object RefViews {
 
@@ -40,22 +41,29 @@ object RefViews {
 
       PageLayout(
         color = MaterialColor.BlueGrey(500),
-        height = 128,
         toolbarText = "Ref List",
         listFAB = Some(fab),
         title = None,
-        contents = Some(contents)//,
-        //        scrollContents = true
+        contents = Some(contents),
+        scrollContents = true
       )
     }
   }
 
+  //TODO should we have a single page view that applies the styling needed for
+  //PageLayout to work inside?
+  val RefPagesView = PagesView[DataItemList, RefPage.type]("RefPagesView"){
+    cp =>
+      List[(Key, VdomElement)](
+        (0, RefView(cp): VdomElement)
+      )
+  }
+
   val RefMirrorView = cursorView[MirrorAndId[DataItemList], Pages[RefPage.type, RefPage.type]]("RefMirrorView"){
     c =>
-//      System.out.println(c.model)
       c.followRef(org.rebeam.tree.sync.Ref(c.model.id))
-      .map(RefView(_): VdomElement)
-      .getOrElse(RefEmptyView: VdomElement)
+        .map(RefPagesView(_): VdomElement)
+        .getOrElse(RefEmptyView: VdomElement)
   }
 
   // This combines and stores the url and renderer, and will then produce a new element per page. This avoids

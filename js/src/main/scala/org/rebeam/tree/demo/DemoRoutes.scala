@@ -44,9 +44,15 @@ object DemoRoutes {
   case class TodoProjectListPage(listId: Id[TodoList]) extends PageWithTodoProjectList
   case class TodoProjectListItemPage(listId: Id[TodoList], todoId: Id[Todo]) extends PageWithTodoProjectListItem
 
-  implicit val transitions = new PagesToTransition[TodoPage] {
+  implicit val todoTransitions = new PagesToTransition[TodoPage] {
     override def apply(from: TodoPage, to: TodoPage) = {
       if (from == to.back) PagesTransition.Right else PagesTransition.Left
+    }
+  }
+
+  implicit val refTransitions = new PagesToTransition[RefPage.type] {
+    override def apply(from: RefPage.type, to: RefPage.type) = {
+      PagesTransition.Right
     }
   }
 

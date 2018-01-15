@@ -129,7 +129,15 @@ object TodoPagesViews {
           p => cp.act(TodoProjectAction.ListIndexChange(p.oldIndex, p.newIndex): TodoProjectAction)
         )(cp)
 
-      PageLayout(MaterialColor.BlueGrey(500), 128, "", Some(fab), Some(title), Some(contents))
+      PageLayout(
+        MaterialColor.BlueGrey(500),
+        128,
+        "",
+        Some(fab),
+        Some(title),
+        Some(contents),
+        scrollContents = true
+      )
     }
   }
 
@@ -196,9 +204,15 @@ object TodoPagesViews {
 //          "Contents todo!"
 //        )
 
-      PageLayout(MaterialColor.BlueGrey(500), 128, "", None, Some(title), Some(contents), iconButtons = List(
-        ToolbarIconButton(Mui.SvgIcons.ActionDelete()(), Callback.empty)
-      ))
+      PageLayout(
+        color = MaterialColor.BlueGrey(500),
+        title = Some(title),
+        contents = Some(contents),
+        iconButtons = List(
+          ToolbarIconButton(Mui.SvgIcons.ActionDelete()(), Callback.empty)
+        ),
+        scrollContents = true
+      )
     }
   }
 
@@ -223,7 +237,7 @@ object TodoPagesViews {
       ).flatten
   }
 
-  // TODO why do we need all these acriptions to VdomElement?
+  // TODO why do we need all these ascriptions to VdomElement?
   val TodoProjectCachePagesView = cursorView[Mirror, Pages[TodoPage, TodoPage]]("TodoProjectCachePagesView"){
     c => c.followRef(org.rebeam.tree.sync.Ref(Id[TodoProject](Guid(ClientId(0), ClientDeltaId(0), WithinDeltaId(0)))))
           .map(TodoProjectPagesView(_): VdomElement)
