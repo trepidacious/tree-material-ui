@@ -1,7 +1,7 @@
 package org.rebeam.tree.demo
 
 import japgolly.scalajs.react.vdom.html_<^._
-import org.rebeam.tree.{DeltaIOContextSource}
+import org.rebeam.tree.DeltaIOContextSource
 import org.rebeam.tree.view.View._
 import org.rebeam.tree.view._
 import DemoData._
