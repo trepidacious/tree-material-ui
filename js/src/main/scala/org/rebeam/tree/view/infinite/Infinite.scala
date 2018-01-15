@@ -1,35 +1,40 @@
 package org.rebeam.tree.view.infinite
 
-import chandu0101.macros.tojs.JSMacro
 import japgolly.scalajs.react._
 import japgolly.scalajs.react.vdom.html_<^._
-import org.scalajs.dom.raw.HTMLElement
 
 import scala.scalajs.js
 
-case class Infinite(handleScroll: js.UndefOr[HTMLElement => Callback] = js.undefined,
-                         preloadAdditionalHeight: js.UndefOr[Int] = js.undefined,
-                         isInfiniteLoading: js.UndefOr[Boolean] = js.undefined,
-                         preloadBatchSize: js.UndefOr[Int] = js.undefined,
-                         containerHeight: Int,
-                         ref: js.UndefOr[InfiniteM => Unit] = js.undefined,
-                         loadingSpinnerDelegate: js.UndefOr[VdomElement] = js.undefined,
-                         timeScrollStateLastsForAfterUserScrolls: js.UndefOr[Int] = js.undefined,
-                         elementHeight: Double,
-                         key: js.UndefOr[String] = js.undefined,
-                         className: js.UndefOr[String] = js.undefined,
-                         infiniteLoadBeginBottomOffset: js.UndefOr[Int] = js.undefined,
-                         onInfiniteLoad: js.UndefOr[Callback] = js.undefined,
-                         useWindowAsScrollContainer: js.UndefOr[Boolean] = js.undefined) {
+object Infinite {
 
-  def apply(children: Seq[VdomElement]) = {
-    val props     = JSMacro[Infinite](this)
-    val component = JsComponent[js.Object, Children.Varargs, Null](js.Dynamic.global.Infinite)
-    component(props)(children: _*)
+  @js.native
+  trait Props extends js.Object {
+    var containerHeight: Int = js.native
+    var elementHeight: Double = js.native
+    var key: js.UndefOr[String] = js.native
+    var className: js.UndefOr[String] = js.native
+    var useWindowAsScrollContainer: js.UndefOr[Boolean] = js.native
   }
+
+  private val rawComponent = js.Dynamic.global.Infinite
+  private val component = JsComponent[Props, Children.Varargs, Null](rawComponent)
+
+  def apply(containerHeight: Int,
+            elementHeight: Double,
+            key: js.UndefOr[String] = js.undefined,
+            className: js.UndefOr[String] = js.undefined,
+            useWindowAsScrollContainer: js.UndefOr[Boolean] = js.undefined)
+            (children: Seq[VdomElement]) = {
+
+    val p = (new js.Object).asInstanceOf[Props]
+    p.containerHeight = containerHeight
+    p.elementHeight = elementHeight
+    p.key = key
+    p.className = className
+    p.useWindowAsScrollContainer = useWindowAsScrollContainer
+
+    component(p)(children: _*)
+  }
+
 }
 
-@js.native
-trait InfiniteM extends js.Object {
-  def getScrollTop(): Double = js.native
-}
