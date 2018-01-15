@@ -9,12 +9,11 @@ import org.rebeam.tree.ref._
 import org.rebeam.tree.sync._
 import org.rebeam.tree.view._
 import org.rebeam.tree.view.View._
-//import org.rebeam.tree.view.infinite.Infinite
-//import org.rebeam.tree.view.measure.CursorHeightView
+import org.rebeam.tree.view.infinite.Infinite
+import org.rebeam.tree.view.measure.CursorHeightView
 import org.rebeam.tree.view.pages.Pages
 import org.rebeam.tree.view.transition._
 import japgolly.scalajs.react.vdom.html_<^._
-//import scala.language.higherKinds
 
 import scala.scalajs.js
 
@@ -437,36 +436,38 @@ object ListView {
     //FIXME restore infinite scrolling when Measure is fixed :)
     mode match {
       // Wrap in an Infinite for performance on long lists
-//      case ListMode.Infinite =>
-//        // Use a height view to get us the height of the rendered element as an extra part of prop.
-//        // This lets us scale the Infinite list appropriately to fill space.
-//        val view = CursorHeightView[L, P](name) {
-//          (cp, height) =>
-//            val h: Int = height.map(_.toInt).getOrElse(60)
-//
-//            // We need to apply a style by class to get the Infinite to be 100% height rather than the
-//            // "height: containerHeight" inline style it sets on itself. This allows it to resize to fill
-//            // available space, then be measured by Measure, which adjusts the containerHeight. This is
-//            // neater than wrapping in a "height: 100%" div, and also works with react-sortable-hoc, which
-//            // expects the top level component to be the one containing the sortable elements. Using a div
-//            // breaks this and so breaks the nice feature where dragging to container edge starts scrolling.
-//            Infinite(elementHeight = 60, containerHeight = h, className = "tree-infinite--height-100-percent")(
-//              MuiSubheader(
-//                inset = true,
-//                style = js.Dynamic.literal(
-//                  "height" -> "60px",
-//                  "padding-top" -> "8px"
-//                )
-//              )(subheader: VdomNode) :: listCursorToItems(cp).zipWithIndex.map {
-//                case (a, index) => <.div(^.className := "tree-list-view__item", ^.key := itemToKey(a), itemView(a)): VdomElement //itemView(a) //TODO get the key in here using itemToKey(a)...
-//              }
-//            )
-//        }
-//        (onIndexChange: IndexChange => Callback) => view(_)
+      case ListMode.Infinite =>
+        // Use a height view to get us the height of the rendered element as an extra part of prop.
+        // This lets us scale the Infinite list appropriately to fill space.
+        val view = CursorHeightView[L, P](name) {
+          (cp, height) =>
+            // Note we provide a minimum height of 1 since Infinite detects
+            // a height of 0 as a missing property!
+            val h: Int = Math.max(1, height.map(_.toInt).getOrElse(300))
+
+            // We need to apply a style by class to get the Infinite to be 100% height rather than the
+            // "height: containerHeight" inline style it sets on itself. This allows it to resize to fill
+            // available space, then be measured by Measure, which adjusts the containerHeight. This is
+            // neater than wrapping in a "height: 100%" div, and also works with react-sortable-hoc, which
+            // expects the top level component to be the one containing the sortable elements. Using a div
+            // breaks this and so breaks the nice feature where dragging to container edge starts scrolling.
+            Infinite(elementHeight = 60, containerHeight = h, className = "tree-infinite--height-100-percent")(
+              MuiSubheader(
+                inset = true,
+                style = js.Dynamic.literal(
+                  "height" -> "60px",
+                  "padding-top" -> "8px"
+                )
+              )(subheader: VdomNode) :: listCursorToItems(cp).map {
+                a => <.div(^.className := "tree-list-view__item", ^.key := itemToKey(a), itemView(a)): VdomElement
+              }
+            )
+        }
+        (onIndexChange: IndexChange => Callback) => view(_)
 
       // Don't wrap with infinite, therefore doesn't need a height view.
       // For this case we can also provide enter/leave transitions.
-      case _ => // ListMode.Finite =>
+      case ListMode.Finite =>
         val view = cursorView[L, P](name) {
           cp =>
             CSSTransitionGroup(
@@ -482,8 +483,8 @@ object ListView {
                   "height" -> "60px",
                   "padding-top" -> "8px"
                 )
-              )(subheader: VdomNode):VdomNode) :: listCursorToItems(cp).zipWithIndex.map {
-                case (a, index) => <.div(^.className := "tree-list-view__item", ^.key := itemToKey(a), itemView(a)): VdomElement //itemView(a) //TODO get the key in here using itemToKey(a)...
+              )(subheader: VdomNode):VdomNode) :: listCursorToItems(cp).map {
+                a => <.div(^.className := "tree-list-view__item", ^.key := itemToKey(a), itemView(a)): VdomElement
               } : _*
             )
         }

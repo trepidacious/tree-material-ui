@@ -80,7 +80,7 @@ object TodoPagesViews {
     ),
     TodoSummary(_),
     "Todo items",
-    mode = ListView.ListMode.Finite
+    mode = ListView.ListMode.Infinite
   )
 
   val TodoProjectEmptyView = PageLayout(
