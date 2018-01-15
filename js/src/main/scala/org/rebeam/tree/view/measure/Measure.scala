@@ -24,7 +24,7 @@ object Measure {
     var includeMargin: js.UndefOr[Boolean] = js.native
     var useClone: js.UndefOr[Boolean] = js.native
     var shouldMeasure: js.UndefOr[Boolean] = js.native
-    var onMeasure: DimensionsJS => Unit = js.native
+    var onMeasure: js.Function1[DimensionsJS, Unit] = js.native
   }
 
   private val rawComponent = js.Dynamic.global.Measure
@@ -47,11 +47,10 @@ object Measure {
     p.includeMargin = includeMargin
     p.useClone = useClone
     p.shouldMeasure = shouldMeasure
-    val onMeasureJS: (DimensionsJS) => Unit = djs => {
+    p.onMeasure = djs => {
       val d = Dimensions(djs.width, djs.height)
       onMeasure(d).runNow()
     }
-    p.onMeasure = onMeasureJS
 
     component(p)(child)
   }
