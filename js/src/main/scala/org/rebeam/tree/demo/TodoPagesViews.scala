@@ -229,12 +229,12 @@ object TodoPagesViews {
         cp.zoom(TodoProject.lists).zoomId(p.listId).flatMap(_.zoom(TodoList.items).zoomId(p.todoId))
       )
 
-      // TODO neater - make list of Option[VdomElement], then zip with index and flatten?
       List[Option[(Key, VdomElement)]](
-        Some((0, TodoProjectPageView(cp): VdomElement)),
-        list.map(c => (1, TodoListPageView(c): VdomElement)),
-        item.map(c => (2, TodoView(c): VdomElement))
+        Some(         (0, TodoProjectPageView(cp))),
+        list.map(c => (1, TodoListPageView(c))),
+        item.map(c => (2, TodoView(c)))
       ).flatten
+
   }
 
   // TODO why do we need all these ascriptions to VdomElement?
