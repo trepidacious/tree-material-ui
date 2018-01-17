@@ -54,7 +54,6 @@ object ReactApp {
 
     // Finally, render the themed top-level view to the predefined HTML div with id "container"
     themedView().renderIntoDOM(dom.document.getElementById("container"))
-
     ()
   }
 
