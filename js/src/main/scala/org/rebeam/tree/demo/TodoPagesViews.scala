@@ -51,16 +51,16 @@ object TodoPagesViews {
     todoList => avatarArcHashIdentifiedAndColored(todoList)
   )
 
-  val TodoProjectView = ListView.usingId[TodoProject, Pages[TodoPage, TodoPage], TodoList, EditAndDeleteActions](
+  val TodoProjectView = SortableListView.usingId[TodoProject, Pages[TodoPage, TodoPage], TodoList, EditAndDeleteActions](
     "TodoProjectView",
     _.zoom(TodoProject.lists),
     (todoList, todoProjectCursor) => EditAndDeleteActions(
       todoProjectCursor.location.modify(_.toList(todoList.id)),
       todoProjectCursor.act(TodoProjectAction.DeleteListById(todoList.id): TodoProjectAction)
     ),
-    TodoListSummary(_),
+    TodoListSummary,
     "Todo lists",
-    mode = ListView.ListMode.Finite
+    mode = SortableListView.ListMode.Finite
   )
 
 
@@ -71,16 +71,16 @@ object TodoPagesViews {
     Todo.completed
   )
 
-  val TodoListView = ListView.usingId[TodoList, Pages[PageWithTodoProjectList, TodoPage], Todo, EditAndDeleteActions](
+  val TodoListView = SortableListView.usingId[TodoList, Pages[PageWithTodoProjectList, TodoPage], Todo, EditAndDeleteActions](
     "TodoListView",
     _.zoom(TodoList.items),
     (todo, todoListCursor) => EditAndDeleteActions(
       todoListCursor.location.modify(_.toItem(todo.id)),
       todoListCursor.act(TodoListAction.DeleteTodoById(todo.id): TodoListAction)
     ),
-    TodoSummary(_),
+    TodoSummary,
     "Todo items",
-    mode = ListView.ListMode.Infinite
+    mode = SortableListView.ListMode.Infinite
   )
 
   val TodoProjectEmptyView = PageLayout(

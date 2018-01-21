@@ -13,26 +13,25 @@ import org.scalajs.dom.html.Div
 
 object ListItem {
 
-//  val HandleGrip =
-//    ScalaComponent.builder[String]("HandleGrip")
-//      .render_P(s =>
-//        <.div(
-//          ^.className:= "tree-list-item__plain-handle",
-//          Icons.handleIcon
-//        )
-//      ).build
-//
-//  private val handle = SortableHandle.wrap(HandleGrip)("")
-
   val HandleGrip =
-    ScalaComponent.static("HandleGrip")(
-      <.div(
-        ^.className:= "tree-list-item__plain-handle",
-        Icons.handleIcon
-      )
-    )
+    ScalaComponent.builder[String]("HandleGrip")
+      .render_P(s =>
+        <.div(
+          ^.className:= "tree-list-item__plain-handle",
+          Icons.handleIcon
+        )
+      ).build
 
-  private val handle = HandleGrip()
+  private val handle = SortableHandle.wrap(HandleGrip)("")
+
+//  val HandleGrip =
+//    ScalaComponent.static("HandleGrip")(
+//      <.div(
+//        ^.className:= "tree-list-item__plain-handle",
+//        Icons.handleIcon
+//      )
+//    )
+//  private val handle = HandleGrip()
 
   case class ButtonAction(icon: VdomElement, cb: Callback)
 

@@ -3,7 +3,6 @@ package org.rebeam.tree.view
 import japgolly.scalajs.react._
 
 import scala.scalajs.js
-import scala.language.higherKinds
 
 object WidthProvider {
 
@@ -16,8 +15,8 @@ object WidthProvider {
     * @tparam P               The type of Props of the wrapped component
     * @return                 A component wrapping the wrapped component...
     */
-  def wrap[P, CT[-p, +u] <: CtorType[p, u], U](
-    wrappedComponent: GenericComponent[P, CT, U]
+  def wrap[P](
+    wrappedComponent: GenericComponent[P, CtorType.Props, _]
 //  ): Props => P => raw.ReactElement = {
   ): Props => P => JsComponent.Unmounted[js.Object, Null] = {
 
