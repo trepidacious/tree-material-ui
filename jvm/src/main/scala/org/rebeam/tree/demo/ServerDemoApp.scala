@@ -3,12 +3,13 @@ package org.rebeam.tree.demo
 import java.io.File
 import java.util.concurrent.atomic.AtomicLong
 
+import cats.effect.{Effect, IO}
+import fs2.StreamApp.ExitCode
+import fs2.{Stream, StreamApp}
 import org.http4s._
 import org.http4s.dsl._
-import org.http4s.server.ServerApp
 import org.http4s.server.blaze.BlazeBuilder
 import org.http4s.server.staticcontent._
-import org.http4s.server.websocket._
 import org.rebeam.tree.{DeltaIOContext, DeltaIOContextSource, Moment}
 import org.rebeam.tree.server.{ServerStore, ServerStoreValueExchange}
 import org.rebeam.tree.Delta._
@@ -17,9 +18,13 @@ import org.rebeam.tree.sync.DeltaIORun._
 import org.rebeam.tree.demo.DemoData.Address
 import org.rebeam.tree.demo.RefData.DataItemList
 import org.rebeam.tree.ref.{Mirror, MirrorAndId}
-import org.rebeam.tree.sync.{RefAdder, Ref}
+import org.rebeam.tree.sync.{Ref, RefAdder}
 
-object ServerDemoApp extends ServerApp {
+import scala.concurrent.ExecutionContext.Implicits.global
+
+object ServerDemoAppIO extends ServerDemoApp[IO]
+
+class ServerDemoApp[F[_]](implicit F: Effect[F]) extends StreamApp[F] with Http4sDsl[F] {
 
   val address: ServerStore[Address] = {
     import DemoData._
@@ -53,7 +58,6 @@ object ServerDemoApp extends ServerApp {
     ).data
     new ServerStore(todoProject.lists.head)
   }
-
 
   private val todoProjectStore = {
     import DemoData._
@@ -91,11 +95,12 @@ object ServerDemoApp extends ServerApp {
   }
 
   // TODO better way of doing this - start from 1 since we use 0 to generate example data
+  // Can we make a stream and use this to produce incrementing values?
   private val nextClientId = new AtomicLong(1)
 
   private val contextSource = DeltaIOContextSource.default
 
-  val apiService = HttpService {
+  val apiService: HttpService[F] = HttpService[F] {
 
     case GET -> Root / "hello" =>
       Ok("Hello world!")
@@ -104,98 +109,77 @@ object ServerDemoApp extends ServerApp {
       Ok(System.getProperty("user.dir"))
 
     case GET -> Root / "todolist" =>
-      WS(
-        ServerStoreValueExchange(
-          todoListStore,
-          ClientId(nextClientId.getAndIncrement()),
-          contextSource
-        )
+      ServerStoreValueExchange(
+        todoListStore,
+        ClientId(nextClientId.getAndIncrement()),
+        contextSource
       )
 
     case GET -> Root / "todoproject" =>
-      WS(
-        ServerStoreValueExchange(
-          todoProjectStore,
-          ClientId(nextClientId.getAndIncrement()),
-          contextSource
-        )
+      ServerStoreValueExchange(
+        todoProjectStore,
+        ClientId(nextClientId.getAndIncrement()),
+        contextSource
       )
 
     case GET -> Root / "todoprojectmirror" =>
       import DemoData._
-      WS(
-        ServerStoreValueExchange(
-          todoProjectMirrorStore,
-          ClientId(nextClientId.getAndIncrement()),
-          contextSource
-        )
+      ServerStoreValueExchange(
+        todoProjectMirrorStore,
+        ClientId(nextClientId.getAndIncrement()),
+        contextSource
       )
 
     case GET -> Root / "refs" =>
       import RefData._
-      WS(
-        ServerStoreValueExchange(
-          refDemoStore,
-          ClientId(nextClientId.getAndIncrement()),
-          contextSource
-        )
+      ServerStoreValueExchange(
+        refDemoStore,
+        ClientId(nextClientId.getAndIncrement()),
+        contextSource
       )
 
     case GET -> Root / "task" =>
-      WS(
-        ServerStoreValueExchange(
-          taskStore,
-          ClientId(nextClientId.getAndIncrement()),
-          contextSource
-        )
+      ServerStoreValueExchange(
+        taskStore,
+        ClientId(nextClientId.getAndIncrement()),
+        contextSource
       )
 
     case GET -> Root / "address" =>
-      WS(
-        ServerStoreValueExchange(
-          address,
-          ClientId(nextClientId.getAndIncrement()),
-          contextSource
-        )
+      ServerStoreValueExchange(
+        address,
+        ClientId(nextClientId.getAndIncrement()),
+        contextSource
       )
 
   }
-
-  //This will serve from java resources, so work in a jar
-  //We can also set cacheStartegy = staticcontent.MemoryCache() in the Config
-//  val assets = resourceService(ResourceService.Config("", "/"))
 
   //This serves directly from development resources directory, so will update
   //when we change original resources files and refresh browser
   //Serve our assets relative to user directory - kind of messy
-  val assets = fileService(FileService.Config(new File(System.getProperty("user.dir")).getParent + "/assets", "/assets"))
-  val assetsService: HttpService = HttpService {
-    case r @ GET -> _ => assets(r)
-  }
-
-  //This will serve from java resources, so work in a jar
-  //We can also set cacheStartegy = staticcontent.MemoryCache() in the Config
-  //val resources = resourceService(ResourceService.Config("", "/"))
+  val assets: HttpService[F] = fileService(FileService.Config(new File(System.getProperty("user.dir")).getParent + "/assets", "/assets"))
 
   //This serves directly from development resources directory, so will update
   //when we change original resources files and refresh browser
-  val resources = fileService(FileService.Config("src/main/resources", "/"))
+  val resources: HttpService[F] = fileService(FileService.Config("src/main/resources", "/"))
 
-  val resourcesService: HttpService = HttpService {
-    case r @ GET -> _ if r.pathInfo.isEmpty => resourcesService(r.withPathInfo("index.html"))
-    case r @ GET -> _ if r.pathInfo.endsWith("/") => resourcesService(r.withPathInfo(r.pathInfo + "index.html"))
-    case r @ GET -> _ => resources(r)
+  val indexService: HttpService[F] = HttpService[F] {
+    case request @ GET -> Root =>
+      StaticFile.fromFile(new File("src/main/resources/index.html"), Some(request)).getOrElseF(NotFound())
   }
 
   // val apiCORS = CORS(apiService)
 
-  def server(args: List[String]) =
-    BlazeBuilder.bindHttp(8080, "0.0.0.0")
-      .withWebSockets(true)
-      .mountService(apiService, "/api")
-      .mountService(resourcesService, "/")
-      .mountService(assetsService, "/")     //Note that the "/assets" path is already built into the fileService
-      // .mountService(apiCORS, "/api")
-      .start
+  def stream(args: List[String], requestShutdown: F[Unit]): Stream[F, ExitCode] =
+    for {
+      exitCode <- BlazeBuilder[F]
+        .bindHttp(8080, "0.0.0.0")
+        .withWebSockets(true)
+        .mountService(apiService, "/api")
+        .mountService(indexService, "/")
+        .mountService(resources, "/")
+        .mountService(assets, "/")     //Note that the "/assets" path is already built into the fileService
+        .serve
+    } yield exitCode
 
 }
