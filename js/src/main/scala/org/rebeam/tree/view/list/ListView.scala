@@ -433,7 +433,6 @@ object ListView {
     mode: ListMode = ListMode.Infinite
   ): ((IndexChange) => Callback) => (Cursor[L, P]) => VdomElement = {
 
-    //FIXME restore infinite scrolling when Measure is fixed :)
     mode match {
       // Wrap in an Infinite for performance on long lists
       case ListMode.Infinite =>
@@ -491,12 +490,5 @@ object ListView {
         (onIndexChange: IndexChange => Callback) => view(_)
     }
   }
-
-//  def p(onSortEnd: IndexChange => Callback = p => Callback{}): SortableContainer.Props =
-//    SortableContainer.Props(
-//      onSortEnd = onSortEnd,
-//      useDragHandle = true,
-//      helperClass = "react-sortable-handler"
-//    )
 
 }
