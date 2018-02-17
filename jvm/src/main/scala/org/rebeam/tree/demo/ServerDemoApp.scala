@@ -3,13 +3,6 @@ package org.rebeam.tree.demo
 import java.io.File
 import java.util.concurrent.atomic.AtomicLong
 
-import cats.effect.{Effect, IO}
-import fs2.StreamApp.ExitCode
-import fs2.{Stream, StreamApp}
-import org.http4s._
-import org.http4s.dsl._
-import org.http4s.server.blaze.BlazeBuilder
-import org.http4s.server.staticcontent._
 import org.rebeam.tree.{DeltaIOContext, DeltaIOContextSource, Moment}
 import org.rebeam.tree.server.{ServerStore, ServerStoreValueExchange}
 import org.rebeam.tree.Delta._
@@ -19,6 +12,16 @@ import org.rebeam.tree.demo.DemoData.Address
 import org.rebeam.tree.demo.RefData.DataItemList
 import org.rebeam.tree.ref.{Mirror, MirrorAndId}
 import org.rebeam.tree.sync.{Ref, RefAdder}
+
+import org.http4s._
+import org.http4s.dsl._
+import org.http4s.server.blaze.BlazeBuilder
+import org.http4s.server.staticcontent._
+
+import cats.effect.{Effect, IO}
+
+import fs2.StreamApp.ExitCode
+import fs2.{Stream, StreamApp}
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
