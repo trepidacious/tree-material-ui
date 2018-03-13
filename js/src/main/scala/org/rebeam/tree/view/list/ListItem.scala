@@ -33,15 +33,16 @@ object ListItem {
 //    )
 //  private val handle = HandleGrip()
 
-  case class ButtonAction(icon: VdomElement, cb: Callback)
+  //FIXME make this accept an action?
+  case class ButtonAction(icon: VdomElement, action: Action)
 
-  case class Props(avatar: VdomElement, content: VdomElement, iconButtons: List[ButtonAction], onClick: Callback, onClickAvatar: Callback, onClickContents: Callback, buttonBackgroundColor: Color)
+  case class Props(avatar: VdomElement, content: VdomElement, iconButtons: List[ButtonAction], onClick: Callback, onClickAvatar: Callback, onClickContents: Callback, buttonBackgroundColor: Color, draggable: Boolean)
 
   case class State(open: Boolean)
 
   class Backend(scope: BackendScope[Props, State]) {
 
-    private val onClickEllipsis = scope.modState(s => s.copy(open = !s.open))
+    private val onClickEllipsis: Callback = scope.modState(s => s.copy(open = !s.open))
     private val close = scope.modState(s => s.copy(open = false))
 
     private def renderPlain(p: Props): VdomTagOf[Div] = {
@@ -59,11 +60,11 @@ object ListItem {
           p.content
         ),
         <.div(
-          ^.onClick --> onClickEllipsis,
+          ^.onClick --> (if (p.iconButtons.isEmpty) p.onClick else onClickEllipsis),
           ^.className := "tree-list-item__plain-ellipsis",
-          Icons.ellipsisIcon
+          if (p.iconButtons.isEmpty) Icons.navigateRightIcon else Icons.ellipsisIcon
         ),
-        handle
+        handle.when(p.draggable)
       )
     }
 
@@ -82,7 +83,7 @@ object ListItem {
           p.iconButtons.toTagMod(
             b => <.div(
               ^.flex := "0 0 56px",
-              ListItemIconButton(b.icon, b.cb >> close)
+              ListItemIconButton(b.icon, b.action.callback >> close)
             )
           )
         ),
@@ -149,7 +150,7 @@ object ListItem {
       )(
         //NOTE we can pass children* here, so just need to get this
         //from list of divs in each case, to avoid double outer div.
-        if (state.open) {
+        if (state.open && p.iconButtons.nonEmpty) {
           renderOpen(p)
         } else {
           renderPlain(p)
@@ -173,8 +174,9 @@ object ListItem {
     onClick: Callback = Callback.empty,
     onClickAvatar: Callback = Callback.empty,
     onClickContents: Callback = Callback.empty,
-    buttonBackgroundColor: Color = MaterialColor.Indigo(500)
-  ) = component(Props(avatar, content, iconButtons, onClick, onClickAvatar, onClickContents, buttonBackgroundColor))
+    buttonBackgroundColor: Color = MaterialColor.Indigo(500),
+    draggable: Boolean = true
+  ) = component(Props(avatar, content, iconButtons, onClick, onClickAvatar, onClickContents, buttonBackgroundColor, draggable))
 
   def twoLines(line1: String, line2: String): VdomTagOf[Div] =
     <.div(
@@ -214,7 +216,7 @@ object ListItem {
         //FIXME pass ActionCallback directly
         ListItem.ButtonAction(
           Mui.SvgIcons.ActionDelete()(),
-          cp.location.delete.callback
+          cp.location.delete
         )
       )
 
@@ -279,5 +281,14 @@ object ListItem {
     }
   }
 
+  def listItemWithNavigate[A](name: String, firstLine: A => String, secondLine: A => String, avatar: A => VdomElement, action: A => Action) = ScalaComponent.builder[A](name)
+    .render_P(
+      a => ListItem(
+        avatar = avatar(a),
+        content = ListItem.twoLines(firstLine(a), secondLine(a)),
+        iconButtons = Nil,
+        onClick = action(a),
+        draggable = false)
+  ).build
 
 }
