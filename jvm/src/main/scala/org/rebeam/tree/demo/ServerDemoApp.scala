@@ -12,16 +12,14 @@ import org.rebeam.tree.demo.DemoData.Address
 import org.rebeam.tree.demo.RefData.DataItemList
 import org.rebeam.tree.ref.{Mirror, MirrorAndId}
 import org.rebeam.tree.sync.{Ref, RefAdder}
-
 import org.http4s._
 import org.http4s.dsl._
 import org.http4s.server.blaze.BlazeBuilder
 import org.http4s.server.staticcontent._
-
 import cats.effect.{Effect, IO}
-
 import fs2.StreamApp.ExitCode
 import fs2.{Stream, StreamApp}
+import org.rebeam.tree.demo.RefFailureData.DataLinkPair
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
@@ -97,6 +95,18 @@ class ServerDemoApp[F[_]](implicit F: Effect[F]) extends StreamApp[F] with Http4
     new ServerStore(mirrorAndId)
   }
 
+  private val refFailureDemoStore: ServerStore[MirrorAndId[DataLinkPair]] = {
+    import RefFailureData._
+
+    val result = RefFailureData.exampleDataMirrorIO.runWith(
+      DeltaIOContext(Moment(0)),
+      DeltaId(ClientId(0), ClientDeltaId(0))
+    )
+
+    val mirrorAndId = RefAdder.mirrorAndIdRefAdder.addRefs(result)
+    new ServerStore(mirrorAndId)
+  }
+
   // TODO better way of doing this - start from 1 since we use 0 to generate example data
   // Can we make a stream and use this to produce incrementing values?
   private val nextClientId = new AtomicLong(1)
@@ -137,6 +147,14 @@ class ServerDemoApp[F[_]](implicit F: Effect[F]) extends StreamApp[F] with Http4
       import RefData._
       ServerStoreValueExchange(
         refDemoStore,
+        ClientId(nextClientId.getAndIncrement()),
+        contextSource
+      )
+
+    case GET -> Root / "reffailure" =>
+      import RefFailureData._
+      ServerStoreValueExchange(
+        refFailureDemoStore,
         ClientId(nextClientId.getAndIncrement()),
         contextSource
       )

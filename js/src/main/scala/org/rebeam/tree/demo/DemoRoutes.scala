@@ -16,6 +16,7 @@ object DemoRoutes {
   case object AddressPage       extends Page
 
   case object RefPage           extends Page
+  case object RefFailurePage    extends Page
 
   sealed trait TodoPage extends Page {
     def back: TodoPage
@@ -56,6 +57,12 @@ object DemoRoutes {
     }
   }
 
+  implicit val refFailureTransitions = new PagesToTransition[RefFailurePage.type] {
+    override def apply(from: RefFailurePage.type, to: RefFailurePage.type) = {
+      PagesTransition.Right
+    }
+  }
+
   val routerConfig = RouterConfigDsl[Page].buildConfig { dsl =>
     import dsl._
 
@@ -70,6 +77,8 @@ object DemoRoutes {
 
     val refRoute = caseObject("#ref", RefPage)
 
+    val refFailureRoute = caseObject("#reffailure", RefFailurePage)
+
     val todoProjectRoute = caseObject("#todo", TodoProjectPage)
     val todoProjectListRoute = ("#todo/list" / id[TodoList]).caseClass[TodoProjectListPage]
     val todoProjectListItemRoute = ("#todo/list" / id[TodoList] / "item" / id[Todo]).caseClass[TodoProjectListItemPage]
@@ -81,6 +90,7 @@ object DemoRoutes {
       | staticRoute(root,   HomePage) ~> render(DemoViews.homeView())
       | staticRoute("#address", AddressPage) ~> render(DemoViews.addressView)
       | dynamicRouteCT(refRoute) ~> dynRenderP[RefPage.type](RefViews.refViewFactory(_): VdomElement)
+      | dynamicRouteCT(refFailureRoute) ~> dynRenderP[RefFailurePage.type](RefFailureViews.refViewFactory(_): VdomElement)
       | dynamicRouteCT(todoProjectRoute) ~> dynRenderP[TodoPage](TodoPagesViews.todoProjectViewFactory(_): VdomElement)
       | dynamicRouteCT(todoProjectListRoute) ~> dynRenderP[TodoPage](TodoPagesViews.todoProjectViewFactory(_): VdomElement)
       | dynamicRouteCT(todoProjectListItemRoute) ~> dynRenderP[TodoPage](TodoPagesViews.todoProjectViewFactory(_): VdomElement)
